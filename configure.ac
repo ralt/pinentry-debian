@@ -1,46 +1,49 @@
 # configure.ac
 # Copyright (C) 1999 Robert Bihlmeyer <robbe@orcus.priv.at>
 # Copyright (C) 2001, 2002, 2003, 2004, 2007 g10 Code GmbH
-# 
+#
 # This file is part of PINENTRY.
-# 
+#
 # PINENTRY is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # PINENTRY is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- 
+
 # (Process this file with autoconf to produce a configure script.)
 AC_PREREQ(2.57)
 min_automake_version="1.10"
 
-# Version number: Remember to change it immediately *after* a release.
-#                 Make sure to run  "svn up" and "./autogen.sh --force"
-#                  before a "make dist".  See below for the LT versions.
-#
-# The SVN version is usually the next intended release version with
-# the string "-svnNNN" appended.  The reason for this is that tests for a
-# specific feature can already be done under the assumption that the
-# SVN version is the most recent one in a branch.  To disable the SVN
-# version for the real release, set the my_issvn macro to no.
-m4_define(my_version, [0.8.1])
-m4_define(my_issvn, [no])
+# To build a release you need to create a tag with the version number
+# (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
+# bump the version number immediately after the release, do another
+# commit, and a push so that the git magic is able to work.
+m4_define(mym4_version, [0.8.3])
 
-m4_define([svn_revision], m4_esyscmd([printf "%d" $(svn info 2>/dev/null \
-           | sed -n '/^Revision:/ s/[^0-9]//gp'|head -1)]))
-# Remember to remove the "-cvs" suffix *before* a release and to bump the
-# version number immediately *after* a release and to re-append the suffix.
-AC_INIT(pinentry,
-        [my_version[]m4_if(my_issvn,[yes],[-svn[]svn_revision])],
-	[gnupg-devel@gnupg.org])
+# Below is m4 magic to extract and compute the git revision number,
+# the decimalized short revision number, a beta version string and a
+# flag indicating a development version (mym4_isgit).  Note that the
+# m4 processing is done by autoconf and not during the configure run.
+m4_define([mym4_revision], m4_esyscmd([git branch -v 2>/dev/null \
+          | awk '/^\* / {printf "%s",$3}']))
+m4_define([mym4_revision_dec],
+          m4_esyscmd_s([echo $((0x$(echo ]mym4_revision[|head -c 4)))]))
+m4_define([mym4_betastring],
+          m4_esyscmd_s([git describe --match 'pinentry-[0-9].[0-9].*[0-9]' \
+                           --long|  awk -F- '$3!=0{print"-beta"$3}']))
+m4_define([mym4_isgit],m4_if(mym4_betastring,[],[no],[yes]))
+m4_define([mym4_full_version],[mym4_version[]mym4_betastring])
+
+AC_INIT([pinentry],[mym4_full_version], [http://bugs.gnupg.org])
+
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(pinentry/pinentry.h)
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
@@ -82,6 +85,8 @@ AC_PROG_RANLIB
 AC_PROG_CXX
 AC_PROG_LN_S
 AC_CHECK_TOOL(WINDRES, windres, :)
+AC_CHECK_PROGS(GITLOG_TO_CHANGELOG, gitlog-to-changelog,
+               [build-aux/gitlog-to-changelog])
 
 
 have_dosish_system=no
@@ -93,7 +98,7 @@ case "${host}" in
                   [Set this to limit filenames to the 8.3 format])
         have_dosish_system=yes
         have_w32_system=yes
-        case "${host}" in 
+        case "${host}" in
           *-mingw32ce*)
             have_w32ce_system=yes
             ;;
@@ -118,7 +123,7 @@ esac
 
 if test "$have_dosish_system" = yes; then
    AC_DEFINE(HAVE_DOSISH_SYSTEM,1,
-             [Defined if we run on some of the PCDOS like systems 
+             [Defined if we run on some of the PCDOS like systems
               (DOS, Windoze. OS/2) with special properties like
               no file modes])
 fi
@@ -144,7 +149,7 @@ if test "$GCC" = yes; then
     AC_MSG_CHECKING([if gcc supports -Wno-pointer-sign])
     _gcc_cflags_save=$CFLAGS
     CFLAGS="-Wno-pointer-sign"
-    AC_COMPILE_IFELSE(AC_LANG_PROGRAM([]),_gcc_psign=yes,_gcc_psign=no)
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],_gcc_psign=yes,_gcc_psign=no)
     AC_MSG_RESULT($_gcc_psign)
     CFLAGS=$_gcc_cflags_save;
     if test x"$_gcc_psign" = xyes ; then
@@ -155,7 +160,7 @@ fi
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(string.h unistd.h langinfo.h termio.h locale.h utime.h)
+AC_CHECK_HEADERS(string.h unistd.h langinfo.h termio.h locale.h utime.h wchar.h)
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(seteuid stpcpy mmap)
@@ -361,7 +366,7 @@ if test $have_qt = "no"; then
 *** end of config.log.$missing_qt_mt
 ***]])
 	else
-	  pinentry_qt="no"	  
+	  pinentry_qt="no"
 	fi
 fi
 if test $have_moc = "no"; then
@@ -377,7 +382,7 @@ if test $have_moc = "no"; then
 *** configure.
 ***]])
 	else
-	  pinentry_qt="no"	  
+	  pinentry_qt="no"
 	fi
 fi
 fi
@@ -506,16 +511,20 @@ Makefile
 AC_OUTPUT
 
 AC_MSG_NOTICE([
+
 	Pinentry v${VERSION} has been configured as follows:
 
-	Curses Pinentry: $pinentry_curses
-	GTK+ Pinentry: $pinentry_gtk
-	GTK+-2 Pinentry: $pinentry_gtk_2
-	Qt Pinentry: $pinentry_qt
-	Qt4 Pinentry: $pinentry_qt4
-        W32 Pinentry: $pinentry_w32
+	Revision:  mym4_revision  (mym4_revision_dec)
+	Platform:  $host
+
+	Curses Pinentry ..: $pinentry_curses
+	GTK+ Pinentry ....: $pinentry_gtk
+	GTK+-2 Pinentry ..: $pinentry_gtk_2
+	Qt Pinentry ......: $pinentry_qt
+	Qt4 Pinentry .....: $pinentry_qt4
+	W32 Pinentry .....: $pinentry_w32
 
 	Fallback to Curses: $fallback_curses
 
-	Default Pinentry: $PINENTRY_DEFAULT
+	Default Pinentry .: $PINENTRY_DEFAULT
 ])

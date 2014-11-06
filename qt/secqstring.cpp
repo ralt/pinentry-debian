@@ -24,7 +24,7 @@
    02111-1307, USA  */
 
 /****************************************************************************
-** $Id: secqstring.cpp 115 2004-01-18 18:10:04Z marcus $
+** $Id$
 **
 ** Implementation of the SecQString class and related Unicode functions
 **

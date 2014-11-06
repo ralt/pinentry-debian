@@ -1,5 +1,5 @@
-This is pinentry.info, produced by makeinfo version 4.13 from
-pinentry.texi.
+This is /home/wk/w/pinentry/doc/pinentry.info, produced by makeinfo
+version 4.13 from /home/wk/w/pinentry/doc/pinentry.texi.
 
 INFO-DIR-SECTION GNU Utilities
 START-INFO-DIR-ENTRY
@@ -7,8 +7,8 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
    This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.8.1, last updated 16 December 2010, of `The
-`PINEntry' Manual', for version 0.8.1.
+   This is edition 0.8.3, last updated 4 March 2013, of `The `PINEntry'
+Manual', for version 0.8.3.
 
    Published by g10 Code GmbH
 Hüttenstr. 61
@@ -96,6 +96,12 @@ commands according to the Assuan protocol via stdin/stdout.
      Use window ID N as the parent window for positioning the window.
      Note, that this is not fully supported by all flavors of PINENTRY.
 
+`--timeout SECONDS'
+     Give up waiting for input from the user after the specified number
+     of seconds and return an error. The error returned is the same as
+     if the Cancel button was selected. To disable the timeout and wait
+     indefinately then set to 0, the default.
+
 `--display STRING'
 `--ttyname STRING'
 `--ttytype STRING'
@@ -133,6 +139,10 @@ linefeeds or other special characters, you may percent-escape them
 encoded as `%25').
 
    Here is the list of supported commands:
+
+`Set the timeout before returning an error'
+            C: SETTIMEOUT 30
+            S: OK
 
 `Set the descriptive text to be displayed'
             C: SETDESC Enter PIN for Richard Nixon <nobody@trickydicky.gov>
@@ -642,15 +652,16 @@ Option Index
 
 * d:                                     Using pinentry.       (line 20)
 * debug:                                 Using pinentry.       (line 20)
-* display:                               Using pinentry.       (line 41)
+* display:                               Using pinentry.       (line 47)
 * g:                                     Using pinentry.       (line 26)
 * help:                                  Using pinentry.       (line 15)
-* lc-ctype:                              Using pinentry.       (line 41)
-* lc-messa:                              Using pinentry.       (line 41)
+* lc-ctype:                              Using pinentry.       (line 47)
+* lc-messa:                              Using pinentry.       (line 47)
 * no-global-grab:                        Using pinentry.       (line 26)
 * parent-wid:                            Using pinentry.       (line 33)
-* ttyname:                               Using pinentry.       (line 41)
-* ttytype:                               Using pinentry.       (line 41)
+* timeout:                               Using pinentry.       (line 37)
+* ttyname:                               Using pinentry.       (line 47)
+* ttytype:                               Using pinentry.       (line 47)
 * version:                               Using pinentry.       (line 12)
 
 
@@ -668,11 +679,11 @@ Index
 
 
 Tag Table:
-Node: Top811
-Node: Using pinentry2002
-Node: Protocol3561
-Node: Copying9907
-Node: Option Index29104
-Node: Index30113
+Node: Top855
+Node: Using pinentry2046
+Node: Protocol3887
+Node: Copying10325
+Node: Option Index29522
+Node: Index30604
 
 End Tag Table
