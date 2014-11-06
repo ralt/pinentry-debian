@@ -45,31 +45,50 @@
    versions.  This is the reason why gpg-agent employs its
    AllowSetForegroundWindow callback machinery to ask the supposed to
    be be calling process to allow a pinentry to go into the
-   foreground.  */
-// #ifdef Q_WS_WIN
-// void SetForegroundWindowEx( HWND hWnd )
-// {
-//    //Attach foreground window thread to our thread
-//    const DWORD ForeGroundID = GetWindowThreadProcessId(::GetForegroundWindow(),NULL);
-//    const DWORD CurrentID   = GetCurrentThreadId();
- 
-//    AttachThreadInput ( ForeGroundID, CurrentID, TRUE );
-//    //Do our stuff here
-//    HWND hLastActivePopupWnd = GetLastActivePopup( hWnd );
-//    SetForegroundWindow( hLastActivePopupWnd );
- 
-//    //Detach the attached thread
-//    AttachThreadInput ( ForeGroundID, CurrentID, FALSE );
-// }// End SetForegroundWindowEx
-// #endif
+   foreground.
+
+   [ah] This is a Hack to workaround the fact that Foregrounding
+   a Window is so restricted that it AllowSetForegroundWindow
+   does not always work (e.g. when the ForegroundWindow timeout
+   has not expired.
+   */
+#ifdef Q_WS_WIN
+WINBOOL SetForegroundWindowEx( HWND hWnd )
+{
+   //Attach foreground window thread to our thread
+   const DWORD ForeGroundID = GetWindowThreadProcessId(::GetForegroundWindow(),NULL);
+   const DWORD CurrentID   = GetCurrentThreadId();
+   WINBOOL retval;
+
+   AttachThreadInput ( ForeGroundID, CurrentID, TRUE );
+   //Do our stuff here
+   HWND hLastActivePopupWnd = GetLastActivePopup( hWnd );
+   retval = SetForegroundWindow( hLastActivePopupWnd );
+
+   //Detach the attached thread
+   AttachThreadInput ( ForeGroundID, CurrentID, FALSE );
+   return retval;
+}// End SetForegroundWindowEx
+#endif
 
 void raiseWindow( QWidget* w )
 {
-#ifdef Q_WS_WIN
-    SetForegroundWindow( w->winId() );
-#endif
+    /* Maybe Qt will become agressive enough one day that
+     * this is enough on windows too*/
     w->raise();
     w->activateWindow();
+#ifdef Q_WS_WIN
+    /* In the meantime we do our own attention grabbing */
+    if (!SetForegroundWindow (w->winId()) &&
+            !SetForegroundWindowEx (w->winId()))  {
+        OutputDebugString("SetForegroundWindow (ex) failed");
+        /* Yet another fallback which will not work on some
+         * versions and is not recommended by msdn */
+        if (!ShowWindow (w->winId(), SW_SHOWNORMAL)) {
+            OutputDebugString ("ShowWindow failed.");
+        }
+    }
+#endif
 }
 
 QPixmap icon( QStyle::StandardPixmap which )
@@ -198,6 +217,7 @@ void PinEntryDialog::setDescription( const QString& txt )
 {
   _desc->setVisible( !txt.isEmpty() );
   _desc->setText( txt );
+  _desc->setAccessibleDescription ( txt );
   _icon->setPixmap( icon() );
   setError( QString::null );
 }
@@ -211,6 +231,7 @@ void PinEntryDialog::setError( const QString& txt )
 {
   if( !txt.isNull() )_icon->setPixmap( icon( QStyle::SP_MessageBoxCritical ) );
   _error->setText( txt );
+  _error->setAccessibleDescription ( txt );
   _error->setVisible( !txt.isEmpty() );
 }
 
@@ -243,19 +264,23 @@ QString PinEntryDialog::prompt() const
 void PinEntryDialog::setOkText( const QString& txt )
 {
   _ok->setText( txt );
+  _ok->setAccessibleDescription ( txt );
   _ok->setVisible( !txt.isEmpty() );
 }
 
 void PinEntryDialog::setCancelText( const QString& txt )
 {
   _cancel->setText( txt );
+  _cancel->setAccessibleDescription ( txt );
   _cancel->setVisible( !txt.isEmpty() );
 }
 
 void PinEntryDialog::setQualityBar( const QString& txt )
 {
-  if (_have_quality_bar)
+  if (_have_quality_bar) {
     _quality_bar_label->setText( txt );
+    _quality_bar_label->setAccessibleDescription ( txt );
+  }
 }
 
 void PinEntryDialog::setQualityBarTT( const QString& txt )

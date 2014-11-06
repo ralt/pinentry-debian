@@ -148,6 +148,12 @@
 /* The Qt4 version of Pinentry is to be build */
 #undef PINENTRY_QT4
 
+/* Pinentry-qt4 should have clipboard support */
+#undef PINENTRY_QT4_CLIPBOARD
+
+/* The TTY version of Pinentry is to be build */
+#undef PINENTRY_TTY
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 

@@ -73,8 +73,10 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	THANKS TODO config.guess config.rpath config.sub depcomp \
-	install-sh missing mkinstalldirs
+	THANKS TODO build-aux/compile build-aux/config.guess \
+	build-aux/config.rpath build-aux/config.sub build-aux/depcomp \
+	build-aux/install-sh build-aux/mdate-sh build-aux/missing \
+	build-aux/texinfo.tex depcomp install-sh missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
 	$(top_srcdir)/m4/glib.m4 $(top_srcdir)/m4/gtk.m4 \
@@ -85,7 +87,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
@@ -110,7 +112,8 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = assuan secmem pinentry curses gtk gtk+-2 qt qt4 w32 doc
+DIST_SUBDIRS = assuan secmem pinentry curses tty gtk gtk+-2 qt qt4 w32 \
+	doc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -174,7 +177,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-#DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt4
 GITLOG_TO_CHANGELOG = gitlog-to-changelog
 GLIB_CFLAGS = @GLIB_CFLAGS@
 GLIB_CONFIG = @GLIB_CONFIG@
@@ -300,12 +302,15 @@ top_srcdir = @top_srcdir@
 x_libraries = @x_libraries@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
-EXTRA_DIST = autogen.sh README.GIT ChangeLog-old \
+DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt4
+EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 	     build-aux/gitlog-to-changelog \
 	     build-aux/git-log-fix build-aux/git-log-footer
 
 @BUILD_PINENTRY_CURSES_FALSE@pinentry_curses = 
 @BUILD_PINENTRY_CURSES_TRUE@pinentry_curses = curses
+@BUILD_PINENTRY_TTY_FALSE@pinentry_tty = 
+@BUILD_PINENTRY_TTY_TRUE@pinentry_tty = tty
 @BUILD_PINENTRY_GTK_FALSE@pinentry_gtk = 
 @BUILD_PINENTRY_GTK_TRUE@pinentry_gtk = gtk
 @BUILD_PINENTRY_GTK_2_FALSE@pinentry_gtk_2 = 
@@ -316,7 +321,7 @@ EXTRA_DIST = autogen.sh README.GIT ChangeLog-old \
 @BUILD_PINENTRY_QT4_TRUE@pinentry_qt4 = qt4
 @BUILD_PINENTRY_W32_FALSE@pinentry_w32 = 
 @BUILD_PINENTRY_W32_TRUE@pinentry_w32 = w32
-SUBDIRS = assuan secmem pinentry ${pinentry_curses} \
+SUBDIRS = assuan secmem pinentry ${pinentry_curses} ${pinentry_tty} \
 	${pinentry_gtk} ${pinentry_gtk_2} ${pinentry_qt} ${pinentry_qt4} \
 	${pinentry_w32} doc
 

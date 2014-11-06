@@ -15,8 +15,8 @@
 
 @SET_MAKE@
 
-# Makefile.am - PIN entry W32
-# Copyright (C) 2004 g10 Code GmbH
+# Makefile.am - PIN entry curses frontend.
+# Copyright (C) 2002 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -24,15 +24,14 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # PINENTRY is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 VPATH = @srcdir@
 am__make_dryrun = \
@@ -70,8 +69,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = pinentry-w32$(EXEEXT)
-subdir = w32
+bin_PROGRAMS = pinentry-tty$(EXEEXT)
+subdir = tty
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
@@ -87,12 +86,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_pinentry_w32_OBJECTS = main.$(OBJEXT)
-pinentry_w32_OBJECTS = $(am_pinentry_w32_OBJECTS)
-pinentry_w32_DEPENDENCIES = pinentry-w32.o ../pinentry/libpinentry.a \
-	../assuan/libassuan.a ../secmem/libsecmem.a
-pinentry_w32_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(pinentry_w32_LDFLAGS) $(LDFLAGS) -o $@
+am_pinentry_tty_OBJECTS = pinentry-tty.$(OBJEXT)
+pinentry_tty_OBJECTS = $(am_pinentry_tty_OBJECTS)
+pinentry_tty_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+pinentry_tty_DEPENDENCIES = ../pinentry/libpinentry.a \
+	../assuan/libassuan.a ../secmem/libsecmem.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__depfiles_maybe = depfiles
@@ -101,8 +101,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(pinentry_w32_SOURCES)
-DIST_SOURCES = $(pinentry_w32_SOURCES)
+SOURCES = $(pinentry_tty_SOURCES)
+DIST_SOURCES = $(pinentry_tty_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -257,17 +257,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 x_libraries = @x_libraries@
-EXTRA_DIST = Manifest
-AM_CPPFLAGS = -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem \
-	      -I$(top_srcdir)/pinentry
+AM_CPPFLAGS = -I$(top_srcdir)/pinentry
+LDADD = ../pinentry/libpinentry.a \
+	../assuan/libassuan.a ../secmem/libsecmem.a \
+	$(LIBCAP) $(LIBICONV)
 
-pinentry_w32_SOURCES = main.c pinentry-w32.rc resource.h
-
-# Note: For testing you should add -mconsole to LDFLAGS.
-pinentry_w32_LDFLAGS = -mwindows
-pinentry_w32_LDADD = pinentry-w32.o \
-	../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a
-
+pinentry_tty_SOURCES = pinentry-tty.c
 all: all-am
 
 .SUFFIXES:
@@ -281,9 +276,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu w32/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu tty/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu w32/Makefile
+	  $(AUTOMAKE) --gnu tty/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -342,9 +337,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-pinentry-w32$(EXEEXT): $(pinentry_w32_OBJECTS) $(pinentry_w32_DEPENDENCIES) $(EXTRA_pinentry_w32_DEPENDENCIES) 
-	@rm -f pinentry-w32$(EXEEXT)
-	$(pinentry_w32_LINK) $(pinentry_w32_OBJECTS) $(pinentry_w32_LDADD) $(LIBS)
+pinentry-tty$(EXEEXT): $(pinentry_tty_OBJECTS) $(pinentry_tty_DEPENDENCIES) $(EXTRA_pinentry_tty_DEPENDENCIES) 
+	@rm -f pinentry-tty$(EXEEXT)
+	$(LINK) $(pinentry_tty_OBJECTS) $(pinentry_tty_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -352,7 +347,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-tty.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -571,9 +566,6 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
-
-pinentry-w32.o: pinentry-w32.rc resource.h
-	$(WINDRES) -I.. -v -o $@ $< 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
