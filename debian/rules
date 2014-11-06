@@ -11,7 +11,7 @@ DEB_DH_INSTALL_SOURCEDIR = debian/tmp
 LDFLAGS += -Wl,--as-needed
 
 
-pre-build:: debian/stamp-custom-prepare qt4/pinentrydialog.moc qt4/qsecurelineedit.moc
+pre-build:: debian/stamp-custom-prepare qt4/pinentryconfirm.moc qt4/pinentrydialog.moc qt4/qsecurelineedit.moc
 
 debian/stamp-custom-prepare:
 	dh_testdir
