@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: secqinternal_p.h 115 2004-01-18 18:10:04Z marcus $
+** $Id$
 **
 ** Definition of some shared interal classes
 **

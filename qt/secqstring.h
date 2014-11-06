@@ -24,7 +24,7 @@
    02111-1307, USA  */
 
 /****************************************************************************
-** $Id: secqstring.h 102 2003-12-19 23:28:11Z marcus $
+** $Id$
 **
 ** Definition of the SecQString class, and related Unicode functions.
 **

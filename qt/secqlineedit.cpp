@@ -30,7 +30,7 @@
 
 
 /**********************************************************************
-** $Id: secqlineedit.cpp 169 2007-09-18 17:45:38Z wk $
+** $Id$
 **
 ** Implementation of SecQLineEdit widget class
 **

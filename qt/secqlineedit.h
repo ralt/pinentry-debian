@@ -29,7 +29,7 @@
 #define SECURE	1
 
 /**********************************************************************
-** $Id: secqlineedit.h 169 2007-09-18 17:45:38Z wk $
+** $Id$
 **
 ** Definition of SecQLineEdit widget class
 **
