@@ -20,7 +20,7 @@
  
 # (Process this file with autoconf to produce a configure script.)
 AC_PREREQ(2.57)
-min_automake_version="1.7.6"
+min_automake_version="1.10"
 
 # Version number: Remember to change it immediately *after* a release.
 #                 Make sure to run  "svn up" and "./autogen.sh --force"
@@ -31,7 +31,7 @@ min_automake_version="1.7.6"
 # specific feature can already be done under the assumption that the
 # SVN version is the most recent one in a branch.  To disable the SVN
 # version for the real release, set the my_issvn macro to no.
-m4_define(my_version, [0.8.0])
+m4_define(my_version, [0.8.1])
 m4_define(my_issvn, [no])
 
 m4_define([svn_revision], m4_esyscmd([printf "%d" $(svn info 2>/dev/null \
@@ -51,7 +51,22 @@ AM_MAINTAINER_MODE
 
 AC_CANONICAL_HOST
 
+AH_TOP([
+#ifndef PINENTRY_CONFIG_H_INCLUDED
+#define PINENTRY_CONFIG_H_INCLUDED
+
+/* Enable gpg-error's strerror macro under W32CE.  */
+#define GPG_ERR_ENABLE_ERRNO_MACROS 1
+])
+
+AH_BOTTOM([
+#endif /*PINENTRY_CONFIG_H_INCLUDED*/
+])
+
+
 dnl Checks for programs.
+AC_PROG_MAKE_SET
+AM_SANITY_CHECK
 missing_dir=`cd $ac_aux_dir && pwd`
 AM_MISSING_PROG(ACLOCAL, aclocal, $missing_dir)
 AM_MISSING_PROG(AUTOCONF, autoconf, $missing_dir)
@@ -71,14 +86,22 @@ AC_CHECK_TOOL(WINDRES, windres, :)
 
 have_dosish_system=no
 have_w32_system=no
+have_w32ce_system=no
 case "${host}" in
     *-mingw32*)
         AC_DEFINE(USE_ONLY_8DOT3,1,
-                  [set this to limit filenames to the 8.3 format])
-        AC_DEFINE(HAVE_DRIVE_LETTERS,1,
-                  [defined if we must run on a stupid file system])
+                  [Set this to limit filenames to the 8.3 format])
         have_dosish_system=yes
         have_w32_system=yes
+        case "${host}" in 
+          *-mingw32ce*)
+            have_w32ce_system=yes
+            ;;
+          *)
+            AC_DEFINE(HAVE_DRIVE_LETTERS,1,
+                      [Defined if the OS supports drive letters.])
+            ;;
+        esac
         ;;
     i?86-emx-os2 | i?86-*-os2*emx )
         # OS/2 with the EMX environment
@@ -103,8 +126,12 @@ AM_CONDITIONAL(HAVE_DOSISH_SYSTEM, test "$have_dosish_system" = yes)
 
 if test "$have_w32_system" = yes; then
    AC_DEFINE(HAVE_W32_SYSTEM,1, [Defined if we run on a W32 API based system])
+   if test "$have_w32ce_system" = yes; then
+      AC_DEFINE(HAVE_W32CE_SYSTEM,1,[Defined if we run on WindowsCE])
+   fi
 fi
 AM_CONDITIONAL(HAVE_W32_SYSTEM, test "$have_w32_system" = yes)
+AM_CONDITIONAL(HAVE_W32CE_SYSTEM, test "$have_w32ce_system" = yes)
 
 
 

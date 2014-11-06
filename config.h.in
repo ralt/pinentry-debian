@@ -1,5 +1,13 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+
+#ifndef PINENTRY_CONFIG_H_INCLUDED
+#define PINENTRY_CONFIG_H_INCLUDED
+
+/* Enable gpg-error's strerror macro under W32CE.  */
+#define GPG_ERR_ENABLE_ERRNO_MACROS 1
+
+
 /* The GUI pinentries should fall back to curses if X is not available. */
 #undef FALLBACK_CURSES
 
@@ -13,7 +21,7 @@
    with special properties like no file modes */
 #undef HAVE_DOSISH_SYSTEM
 
-/* defined if we must run on a stupid file system */
+/* Defined if the OS supports drive letters. */
 #undef HAVE_DRIVE_LETTERS
 
 /* Defined if GTK is available */
@@ -92,6 +100,9 @@
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
 
+/* Defined if we run on WindowsCE */
+#undef HAVE_W32CE_SYSTEM
+
 /* Defined if we run on a W32 API based system */
 #undef HAVE_W32_SYSTEM
 
@@ -137,7 +148,7 @@
 /* The capabilities support library is installed */
 #undef USE_CAPABILITIES
 
-/* set this to limit filenames to the 8.3 format */
+/* Set this to limit filenames to the 8.3 format */
 #undef USE_ONLY_8DOT3
 
 /* Enable extensions on AIX 3, Interix.  */
@@ -177,3 +188,7 @@
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
+
+
+#endif /*PINENTRY_CONFIG_H_INCLUDED*/
+
