@@ -1,3 +1,14 @@
+pinentry (0.8.1-1) unstable; urgency=low
+
+  * New upstream release
+    - keyboard-race.patch incorporated upstream
+    - Fixed segmentation fault in pinentry-gtk2 (closes: #584947)
+  * Removed Qt 3 variant (closes: #604369)
+  * Updated standards version
+  * Changed to debhelper level 8
+
+ -- Peter Eisentraut <petere@debian.org>  Wed, 16 Feb 2011 20:18:53 +0200
+
 pinentry (0.8.0-1) unstable; urgency=low
 
   * New upstream release

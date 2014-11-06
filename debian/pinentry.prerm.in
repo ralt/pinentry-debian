@@ -2,7 +2,6 @@ m4_changequote({,})m4_dnl
 m4_define(is_x11,
           {m4_ifelse(flavor, {curses}, no,
                      flavor, {gtk-2}, yes,
-                     flavor, {qt}, yes,
                      flavor, {qt4}, yes)})m4_dnl
 #! /bin/sh
 

@@ -29,12 +29,6 @@ using the GTK+ tool kit version 2, so it is especially suitable for
 users of GNOME.  If the X Window System is not active then an alternative
 text-mode dialog will be used.  There are other flavors that
 implement PIN entry dialogs using other tool kits.}},
-flavor, {qt},
-{{\fBpinentry-qt\fR implements a PIN entry dialog
-using the Qt 3 tool kit, so it is especially suitable for users of KDE 3.
-If the X Window System is not active then an alternative text-mode
-dialog will be used.  There are other flavors that implement PIN
-entry dialogs using other tool kits.}},
 flavor, {qt4},
 {{\fBpinentry-qt\fR implements a PIN entry dialog
 using the Qt 4 tool kit, so it is especially suitable for users of KDE 4.
@@ -82,8 +76,6 @@ alternative way to pass these information.
 m4_ifelse(flavor, {curses}, {}, {.BR pinentry-curses (1),
 })m4_dnl
 m4_ifelse(flavor, {gtk-2}, {}, {.BR pinentry-gtk-2 (1),
-})m4_dnl
-m4_ifelse(flavor, {qt}, {}, {.BR pinentry-qt (1),
 })m4_dnl
 m4_ifelse(flavor, {qt4}, {}, {.BR pinentry-qt4 (1),
 })m4_dnl

@@ -4,7 +4,7 @@ include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
 
 DEB_CONFIGURE_EXTRA_FLAGS = --disable-rpath --without-libcap \
-	--enable-pinentry-curses --enable-pinentry-qt --enable-pinentry-qt4 --disable-pinentry-gtk --enable-pinentry-gtk2
+	--enable-pinentry-curses --disable-pinentry-qt --enable-pinentry-qt4 --disable-pinentry-gtk --enable-pinentry-gtk2
 DEB_INSTALL_DOCS_ALL = NEWS AUTHORS
 DEB_DH_INSTALL_SOURCEDIR = debian/tmp
 
