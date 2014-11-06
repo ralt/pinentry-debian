@@ -24,9 +24,6 @@
 /* Defined if the OS supports drive letters. */
 #undef HAVE_DRIVE_LETTERS
 
-/* Defined if GTK is available */
-#undef HAVE_GTK
-
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 
@@ -35,9 +32,6 @@
 
 /* Define to 1 if you have the <langinfo.h> header file. */
 #undef HAVE_LANGINFO_H
-
-/* Define if you have a working libpthread (will enable threaded code) */
-#undef HAVE_LIBPTHREAD
 
 /* Define to 1 if you have the `rt' library (-lrt). */
 #undef HAVE_LIBRT
@@ -59,10 +53,6 @@
 
 /* Define to 1 if you have the `plock' function. */
 #undef HAVE_PLOCK
-
-/* Define to 1 if you have the <pthread/linuxthreads/pthread.h> header file.
-   */
-#undef HAVE_PTHREAD_LINUXTHREADS_PTHREAD_H
 
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
@@ -139,12 +129,6 @@
 /* The Curses version of Pinentry is to be build */
 #undef PINENTRY_CURSES
 
-/* The GTK+ version of Pinentry is to be build */
-#undef PINENTRY_GTK
-
-/* The Qt version of Pinentry is to be build */
-#undef PINENTRY_QT
-
 /* The Qt4 version of Pinentry is to be build */
 #undef PINENTRY_QT4
 
@@ -187,9 +171,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Define to 1 if the X Window System is missing or not being used. */
-#undef X_DISPLAY_MISSING
 
 /* Define to 1 if on MINIX. */
 #undef _MINIX

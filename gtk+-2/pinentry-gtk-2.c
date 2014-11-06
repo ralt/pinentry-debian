@@ -58,6 +58,8 @@ typedef enum { CONFIRM_CANCEL, CONFIRM_OK, CONFIRM_NOTOK } confirm_value_t;
 static confirm_value_t confirm_value;
 
 static GtkWidget *entry;
+static GtkWidget *repeat_entry;
+static GtkWidget *error_label;
 static GtkWidget *qualitybar;
 #ifdef ENABLE_ENHANCED
 static GtkWidget *insure;
@@ -130,11 +132,11 @@ make_transient (GtkWidget *win, GdkEvent *event, gpointer data)
 
 
 /* Grab the keyboard for maximum security */
-static void
+static int
 grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
 {
   if (! pinentry->grab)
-    return;
+    return FALSE;
 
   if (gdk_keyboard_grab (win->window, FALSE, gdk_event_get_time (event)))
     {
@@ -142,11 +144,12 @@ grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
       grab_failed = 1;
       gtk_main_quit ();
     }
+  return FALSE;
 }
 
 
 /* Remove grab.  */
-static void
+static int
 ungrab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
 {
   gdk_keyboard_ungrab (gdk_event_get_time (event));
@@ -156,6 +159,7 @@ ungrab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
      code is taken from gtk_window_transient_parent_unrealized.  */
   gdk_property_delete (win->window,
                        gdk_atom_intern_static_string ("WM_TRANSIENT_FOR"));
+  return FALSE;
 }
 
 
@@ -173,22 +177,40 @@ button_clicked (GtkWidget *widget, gpointer data)
 {
   if (data)
     {
-      const char *s;
+      const char *s, *s2;
 
       /* Okay button or enter used in text field.  */
 #ifdef ENABLE_ENHANCED
       /* FIXME: This is not compatible with assuan.  We can't just
 	 print stuff on stdout.  */
-      if (pinentry->enhanced)
-	printf ("Options: %s\nTimeout: %d\n\n",
-		gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (insure))
-		? "insure" : "",
-		gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (time_out)));
+      /* if (pinentry->enhanced) */
+      /*   printf ("Options: %s\nTimeout: %d\n\n", */
+      /*   	gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (insure)) */
+      /*   	? "insure" : "", */
+      /*   	gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (time_out))); */
 #endif
 
       s = gtk_secure_entry_get_text (GTK_SECURE_ENTRY (entry));
       if (!s)
 	s = "";
+
+      if (pinentry->repeat_passphrase && repeat_entry)
+        {
+          s2 = gtk_secure_entry_get_text (GTK_SECURE_ENTRY (repeat_entry));
+          if (!s2)
+            s2 = "";
+          if (strcmp (s, s2))
+            {
+              gtk_label_set_text (GTK_LABEL (error_label),
+                                  pinentry->repeat_error_string?
+                                  pinentry->repeat_error_string:
+                                  "not correctly repeated");
+              gtk_widget_grab_focus (entry);
+              return; /* again */
+            }
+          pinentry->repeat_okay = 1;
+        }
+
       passphrase_ok = 1;
       pinentry_setbufferlen (pinentry, strlen (s) + 1);
       if (pinentry->pin)
@@ -208,7 +230,7 @@ enter_callback (GtkWidget *widget, GtkWidget *anentry)
 static void
 confirm_button_clicked (GtkWidget *widget, gpointer data)
 {
-  confirm_value = (int) data;
+  confirm_value = (int)(long) data;
   gtk_main_quit ();
 }
 
@@ -251,6 +273,12 @@ changed_text_handler (GtkWidget *widget)
   GdkColor color = { 0, 0, 0, 0};
 
   got_input = TRUE;
+
+  if (pinentry->repeat_passphrase && repeat_entry)
+    {
+      gtk_secure_entry_set_text (GTK_SECURE_ENTRY (repeat_entry), "");
+      gtk_label_set_text (GTK_LABEL (error_label), "");
+    }
 
   if (!qualitybar || !pinentry->quality_bar)
     return;
@@ -369,25 +397,41 @@ create_window (int confirm_mode)
       gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
       gtk_box_pack_start (GTK_BOX (box), w, TRUE, FALSE, 0);
     }
-  if (pinentry->error && !confirm_mode)
+  if (!confirm_mode && (pinentry->error || pinentry->repeat_passphrase))
     {
+      /* With the repeat passphrase option we need to create the label
+         in any case so that it may later be updated by the error
+         message.  */
       GdkColor color = { 0, 0xffff, 0, 0 };
 
-      msg = pinentry_utf8_validate (pinentry->error);
-      w = gtk_label_new (msg);
-      g_free (msg);
-      gtk_misc_set_alignment (GTK_MISC (w), 0.0, 0.5);
-      gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
-      gtk_box_pack_start (GTK_BOX (box), w, TRUE, FALSE, 0);
-      gtk_widget_modify_fg (w, GTK_STATE_NORMAL, &color);
+      if (pinentry->error)
+        msg = pinentry_utf8_validate (pinentry->error);
+      else
+        msg = "";
+      error_label = gtk_label_new (msg);
+      if (pinentry->error)
+        g_free (msg);
+      gtk_misc_set_alignment (GTK_MISC (error_label), 0.0, 0.5);
+      gtk_label_set_line_wrap (GTK_LABEL (error_label), TRUE);
+      gtk_box_pack_start (GTK_BOX (box), error_label, TRUE, FALSE, 0);
+      gtk_widget_modify_fg (error_label, GTK_STATE_NORMAL, &color);
     }
 
   qualitybar = NULL;
 
   if (!confirm_mode)
     {
-      GtkWidget* table = gtk_table_new (pinentry->quality_bar ? 2 : 1, 2,
-					FALSE);
+      int nrow;
+      GtkWidget* table;
+
+      nrow = 1;
+      if (pinentry->quality_bar)
+        nrow++;
+      if (pinentry->repeat_passphrase)
+        nrow++;
+
+      table = gtk_table_new (nrow, 2, FALSE);
+      nrow = 0;
       gtk_box_pack_start (GTK_BOX (box), table, FALSE, FALSE, 0);
 
       if (pinentry->prompt)
@@ -396,7 +440,7 @@ create_window (int confirm_mode)
 	  w = gtk_label_new_with_mnemonic (msg);
 	  g_free (msg);
 	  gtk_misc_set_alignment (GTK_MISC (w), 1.0, 0.5);
-	  gtk_table_attach (GTK_TABLE (table), w, 0, 1, 0, 1,
+	  gtk_table_attach (GTK_TABLE (table), w, 0, 1, nrow, nrow+1,
 			    GTK_FILL, GTK_FILL, 4, 0);
 	}
 
@@ -406,10 +450,11 @@ create_window (int confirm_mode)
 			G_CALLBACK (enter_callback), entry);
       g_signal_connect (G_OBJECT (entry), "changed",
                         G_CALLBACK (changed_text_handler), entry);
-      gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 0, 1,
+      gtk_table_attach (GTK_TABLE (table), entry, 1, 2, nrow, nrow+1,
                         GTK_EXPAND|GTK_FILL, GTK_EXPAND|GTK_FILL, 0, 0);
       gtk_widget_grab_focus (entry);
       gtk_widget_show (entry);
+      nrow++;
 
       if (pinentry->quality_bar)
 	{
@@ -417,7 +462,7 @@ create_window (int confirm_mode)
 	  w = gtk_label_new (msg);
           g_free (msg);
 	  gtk_misc_set_alignment (GTK_MISC (w), 1.0, 0.5);
-	  gtk_table_attach (GTK_TABLE (table), w, 0, 1, 1, 2,
+	  gtk_table_attach (GTK_TABLE (table), w, 0, 1, nrow, nrow+1,
 			    GTK_FILL, GTK_FILL, 4, 0);
 	  qualitybar = gtk_progress_bar_new();
 	  gtk_widget_add_events (qualitybar,
@@ -428,9 +473,32 @@ create_window (int confirm_mode)
           if (pinentry->quality_bar_tt)
             gtk_tooltips_set_tip (GTK_TOOLTIPS (tooltips), qualitybar,
                                   pinentry->quality_bar_tt, "");
-	  gtk_table_attach (GTK_TABLE (table), qualitybar, 1, 2, 1, 2,
+	  gtk_table_attach (GTK_TABLE (table), qualitybar, 1, 2, nrow, nrow+1,
 	  		    GTK_EXPAND|GTK_FILL, GTK_EXPAND|GTK_FILL, 0, 0);
+          nrow++;
 	}
+
+
+      if (pinentry->repeat_passphrase)
+        {
+	  msg = pinentry_utf8_validate (pinentry->repeat_passphrase);
+	  w = gtk_label_new (msg);
+	  g_free (msg);
+	  gtk_misc_set_alignment (GTK_MISC (w), 1.0, 0.5);
+	  gtk_table_attach (GTK_TABLE (table), w, 0, 1, nrow, nrow+1,
+			    GTK_FILL, GTK_FILL, 4, 0);
+
+          repeat_entry = gtk_secure_entry_new ();
+          gtk_widget_set_size_request (repeat_entry, 200, -1);
+          g_signal_connect (G_OBJECT (entry), "activate",
+                            G_CALLBACK (enter_callback), repeat_entry);
+          gtk_table_attach (GTK_TABLE (table), repeat_entry, 1, 2, nrow, nrow+1,
+                            GTK_EXPAND|GTK_FILL, GTK_EXPAND|GTK_FILL, 0, 0);
+          gtk_widget_grab_focus (entry);
+          gtk_widget_show (entry);
+          nrow++;
+        }
+
 
 #ifdef ENABLE_ENHANCED
       if (pinentry->enhanced)

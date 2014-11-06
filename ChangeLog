@@ -1,3 +1,55 @@
+2014-10-26  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.0.
+
+	gtk: Aboid segv for opaste keys.
+	* gtk+-2/gtksecentry.c (gtk_secure_entry_class_init): Disable paste
+	key bindings.
+
+	Remove support form QT3 and GTK+-1.
+	* configure.ac: Remove old qt and gtk+-1 support.
+	* Makefile.am: Ditto.
+
+2014-10-26  Stanislav Ochotnicky  <sochotnicky@redhat.com>
+
+	Check if we are on tty before initializing curses.
+	* pinentry/pinentry-curses.c (dialog_run): Check stant stdin and stout
+	are connected to ttys.
+
+2014-10-26  Werner Koch  <wk@gnupg.org>
+
+	gtk: Allow pasting using the mouse.
+	* gtk+-2/gtksecentry.h (_GtkSecureEntry): Add fields insert_pos,
+	real_changed, cand change_count.
+	(_GtkSecureEntryClass): Add field paste_clipboard.
+	* gtk+-2/gtksecentry.c (PASTE_CLIPBOARD): New.
+	(gtk_secure_entry_class_init): Set paste_clipboard and create
+	paste-clipboard signal.
+	(gtk_secure_entry_button_press): Call gtk_secure_entry_pase.
+	(begin_change, end_change, emit_changed): New.
+	(gtk_secure_entry_real_insert_text): Use emit_changed.
+	(gtk_secure_entry_real_delete_text): Ditto.
+	(paste_received, gtk_secure_entry_paste)
+	(gtk_secure_entry_paste_clipboard): New.
+
+2014-10-24  Werner Koch  <wk@gnupg.org>
+
+	gtk+-2: Make current focus visible again.
+	* gtk+-2/pinentry-gtk-2.c (grab_keyboard): Return false
+	(ungrab_keyboard): Ditto.
+
+	gtk+-2: Implement the SETREPEAT command.
+	* gtk+-2/pinentry-gtk-2.c (repeat_entry, error_label): New.
+	(button_clicked): Implement repeat check.
+	(changed_text_handler): Clear repeat field.
+	(create_window): Add repeat entry.
+
+	Add commands to allow implementing a "repeat passphrase" field.
+	* pinentry/pinentry.c (cmd_setrepeat): New.
+	(cmd_setrepeaterror): New.
+	(register_commands): Add new commands.
+	(cmd_getpin): Print "PIN_REPEATED" status.
+
 2014-09-18  Werner Koch  <wk@gnupg.org>
 
 	Release 0.8.4.
