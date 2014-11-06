@@ -1,3 +1,10 @@
+pinentry (0.8.3-2) unstable; urgency=medium
+
+  * Added libncursesw5-dev to build dependencies (closes: #728512,
+    #733268, #734179)
+
+ -- Peter Eisentraut <petere@debian.org>  Thu, 23 Jan 2014 22:28:38 -0500
+
 pinentry (0.8.3-1) unstable; urgency=medium
 
   * New upstream release (closes: #731494)

@@ -2,7 +2,7 @@ Source: pinentry
 Section: utils
 Priority: optional
 Maintainer: Peter Eisentraut <petere@debian.org>
-Build-Depends: cdbs (>= 0.4.41), debhelper (>= 8), libglib2.0-dev (>= 2.15.5), libgtk2.0-dev (>= 2.4.0), libncurses5-dev, libqt4-dev, m4
+Build-Depends: cdbs (>= 0.4.41), debhelper (>= 8), libglib2.0-dev (>= 2.15.5), libgtk2.0-dev (>= 2.4.0), libncurses5-dev, libncursesw5-dev, libqt4-dev, m4
 Standards-Version: 3.9.5
 Homepage: http://www.gnupg.org/aegypten/
 
