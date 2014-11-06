@@ -1,3 +1,10 @@
+pinentry (0.9.0-0.1) experimental; urgency=medium
+
+  * Non-maintainer upload
+  * new upstream release (Closes: #765532)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 06 Nov 2014 17:53:20 -0500
+
 pinentry (0.8.3-2) unstable; urgency=medium
 
   * Added libncursesw5-dev to build dependencies (closes: #728512,
