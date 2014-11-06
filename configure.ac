@@ -26,7 +26,7 @@ min_automake_version="1.10"
 # (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
 # bump the version number immediately after the release, do another
 # commit, and a push so that the git magic is able to work.
-m4_define(mym4_version, [0.8.3])
+m4_define(mym4_version, [0.8.4])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -44,6 +44,7 @@ m4_define([mym4_full_version],[mym4_version[]mym4_betastring])
 
 AC_INIT([pinentry],[mym4_full_version], [http://bugs.gnupg.org])
 
+AC_CONFIG_AUX_DIR([build-aux])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(pinentry/pinentry.h)
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
@@ -232,6 +233,20 @@ AM_CONDITIONAL(FALLBACK_CURSES, test "$fallback_curses" = "yes")
 if test "$pinentry_curses" = "yes"; then
   AC_DEFINE(PINENTRY_CURSES, 1,
            [The Curses version of Pinentry is to be build])
+fi
+
+
+dnl
+dnl Check for tty pinentry program.
+dnl
+AC_ARG_ENABLE(pinentry-tty,
+            AC_HELP_STRING([--enable-pinentry-tty], [build tty pinentry]),
+            pinentry_tty=$enableval, pinentry_tty=maybe)
+AM_CONDITIONAL(BUILD_PINENTRY_TTY, test "$pinentry_tty" = "yes")
+
+if test "$pinentry_tty" = "yes"; then
+  AC_DEFINE(PINENTRY_TTY, 1,
+           [The TTY version of Pinentry is to be build])
 fi
 
 
@@ -427,6 +442,7 @@ fi)
 fi
 
 if test "$pinentry_qt4" != "no"; then
+QT_PATH_MOC
 PKG_CHECK_MODULES(QT4_GUI, QtGui,,
 if test "$pinentry_qt4" = "yes"; then
     AC_MSG_ERROR([[
@@ -445,6 +461,18 @@ fi
 AM_CONDITIONAL(BUILD_PINENTRY_QT4, test "$pinentry_qt4" = "yes")
 if test "$pinentry_qt4" = "yes"; then
   AC_DEFINE(PINENTRY_QT4, 1, [The Qt4 version of Pinentry is to be build])
+fi
+
+dnl
+dnl Option to add insecure clipboard support to pinentry-qt4
+dnl
+AC_ARG_ENABLE(pinentry-qt4-clipboard,
+              AC_HELP_STRING([--enable-pinentry-qt4-clipboard], [Enable clipboard support in
+                              pinentry-qt4]), pinentry_qt4_clipboard=$enableval)
+
+if test "$pinentry_qt4_clipboard" = "yes" -a "$pinentry_qt4" = "yes"; then
+  AC_DEFINE(PINENTRY_QT4_CLIPBOARD, 1, [Pinentry-qt4 should have clipboard support])
+  pinentry_qt4_clip_msg="(with clipboard support)"
 fi
 
 dnl if test "$pinentry_qt4" = "yes"; then
@@ -481,10 +509,14 @@ else
         if test "$pinentry_curses" = "yes"; then
           PINENTRY_DEFAULT=pinentry-curses
         else
-          if test "$pinentry_w32" = "yes"; then
-            PINENTRY_DEFAULT=pinentry-w32
+          if test "$pinentry_tty" = "yes"; then
+            PINENTRY_DEFAULT=pinentry-tty
           else
-            AC_MSG_ERROR([[No pinentry enabled.]])
+            if test "$pinentry_w32" = "yes"; then
+              PINENTRY_DEFAULT=pinentry-w32
+            else
+              AC_MSG_ERROR([[No pinentry enabled.]])
+            fi
           fi
         fi
       fi
@@ -499,6 +531,7 @@ assuan/Makefile
 secmem/Makefile
 pinentry/Makefile
 curses/Makefile
+tty/Makefile
 gtk/Makefile
 gtk+-2/Makefile
 qt/Makefile
@@ -518,10 +551,11 @@ AC_MSG_NOTICE([
 	Platform:  $host
 
 	Curses Pinentry ..: $pinentry_curses
+	TTY Pinentry .....: $pinentry_tty
 	GTK+ Pinentry ....: $pinentry_gtk
 	GTK+-2 Pinentry ..: $pinentry_gtk_2
 	Qt Pinentry ......: $pinentry_qt
-	Qt4 Pinentry .....: $pinentry_qt4
+	Qt4 Pinentry .....: $pinentry_qt4 $pinentry_qt4_clip_msg
 	W32 Pinentry .....: $pinentry_w32
 
 	Fallback to Curses: $fallback_curses

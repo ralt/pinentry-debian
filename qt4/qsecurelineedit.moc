@@ -1,17 +1,16 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'qsecurelineedit.h'
 **
-** Created: Wed Aug 8 16:09:59 2012
-**      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "qsecurelineedit.h"
+#include "../../../s/pinentry/qt4/qsecurelineedit.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'qsecurelineedit.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
-#error "This file was generated using the moc from 4.8.2. It"
+#error "This file was generated using the moc from 4.8.6. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -23,9 +22,9 @@ static const uint qt_meta_data_QSecureLineEdit[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      14,   14, // methods
-      16,   84, // properties
-       1,  148, // enums/sets
+      17,   14, // methods
+      16,   99, // properties
+       1,  163, // enums/sets
        0,    0, // constructors
        0,       // flags
        6,       // signalCount
@@ -44,27 +43,30 @@ static const uint qt_meta_data_QSecureLineEdit[] = {
      178,   16,   16,   16, 0x0a,
      190,   16,   16,   16, 0x0a,
      197,   16,   16,   16, 0x0a,
-     204,   16,   16,   16, 0x08,
-     226,   16,   16,   16, 0x08,
-     252,   16,   16,   16, 0x08,
+     204,   16,   16,   16, 0x0a,
+     210,   16,   16,   16, 0x0a,
+     217,   16,   16,   16, 0x0a,
+     225,   16,   16,   16, 0x08,
+     247,   16,   16,   16, 0x08,
+     273,   16,   16,   16, 0x08,
 
  // properties: name, type, flags
-     280,  272, 0x0a095103,
-     301,  290, 0x0059510b,
-     310,  306, 0x02095103,
-     325,  320, 0x01095103,
-     340,  331, 0x00095009,
-     349,  290, 0x00095009,
-     361,  306, 0x02095103,
-     390,  376, 0x0009510b,
-     400,  320, 0x01094103,
-     409,  320, 0x01095001,
-     425,  290, 0x00095009,
-     438,  320, 0x01095103,
-     450,  320, 0x01095103,
-     459,  320, 0x01095001,
-     473,  320, 0x01095001,
-     487,  320, 0x01095001,
+     301,  293, 0x0a095103,
+     322,  311, 0x0059510b,
+     331,  327, 0x02095103,
+     346,  341, 0x01095103,
+     361,  352, 0x00095009,
+     370,  311, 0x00095009,
+     382,  327, 0x02095103,
+     411,  397, 0x0009510b,
+     421,  341, 0x01094103,
+     430,  341, 0x01095001,
+     446,  311, 0x00095009,
+     459,  341, 0x01095103,
+     471,  341, 0x01095103,
+     480,  341, 0x01095001,
+     494,  341, 0x01095001,
+     508,  341, 0x01095001,
 
  // properties: notify_signal_id
        0,
@@ -85,13 +87,13 @@ static const uint qt_meta_data_QSecureLineEdit[] = {
        0,
 
  // enums: name, flags, count, data
-     331, 0x0,    4,  152,
+     352, 0x0,    4,  167,
 
  // enum data: key, value
-     503, uint(QSecureLineEdit::Normal),
-     510, uint(QSecureLineEdit::NoEcho),
-     517, uint(QSecureLineEdit::Password),
-     526, uint(QSecureLineEdit::PasswordEchoOnEdit),
+     524, uint(QSecureLineEdit::Normal),
+     531, uint(QSecureLineEdit::NoEcho),
+     538, uint(QSecureLineEdit::Password),
+     547, uint(QSecureLineEdit::PasswordEchoOnEdit),
 
        0        // eod
 };
@@ -103,15 +105,15 @@ static const char qt_meta_stringdata_QSecureLineEdit[] = {
     "returnPressed()\0editingFinished()\0"
     "selectionChanged()\0setText(secqstring)\0"
     "clear()\0selectAll()\0undo()\0redo()\0"
-    "_q_clipboardChanged()\0_q_handleWindowActivate()\0"
-    "_q_deleteSelected()\0QString\0inputMask\0"
-    "secqstring\0text\0int\0maxLength\0bool\0"
-    "frame\0EchoMode\0echoMode\0displayText\0"
-    "cursorPosition\0Qt::Alignment\0alignment\0"
-    "modified\0hasSelectedText\0selectedText\0"
-    "dragEnabled\0readOnly\0undoAvailable\0"
-    "redoAvailable\0acceptableInput\0Normal\0"
-    "NoEcho\0Password\0PasswordEchoOnEdit\0"
+    "cut()\0copy()\0paste()\0_q_clipboardChanged()\0"
+    "_q_handleWindowActivate()\0_q_deleteSelected()\0"
+    "QString\0inputMask\0secqstring\0text\0int\0"
+    "maxLength\0bool\0frame\0EchoMode\0echoMode\0"
+    "displayText\0cursorPosition\0Qt::Alignment\0"
+    "alignment\0modified\0hasSelectedText\0"
+    "selectedText\0dragEnabled\0readOnly\0"
+    "undoAvailable\0redoAvailable\0acceptableInput\0"
+    "Normal\0NoEcho\0Password\0PasswordEchoOnEdit\0"
 };
 
 void QSecureLineEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -131,9 +133,12 @@ void QSecureLineEdit::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 8: _t->selectAll(); break;
         case 9: _t->undo(); break;
         case 10: _t->redo(); break;
-        case 11: _t->d_func()->_q_clipboardChanged(); break;
-        case 12: _t->d_func()->_q_handleWindowActivate(); break;
-        case 13: _t->d_func()->_q_deleteSelected(); break;
+        case 11: _t->cut(); break;
+        case 12: _t->copy(); break;
+        case 13: _t->paste(); break;
+        case 14: _t->d_func()->_q_clipboardChanged(); break;
+        case 15: _t->d_func()->_q_handleWindowActivate(); break;
+        case 16: _t->d_func()->_q_deleteSelected(); break;
         default: ;
         }
     }
@@ -171,9 +176,9 @@ int QSecureLineEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 14)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 14;
+        _id -= 17;
     }
 #ifndef QT_NO_PROPERTIES
       else if (_c == QMetaObject::ReadProperty) {

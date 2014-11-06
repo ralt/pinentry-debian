@@ -1,3 +1,115 @@
+2014-09-18  Werner Koch  <wk@gnupg.org>
+
+	Release 0.8.4.
+
+	Add missing build support files and move them to build-aux.
+
+	Use generic autogen.sh script.
+	* autogen.rc: New.
+	* autogen.sh: New.  Take from GnuPG.
+	* Makefile.am (EXTRA_DIST): Add autogen.rc.
+	(DISTCHECK_CONFIGURE_FLAGS): Disable qt4.
+
+2014-08-12  Werner Koch  <wk@gnupg.org>
+
+	common: Fix compiler warning.
+	* pinentry/pinentry.c (pinentry_utf8_to_local): Use cast for iconv arg.
+	(pinentry_local_to_utf8): Ditto.
+
+	New pinentry-tty version for dumb terminals.
+	* Makefile.am: Add pinentry-tty.
+	* NEWS: Add news about pinentry-tty.
+	* README: Update.
+	* configure.ac: Add support for this pinentry.
+	* tty/Makefile.am: New.
+	* tty/pinentry-tty.c: New.
+
+2014-08-06  Andre Heinecke  <aheinecke@intevation.de>
+
+	Check for MOC also if pinentry-qt is disabled.
+	  * configure.ac: Call QT_PATH_MOC if pinentry_qt4 is not no.
+
+	Add fallbacks for SetForegroundWindow.
+	    If that foreground window fails pinentry-qt now tries to
+	    attach to the current foreground process and then tries
+	    to set the foreground window again. If that fails it also
+	    calls ShowWindow as a last resort.
+
+	    * qt4/pinentrydialog.cpp (raiseWindow): Add fallbacks in
+	    case SetForegroundWindow fails.
+
+	Use raiseWindow also for confirm dialogs.
+	    This should fix the case that the dialog opened
+	    in the foreground but a warning / confirm dialog
+	    opened in the background.
+
+	    * qt4/pinentryconfirm.cpp, qt4/pinentryconfirm.h (showEvent):
+	    New overwrite base class method to call raiseWindow.
+	    * NEWS: Mention this.
+
+2014-07-30  Andre Heinecke  <aheinecke@intevation.de>
+
+	Set some accessibility information.
+	    * qt4/main.cpp (qt_cmd_handler): Build buttons with accessibile
+	    Description.
+	    * qt4/pinentrydialog.cpp (setDescription, setError, setOkText)
+	    (setCancelText, setQualityBar): Set an accessible description.
+	    * qt4/pinentryconfirm.cpp (PinentryConfirm): Set message
+	    box contents also as accessible values.
+	    * NEWS: Mention it and the copy/paste change from last year.
+
+2013-07-15  Andre Heinecke  <aheinecke@intevation.de>
+
+	Lower paste length limit to 300.
+	    This should be more then enough and avoids possible problems
+	    with libassuan cmd line lenght or percent escaping etc.
+
+	    * qt4/qsecurelineedit.cpp (insert): Lower paste limit
+
+	Limit paste length to 1023 characters.
+	    * qt4/qsecurelineedit.cpp (insert): Check for a maximum
+	    length before allocation the secmem string.
+
+	Fix contextmenu support for pasting.
+	    MOC ignores preprocessor definitions so we can not conditionally
+	    declare SLOTS. So we now move the ifdefs in the definition and
+	    always declare the SLOTS.
+
+	    * qt4/qsecurelinedit.cpp (cut, copy, paste): Do nothing if
+	    QT_NO_CLIPBOARD is defined.
+	    * qt4/qsecurelinedit.h: Always declare cut, copy and paste slots
+
+	Remove check for RTL extensions.
+	    Our code does nothing RTL specific there anyway. And the
+	    qt_use_rtl_extensions symbol has been removed.
+
+	    * qt4/qsecurelinedit.cpp: Remove check for RTL extensions.
+
+2013-07-12  Werner Koch  <wk@gnupg.org>
+
+	Fix for commit fb38be9 to allow for "make distcheck".
+	* qt4/Makefile.am: Make correct use of BUILT_SOURCES.
+
+2013-05-29  Andre Heinecke  <aheinecke@intevation.de>
+
+	Add pinentry-qt4-clipboard option.
+	    Enabling this option will make it possible to paste a
+	    passphrase into pinentry-qt4. This defeats the secmem
+	    mechanism but drastically increases usability for some
+	    users.
+
+	    * configure.ac: New option pinentry-qt4-clipboard.
+	    * qt4/qsecurelineedit.cpp, qt4/qsecurelineedit.h: Activate
+	    clipboard and context menu if PINENTRY_QT4_CLIPBOARD is defined.
+
+	Remove qt4 moc files and add moc to buildsystem.
+	    This is neccessary to conditionally enable signals/slots
+	    at build time.
+
+	    * qt4/Makefile.am: Moc files automatically.
+	    * qt4/pinentryconfirm.moc, qt4/pinentrydialog.moc,
+	    qsecurelineedit.moc: Removed.
+
 2013-04-26  Werner Koch  <wk@gnupg.org>
 
 	Release 0.8.3.

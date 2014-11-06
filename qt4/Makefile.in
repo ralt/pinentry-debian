@@ -82,7 +82,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
@@ -102,7 +102,7 @@ pinentry_qt4_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	../pinentry/libpinentry.a $(top_builddir)/assuan/libassuan.a \
 	$(top_builddir)/secmem/libsecmem.a $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -270,7 +270,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 x_libraries = @x_libraries@
-EXTRA_DIST = document-encrypt.png pinentry.qrc
+EXTRA_DIST = document-encrypt.png pinentry.qrc pinentryconfirm.moc \
+	qsecurelineedit.moc pinentrydialog.moc
 @FALLBACK_CURSES_FALSE@ncurses_include = 
 @FALLBACK_CURSES_TRUE@ncurses_include = $(NCURSES_INCLUDE)
 @FALLBACK_CURSES_FALSE@libcurses = 
@@ -283,17 +284,23 @@ pinentry_qt4_LDADD = $(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) \
 	../pinentry/libpinentry.a $(top_builddir)/assuan/libassuan.a \
 	$(top_builddir)/secmem/libsecmem.a $(LIBCAP)
 
+BUILT_SOURCES = \
+	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
+
+MAINTAINERCLEANFILES = \
+	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
+
 pinentry_qt4_SOURCES = pinentrydialog.h pinentrydialog.cpp \
 	main.cpp secstring.h secstring.cpp qsecurelineedit.h \
-	qsecurelineedit.cpp pinentrydialog.moc qsecurelineedit.moc \
-	qrc_pinentry.cpp \
-	qsecurelineedit_p.h \
-	pinentryconfirm.cpp pinentryconfirm.h pinentryconfirm.moc
+	qsecurelineedit.cpp qrc_pinentry.cpp \
+	qsecurelineedit_p.h pinentryconfirm.cpp pinentryconfirm.h \
+	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .o .obj
+.SUFFIXES: .cpp .h .moc .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -478,13 +485,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -514,6 +523,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
@@ -583,7 +594,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic ctags distclean distclean-compile \
@@ -598,6 +609,9 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
+
+.h.moc:
+	$(MOC) `test -f '$<' || echo '$(srcdir)/'`$< -o $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

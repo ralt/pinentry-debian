@@ -1,5 +1,5 @@
-This is /home/wk/w/pinentry/doc/pinentry.info, produced by makeinfo
-version 4.13 from /home/wk/w/pinentry/doc/pinentry.texi.
+This is /home/wk/s/pinentry/doc/pinentry.info, produced by makeinfo
+version 4.13 from /home/wk/s/pinentry/doc/pinentry.texi.
 
 INFO-DIR-SECTION GNU Utilities
 START-INFO-DIR-ENTRY
@@ -7,8 +7,8 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
    This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.8.3, last updated 4 March 2013, of `The `PINEntry'
-Manual', for version 0.8.3.
+   This is edition 0.8.4, last updated 21 March 2013, of `The
+`PINEntry' Manual', for version 0.8.4.
 
    Published by g10 Code GmbH
 Hüttenstr. 61
@@ -679,11 +679,11 @@ Index
 
 
 Tag Table:
-Node: Top855
-Node: Using pinentry2046
-Node: Protocol3887
-Node: Copying10325
-Node: Option Index29522
-Node: Index30604
+Node: Top856
+Node: Using pinentry2047
+Node: Protocol3888
+Node: Copying10326
+Node: Option Index29523
+Node: Index30605
 
 End Tag Table

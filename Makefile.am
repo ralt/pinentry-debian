@@ -21,11 +21,11 @@
 
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = dist-bzip2 no-dist-gzip
-#DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt4
+DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt4
 
 GITLOG_TO_CHANGELOG=gitlog-to-changelog
 
-EXTRA_DIST = autogen.sh README.GIT ChangeLog-old \
+EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 	     build-aux/gitlog-to-changelog \
 	     build-aux/git-log-fix build-aux/git-log-footer
 
@@ -33,6 +33,12 @@ if BUILD_PINENTRY_CURSES
 pinentry_curses = curses
 else
 pinentry_curses =
+endif
+
+if BUILD_PINENTRY_TTY
+pinentry_tty = tty
+else
+pinentry_tty =
 endif
 
 if BUILD_PINENTRY_GTK
@@ -65,7 +71,7 @@ else
 pinentry_w32 =
 endif
 
-SUBDIRS = assuan secmem pinentry ${pinentry_curses} \
+SUBDIRS = assuan secmem pinentry ${pinentry_curses} ${pinentry_tty} \
 	${pinentry_gtk} ${pinentry_gtk_2} ${pinentry_qt} ${pinentry_qt4} \
 	${pinentry_w32} doc
 

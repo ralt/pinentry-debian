@@ -1325,6 +1325,17 @@ void QSecureLineEdit::deselect()
     d->finishChange();
 }
 
+#ifndef QT_NO_CLIPBOARD
+/* Should only be used if pasting the passphrase is explicitly
+ * wanted. Defeats the purpose of the secmem implmentation */
+void QSecureLineEdit::insert(const QString &newText)
+{
+    if (!newText.isEmpty() && newText.at(0).isPrint()
+            && newText.length() < 300) {
+        insert( secqstring( newText.begin(), newText.end() ) );
+    }
+}
+#endif
 
 /*!
     Deletes any selected text, inserts \a newText, and validates the
@@ -1420,7 +1431,6 @@ void QSecureLineEdit::setReadOnly(bool enable)
 }
 
 
-#ifndef QT_NO_CLIPBOARD
 /*!
     Copies the selected text to the clipboard and deletes it, if there
     is any, and if echoMode() is \l Normal.
@@ -1433,10 +1443,12 @@ void QSecureLineEdit::setReadOnly(bool enable)
 
 void QSecureLineEdit::cut()
 {
+#ifndef QT_NO_CLIPBOARD
     if (hasSelectedText()) {
         copy();
         del();
     }
+#endif
 }
 
 
@@ -1449,8 +1461,10 @@ void QSecureLineEdit::cut()
 
 void QSecureLineEdit::copy() const
 {
+#ifndef QT_NO_CLIPBOARD
     Q_D(const QSecureLineEdit);
     d->copy();
+#endif
 }
 
 /*!
@@ -1466,6 +1480,8 @@ void QSecureLineEdit::copy() const
 
 void QSecureLineEdit::paste()
 {
+#ifndef QT_NO_CLIPBOARD
+    Q_D(QSecureLineEdit);
     if(echoMode() == PasswordEchoOnEdit)
     {
         Q_D(QSecureLineEdit);
@@ -1474,17 +1490,21 @@ void QSecureLineEdit::paste()
         d->resumePassword = true;
     }
     insert(QApplication::clipboard()->text(QClipboard::Clipboard));
+#endif
 }
 
+#ifndef QT_NO_CLIPBOARD
 void QSecureLineEditPrivate::copy(bool clipboard) const
 {
     Q_Q(const QSecureLineEdit);
-    QString t = q->selectedText();
-    if (!t.isEmpty() && echoMode == QSecureLineEdit::Normal) {
-        q->disconnect(QApplication::clipboard(), SIGNAL(selectionChanged()), q, 0);
-        QApplication::clipboard()->setText(t, clipboard ? QClipboard::Clipboard : QClipboard::Selection);
-        q->connect(QApplication::clipboard(), SIGNAL(selectionChanged()),
-                   q, SLOT(_q_clipboardChanged()));
+    if (echoMode == QSecureLineEdit::Normal) {
+        QString t = QString(q->selectedText().c_str());
+        if (!t.isEmpty()) {
+            q->disconnect(QApplication::clipboard(), SIGNAL(selectionChanged()), q, 0);
+            QApplication::clipboard()->setText(t, clipboard ? QClipboard::Clipboard : QClipboard::Selection);
+            q->connect(QApplication::clipboard(), SIGNAL(selectionChanged()),
+                    q, SLOT(_q_clipboardChanged()));
+        }
     }
 }
 
@@ -2565,10 +2585,6 @@ void QSecureLineEdit::contextMenuEvent(QContextMenuEvent *event)
     delete menu;
 }
 
-#if defined(Q_WS_WIN)
-    extern bool qt_use_rtl_extensions;
-#endif
-
 /*!  This function creates the standard context menu which is shown
         when the user clicks on the line edit with the right mouse
         button. It is called from the default contextMenuEvent() handler.
@@ -2603,16 +2619,17 @@ QMenu *QSecureLineEdit::createStandardContextMenu()
     d->actions[QSecureLineEditPrivate::UndoAct]->setEnabled(d->isUndoAvailable());
     d->actions[QSecureLineEditPrivate::RedoAct]->setEnabled(d->isRedoAvailable());
 #ifndef QT_NO_CLIPBOARD
-    d->actions[QSecureLineEditPrivate::CutAct]->setEnabled(!d->readOnly && d->hasSelectedText());
-    d->actions[QSecureLineEditPrivate::CopyAct]->setEnabled(d->hasSelectedText());
+    d->actions[QSecureLineEditPrivate::CutAct]->setEnabled(!d->readOnly && d->hasSelectedText()
+            && d->echoMode == QSecureLineEdit::Normal);
+    d->actions[QSecureLineEditPrivate::CopyAct]->setEnabled(d->hasSelectedText() && d->echoMode == QSecureLineEdit::Normal);
     d->actions[QSecureLineEditPrivate::PasteAct]->setEnabled(!d->readOnly && !QApplication::clipboard()->text().isEmpty());
 #else
     d->actions[QSecureLineEditPrivate::CutAct]->setEnabled(false);
     d->actions[QSecureLineEditPrivate::CopyAct]->setEnabled(false);
     d->actions[QSecureLineEditPrivate::PasteAct]->setEnabled(false);
 #endif
-    d->actions[QSecureLineEditPrivate::ClearAct]->setEnabled(!d->readOnly && !d->text.isEmpty() && d->hasSelectedText());
-    d->actions[QSecureLineEditPrivate::SelectAllAct]->setEnabled(!d->text.isEmpty() && !d->allSelected());
+    d->actions[QSecureLineEditPrivate::ClearAct]->setEnabled(!d->readOnly && !d->text.empty() && d->hasSelectedText());
+    d->actions[QSecureLineEditPrivate::SelectAllAct]->setEnabled(!d->text.empty() && !d->allSelected());
 
     QMenu *popup = new QMenu(this);
     popup->setObjectName(QLatin1String("qt_edit_menu"));
@@ -2634,14 +2651,10 @@ QMenu *QSecureLineEdit::createStandardContextMenu()
     }
 #endif
 
-#if defined(Q_WS_WIN)
-    if (!d->readOnly && qt_use_rtl_extensions) {
-#else
     if (!d->readOnly) {
-#endif
         popup->addSeparator();
-        QUnicodeControlCharacterMenu *ctrlCharacterMenu = new QUnicodeControlCharacterMenu(this, popup);
-        popup->addMenu(ctrlCharacterMenu);
+        //QUnicodeControlCharacterMenu *ctrlCharacterMenu = new QUnicodeControlCharacterMenu(this, popup);
+        //popup->addMenu(ctrlCharacterMenu);
     }
     return popup;
 }
