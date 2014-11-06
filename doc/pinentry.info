@@ -7,8 +7,8 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
    This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.8.0, last updated 3 March 2010, of `The `PINEntry'
-Manual', for version 0.8.0.
+   This is edition 0.8.1, last updated 16 December 2010, of `The
+`PINEntry' Manual', for version 0.8.1.
 
    Published by g10 Code GmbH
 Hüttenstr. 61
@@ -668,11 +668,11 @@ Index
 
 
 Tag Table:
-Node: Top807
-Node: Using pinentry1998
-Node: Protocol3557
-Node: Copying9903
-Node: Option Index29100
-Node: Index30109
+Node: Top811
+Node: Using pinentry2002
+Node: Protocol3561
+Node: Copying9907
+Node: Option Index29104
+Node: Index30113
 
 End Tag Table

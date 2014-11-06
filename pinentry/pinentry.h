@@ -98,6 +98,11 @@ struct pinentry
      conversion occured. */
   int locale_err;
 
+  /* The user should set this to true if the window close button has
+     been used.  This flag is used in addition to a regular return
+     value.  */
+  int close_button;
+
   /* The caller should set this to true if only one button is
      required.  This is useful for notification dialogs where only a
      dismiss button is required. */
@@ -146,6 +151,9 @@ typedef int (*pinentry_cmd_handler_t) (pinentry_t pin);
    error occurs, -1 is returned and errno indicates the type of an
    error.  Otherwise, 0 is returned.  */
 int pinentry_loop (void);
+
+/* The same as above but allows to specify the i/o descriptors. */
+int pinentry_loop2 (int infd, int outfd);
 
 
 /* Convert the UTF-8 encoded string TEXT to the encoding given in

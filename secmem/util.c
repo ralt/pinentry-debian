@@ -16,19 +16,21 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #define _GNU_SOURCE 1
 
 #include <unistd.h>
-#include <errno.h>
+#ifndef HAVE_W32CE_SYSTEM
+# include <errno.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "util.h"
 
@@ -50,7 +52,13 @@ xwrite(int fd, const void *data, size_t bytes)
     {
       do
         written = write (fd, ptr, todo);
-      while (written == -1 && errno == EINTR);
+      while (
+#ifdef HAVE_W32CE_SYSTEM
+             0
+#else
+             written == -1 && errno == EINTR
+#endif
+             );
       if (written < 0)
         break;
     }

@@ -52,6 +52,7 @@
 #endif
 
 static pinentry_t pinentry;
+static int grab_failed;
 static int passphrase_ok;
 typedef enum { CONFIRM_CANCEL, CONFIRM_OK, CONFIRM_NOTOK } confirm_value_t;
 static confirm_value_t confirm_value;
@@ -135,7 +136,11 @@ grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
     return;
 
   if (gdk_keyboard_grab (win->window, FALSE, gdk_event_get_time (event)))
-    g_error ("could not grab keyboard");
+    {
+      g_critical ("could not grab keyboard");
+      grab_failed = 1;
+      gtk_main_quit ();
+    }
 }
 
 
@@ -145,13 +150,18 @@ ungrab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
 {
   gdk_keyboard_ungrab (gdk_event_get_time (event));
   /* Unmake window transient for the root window.  */
-  gdk_window_set_transient_for (win->window, NULL);
+  /* gdk_window_set_transient_for cannot be used with parent = NULL to
+     unset transient hint (unlike gtk_ version which can).  Replacement
+     code is taken from gtk_window_transient_parent_unrealized.  */
+  gdk_property_delete (win->window,
+                       gdk_atom_intern_static_string ("WM_TRANSIENT_FOR"));
 }
 
 
 static int
 delete_event (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
+  pinentry->close_button = 1;
   gtk_main_quit ();
   return TRUE;
 }
@@ -213,6 +223,8 @@ pinentry_utf8_validate (gchar *text)
   if (g_utf8_validate (text, -1, NULL))
     return g_strdup (text);
 
+  /* Failure: Assume that it was encoded in the current locale and
+     convert it to utf-8.  */
   result = g_locale_to_utf8 (text, -1, NULL, NULL, NULL);
   if (!result)
     {
@@ -300,8 +312,15 @@ create_window (int confirm_mode)
 	g_signal_connect (G_OBJECT (win),
 			  "realize", G_CALLBACK (make_transient), NULL);
 
+      /* We need to grab the keyboard when its visible! not when its
+         mapped (there is a difference)  */
+      g_object_set (G_OBJECT(win), "events",
+                    GDK_VISIBILITY_NOTIFY_MASK | GDK_STRUCTURE_MASK, NULL);
+
       g_signal_connect (G_OBJECT (win),
-			pinentry->grab ? "map-event" : "focus-in-event",
+			pinentry->grab
+                        ? "visibility-notify-event"
+                        : "focus-in-event",
 			G_CALLBACK (grab_keyboard), NULL);
       g_signal_connect (G_OBJECT (win),
 			pinentry->grab ? "unmap-event" : "focus-out-event",
@@ -443,8 +462,20 @@ create_window (int confirm_mode)
           w = gtk_button_new_with_mnemonic (msg);
           g_free (msg);
         }
+      else if (pinentry->default_cancel)
+        {
+          GtkWidget *image;
+
+          msg = pinentry_utf8_validate (pinentry->default_cancel);
+          w = gtk_button_new_with_mnemonic (msg);
+          g_free (msg);
+          image = gtk_image_new_from_stock (GTK_STOCK_CANCEL,
+                                            GTK_ICON_SIZE_BUTTON);
+          if (image)
+            gtk_button_set_image (GTK_BUTTON (w), image);
+        }
       else
-        w = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
+          w = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
       gtk_container_add (GTK_CONTAINER (bbox), w);
       g_signal_connect (G_OBJECT (w), "clicked",
                         G_CALLBACK (confirm_mode ? confirm_button_clicked
@@ -472,6 +503,18 @@ create_window (int confirm_mode)
       w = gtk_button_new_with_mnemonic (msg);
       g_free (msg);
     }
+  else if (pinentry->default_ok)
+    {
+      GtkWidget *image;
+      
+      msg = pinentry_utf8_validate (pinentry->default_ok);
+      w = gtk_button_new_with_mnemonic (msg);
+      g_free (msg);
+      image = gtk_image_new_from_stock (GTK_STOCK_OK,
+                                        GTK_ICON_SIZE_BUTTON);
+      if (image)
+        gtk_button_set_image (GTK_BUTTON (w), image);
+    }
   else
     w = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_container_add (GTK_CONTAINER(bbox), w);
@@ -494,8 +537,9 @@ create_window (int confirm_mode)
     }
 
   gtk_window_set_position (GTK_WINDOW (win), GTK_WIN_POS_CENTER);
-  
-  gtk_widget_show_all(win);
+  gtk_window_set_keep_above (GTK_WINDOW (win), TRUE);
+  gtk_widget_show_all (win);
+  gtk_window_present (GTK_WINDOW (win));  /* Make sure it has the focus.  */
   
   return win;
 }
@@ -516,7 +560,7 @@ gtk_cmd_handler (pinentry_t pe)
   while (gtk_events_pending ())
     gtk_main_iteration ();
 
-  if (confirm_value == CONFIRM_CANCEL)
+  if (confirm_value == CONFIRM_CANCEL || grab_failed)
     pe->canceled = 1;
 
   pinentry = NULL;
