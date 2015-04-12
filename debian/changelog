@@ -1,3 +1,9 @@
+pinentry (0.9.0-1) UNRELEASED; urgency=medium
+
+  * Bringing package under team maintenance, with Peter's agreement.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sun, 12 Apr 2015 15:29:35 -0400
+
 pinentry (0.9.0-0.1) experimental; urgency=medium
 
   * Non-maintainer upload

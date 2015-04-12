@@ -1,10 +1,14 @@
 Source: pinentry
 Section: utils
 Priority: optional
-Maintainer: Peter Eisentraut <petere@debian.org>
+Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
+Uploaders: Peter Eisentraut <petere@debian.org>,
+ Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 Build-Depends: cdbs (>= 0.4.41), debhelper (>= 8), libglib2.0-dev (>= 2.15.5), libgtk2.0-dev (>= 2.4.0), libncurses5-dev, libncursesw5-dev, libqt4-dev, m4
 Standards-Version: 3.9.6
 Homepage: http://www.gnupg.org/aegypten/
+Vcs-Git: git://anonscm.debian.org/pkg-gnupg/pinentry.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-gnupg/pinentry.git
 
 Package: pinentry-curses
 Architecture: any
