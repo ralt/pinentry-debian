@@ -13,7 +13,7 @@ Build-Depends: cdbs (>= 0.4.41),
                libqt4-dev,
                m4
 Standards-Version: 3.9.6
-Homepage: http://www.gnupg.org/aegypten/
+Homepage: https://www.gnupg.org/related_software/pinentry/
 Vcs-Git: git://anonscm.debian.org/pkg-gnupg/pinentry.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-gnupg/pinentry.git
 
