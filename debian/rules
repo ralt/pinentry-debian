@@ -11,12 +11,7 @@ DEB_DH_INSTALL_SOURCEDIR = debian/tmp
 LDFLAGS += -Wl,--as-needed
 
 
-pre-build:: debian/stamp-custom-prepare qt4/pinentryconfirm.moc qt4/pinentrydialog.moc qt4/qsecurelineedit.moc
-
-debian/stamp-custom-prepare:
-	dh_testdir
-	make -C debian all
-	touch $@
+pre-build:: qt4/pinentryconfirm.moc qt4/pinentrydialog.moc qt4/qsecurelineedit.moc
 
 # I guess you're supposed to do this manually, per upstream: 
 # <http://lists.gnupg.org/pipermail/gnupg-devel/2009-June/025197.html> 
@@ -25,6 +20,4 @@ debian/stamp-custom-prepare:
 	moc-qt4 $< >$@
 
 clean::
-	rm -f debian/stamp-custom-prepare
-	make -C debian clean
 	rm -f qt4/*.moc
