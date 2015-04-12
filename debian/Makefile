@@ -1,6 +1,6 @@
 packages = $(addprefix pinentry-, curses gtk2 qt4)
 binaries = $(addprefix pinentry-, curses gtk-2 qt4)
-suffixes = install manpages postinst prerm
+suffixes = manpages postinst prerm
 targets = $(foreach suffix,$(suffixes),$(foreach package,$(packages),$(package).$(suffix))) \
 	$(foreach binary,$(binaries),$(binary).1)
 
