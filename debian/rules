@@ -14,11 +14,9 @@ override_dh_installdocs:
 LDFLAGS += -Wl,--as-needed
 
 
-override_dh_auto_build: qt4/pinentryconfirm.moc qt4/pinentrydialog.moc qt4/qsecurelineedit.moc
-	dh_auto_build
-
-# I guess you're supposed to do this manually, per upstream: 
+# Rebuild moc files manually, per upstream: 
 # <http://lists.gnupg.org/pipermail/gnupg-devel/2009-June/025197.html> 
 # --petere@d.o
-%.moc: %.h
-	moc-qt4 $< >$@
+override_dh_auto_build:
+	$(foreach f,pinentryconfirm pinentrydialog qsecurelineedit, moc-qt4 -o qt4/$(f).moc qt4/$(f).h && ) \
+	dh_auto_build
