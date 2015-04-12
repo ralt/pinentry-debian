@@ -3,8 +3,15 @@ Section: utils
 Priority: optional
 Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Peter Eisentraut <petere@debian.org>,
- Daniel Kahn Gillmor <dkg@fifthhorseman.net>
-Build-Depends: cdbs (>= 0.4.41), debhelper (>= 8), libglib2.0-dev (>= 2.15.5), libgtk2.0-dev (>= 2.4.0), libncurses5-dev, libncursesw5-dev, libqt4-dev, m4
+           Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Build-Depends: cdbs (>= 0.4.41),
+               debhelper (>= 8),
+               libglib2.0-dev (>= 2.15.5),
+               libgtk2.0-dev (>= 2.4.0),
+               libncurses5-dev,
+               libncursesw5-dev,
+               libqt4-dev,
+               m4
 Standards-Version: 3.9.6
 Homepage: http://www.gnupg.org/aegypten/
 Vcs-Git: git://anonscm.debian.org/pkg-gnupg/pinentry.git
@@ -12,7 +19,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-gnupg/pinentry.git
 
 Package: pinentry-curses
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry
 Enhances: gnupg-agent
@@ -35,7 +42,7 @@ Description: curses-based PIN or pass-phrase entry dialog for GnuPG
 
 Package: pinentry-qt4
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry, pinentry-qt, pinentry-x11
 Enhances: gnupg-agent
@@ -53,7 +60,7 @@ Description: Qt-4-based PIN or pass-phrase entry dialog for GnuPG
 
 Package: pinentry-gtk2
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry, pinentry-x11
 Enhances: gnupg-agent
@@ -75,7 +82,7 @@ Description: GTK+-2-based PIN or pass-phrase entry dialog for GnuPG
 Package: pinentry-doc
 Section: doc
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-curses, pinentry-gtk2, pinentry-qt4
 Description: documentation for pinentry packages
  This package contains the documentation for the pinentry packages,
