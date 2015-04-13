@@ -1,4 +1,4 @@
-pinentry (0.9.1-1) UNRELEASED; urgency=medium
+pinentry (0.9.1-1) experimental; urgency=medium
 
   * New Upstream Release
   * Bringing package under team maintenance, with Peter's agreement.
