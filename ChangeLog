@@ -1,3 +1,50 @@
+2015-03-18  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.1.
+
+	Fix build problems on AIX.
+	* pinentry/pinentry.c: Do not include getopt.h.
+	* pinentry/pinentry-curses.c (dialog_run): Call use_default_colors
+	only with ncurses.
+
+	Update to automake 1.14.
+
+2015-03-17  Werner Koch  <wk@gnupg.org>
+
+	Get rid of getopt_long and improve --help output.
+	* pinentry/argparse.c, pinentry/argparse.h: New. Taken from GnuPG
+	master.
+	* pinentry/Makefile.am (libpinentry_a_SOURCES): Add them.
+	* pinentry/pinentry.c: Include argparse.h.
+	(usage): Remove.
+	(my_strusage): New.
+	(pinentry_parse_opts): Rewrite.  Do not return a value.  Change call
+	callers.
+
+	Use CH type instead of wchar_t for curses.
+	* pinentry/pinentry-curses.c (collect_line): Change second arg to CH.
+	* pinentry/pinentry.c (pinentry_utf8_to_local): Make args const.
+
+2014-12-15  Andre Heinecke  <aheinecke@intevation.de>
+
+	qt4: Improve moc handling.
+	    * configure.ac: Disable pinentry-qt4 or exit if moc not found.
+	    * m4/qt.m4: Look for and prefer moc-qt4.
+	    * qt4/Makefile.am: Add moc files to nodist and clean them.
+
+	doc: Update gpl.texi to match version from gcrypt.
+	    * doc/gpl.texi: Use version from gcrypt.
+
+2014-12-09  Vicente Olivert Riera  <Vincent.Riera@imgtec.com>
+
+	pinentry-qt4: make the accessibility part optional.
+	Check if the Qt libraries have support for QT Accessibility before using
+	it. Otherwise it will raise error like these one:
+
+	main.cpp: In function 'int qt_cmd_handler(pinentry_t)':
+	main.cpp:220:51: error: 'class QAbstractButton' has no member named
+	'setAccessibleDescription'
+
 2014-10-26  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.0.

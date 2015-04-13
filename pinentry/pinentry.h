@@ -173,7 +173,7 @@ int pinentry_loop2 (int infd, int outfd);
 
 /* Convert the UTF-8 encoded string TEXT to the encoding given in
    LC_CTYPE.  Return NULL on error. */
-char *pinentry_utf8_to_local (char *lc_ctype, char *text);
+char *pinentry_utf8_to_local (const char *lc_ctype, const char *text);
 
 /* Convert TEXT which is encoded according to LC_CTYPE to UTF-8.  With
    SECURE set to true, use secure memory for the returned buffer.
@@ -197,10 +197,9 @@ void pinentry_init (const char *pgmname);
    "--display". */
 int pinentry_have_display (int argc, char **argv);
 
-/* Parse the command line options.  Returns 1 if user should print
-   version and exit.  Can exit the program if only help output is
-   requested.  */
-int pinentry_parse_opts (int argc, char *argv[]);
+/* Parse the command line options.  May exit the program if only help
+   or version output is requested.  */
+void pinentry_parse_opts (int argc, char *argv[]);
 
 
 /* The caller must define this variable to process assuan commands.  */
