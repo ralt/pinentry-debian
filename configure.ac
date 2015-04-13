@@ -19,14 +19,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
 
 # (Process this file with autoconf to produce a configure script.)
-AC_PREREQ(2.57)
-min_automake_version="1.10"
+AC_PREREQ(2.69)
+min_automake_version="1.14"
 
 # To build a release you need to create a tag with the version number
 # (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
 # bump the version number immediately after the release, do another
 # commit, and a push so that the git magic is able to work.
-m4_define(mym4_version, [0.9.0])
+m4_define(mym4_version, [0.9.1])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -47,7 +47,7 @@ AC_INIT([pinentry],[mym4_full_version], [http://bugs.gnupg.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(pinentry/pinentry.h)
-AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION)
+AM_INIT_AUTOMAKE([serial-tests dist-bzip2 no-dist-gzip])
 
 AC_GNU_SOURCE
 
@@ -335,7 +335,19 @@ fi)
 fi
 
 if test "$pinentry_qt4" != "no"; then
+
 QT_PATH_MOC
+if test "$have_moc" != "yes"; then
+    if test "$pinentry_qt4" = "yes"; then
+        AC_MSG_ERROR([[
+    ***
+    *** Qt moc is required.
+    ***]])
+    else
+        pinentry_qt4=no
+    fi
+fi
+
 PKG_CHECK_MODULES(QT4_GUI, QtGui,,
 if test "$pinentry_qt4" = "yes"; then
     AC_MSG_ERROR([[
