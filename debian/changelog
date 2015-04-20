@@ -1,4 +1,4 @@
-pinentry (0.9.1-2) UNRELEASED; urgency=medium
+pinentry (0.9.1-2) experimental; urgency=medium
 
   [ Eric Dorland ]
   * debian/rules: Install README.Debian in all packages instead of using
@@ -8,7 +8,7 @@ pinentry (0.9.1-2) UNRELEASED; urgency=medium
   * add pinentry-tty package (Closes: #782888)
   * debian/copyright: use DEP5
 
- -- Eric Dorland <eric@debian.org>  Sun, 12 Apr 2015 22:14:33 -0400
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 20 Apr 2015 03:44:17 -0300
 
 pinentry (0.9.1-1) experimental; urgency=medium
 
