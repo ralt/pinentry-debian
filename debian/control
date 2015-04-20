@@ -32,12 +32,35 @@ Description: curses-based PIN or pass-phrase entry dialog for GnuPG
  particular software.
  .
  The program contained in this package implements a PIN entry dialog
- using the curses tool kit, meaning that it is useful for users working
- in text mode without the X Window System.  There are sibling packages
- that implement PIN entry dialogs that use an X tool kit.  If you
- install any of the latter packages then this package is not necessary
- because the sibling packages automatically fall back to text mode if
- X is not active.
+ using the curses tool kit, meaning that it is useful for users
+ working in text mode without the X Window System.  There are sibling
+ packages that implement PIN entry dialogs that use an X tool kit.  If
+ you install any of the graphical packages then this package is not
+ necessary because the sibling packages automatically fall back to
+ text mode if X is not active.
+
+Package: pinentry-tty
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: pinentry-doc
+Provides: pinentry
+Enhances: gnupg-agent
+Description: minimal dunb-terminal PIN or pass-phrase entry for GnuPG
+ This package contains a program that allows for secure entry of PINs or
+ pass phrases.  That means it tries to take care that the entered
+ information is not swapped to disk or temporarily stored anywhere.
+ This functionality is particularly useful for entering pass phrases
+ when using encryption software such as GnuPG or e-mail clients using
+ the same.  It uses an open protocol and is therefore not tied to
+ particular software.
+ .
+ The program contained in this package implements a PIN entry prompt
+ that interacts directly with the controlling terminal.  It has
+ minimal dependencies, meaning that it is useful for users working
+ with dumb terminals or similarly constrained environments.  There are
+ sibling packages that implement PIN entry dialogs that use curses for
+ friendlier text-mode inputs on non-dumb terminals, and other sibling
+ packages that provide PIN entry dialogs using an X tool kit.
 
 Package: pinentry-qt4
 Architecture: any

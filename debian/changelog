@@ -4,6 +4,9 @@ pinentry (0.9.1-2) UNRELEASED; urgency=medium
   * debian/rules: Install README.Debian in all packages instead of using
     symlinks.
 
+  [ Daniel Kahn Gillmor ]
+  * add pinentry-tty package (Closes: #782888)
+
  -- Eric Dorland <eric@debian.org>  Sun, 12 Apr 2015 22:14:33 -0400
 
 pinentry (0.9.1-1) experimental; urgency=medium

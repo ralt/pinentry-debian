@@ -1,11 +1,11 @@
-.TH PINENTRY-CURSES 1 "27 Jan 2005"
+.TH PINENTRY-CURSES 1 "19 Apr 2015"
 .SH NAME
-pinentry\-curses \- PIN or pass-phrase entry dialog for GnuPG
+pinentry\-tty \- PIN or pass-phrase entry dialog for GnuPG
 .PP
 .SH SYNOPSIS
-\fBpinentry-curses\fB [\fIOPTION\fR...]
+\fBpinentry-tty\fB [\fIOPTION\fR...]
 .SH DESCRIPTION
-\fBpinentry\-curses\fR is a program that allows for secure entry of PINs or
+\fBpinentry\-tty\fR is a program that allows for secure entry of PINs or
 pass phrases.  That means it tries to take care that the entered
 information is not swapped to disk or temporarily stored anywhere.
 This functionality is particularly useful for entering pass phrases
@@ -13,15 +13,16 @@ when using encryption software such as GnuPG or e-mail clients using
 the same.  It uses an open protocol and is therefore not tied to
 particular software.
 .PP
-\fBpinentry-curses\fR implements a PIN entry dialog
-using the curses tool kit, meaning that it is useful for users working
-in text mode without the X Window System.  There are other flavors
-that implement PIN entry dialogs that use an X tool kit.  If you
-have installed any of the latter programs then this program is not necessary
-because the X flavors automatically fall back to text mode if
-X is not active.
+\fBpinentry-tty\fR implements a PIN entry prompt directly on the
+controlling tty.  It has minimal dependencies, and a comparably
+minimal feature set.  It is useful for users working with dumb
+terminals and other similarly constrained environments.  There are
+other pinentry flavors that implement more user-friendly PIN entry
+dialogs, either in text mode with the curses toolkit, or using
+graphical X11 toolkits.  Please use one of the other flavors unless
+you know what you are doing.
 .PP
-\fBpinentry\-curses\fR is typically used internally by \fBgpg-agent\fR.
+\fBpinentry\-tty\fR is typically used internally by \fBgpg-agent\fR.
 Users don't normally have a reason to call it directly.
 .SH OPTIONS
 .TP
@@ -41,10 +42,10 @@ not fully supported.
 .TP
 \fB\-\-no\-global\-grab\fR, \fB\-g\fR
 Grab the keyboard only when the window is focused.  Use this
-option if you are debugging software using \fBpinentry\-curses\fR;
+option if you are debugging software using \fBpinentry\-tty\fR;
 otherwise you may not be able to to access your X session anymore (unless
 you have other means to connect to the machine to kill
-\fBpinentry\-curses\fR).
+\fBpinentry\-tty\fR).
 .TP
 \fB\-\-parent\-wid\fR \fIN\fR
 Use window ID \fIN\fR as the parent window for positioning the window.
@@ -52,20 +53,20 @@ Note, that this is not fully supported by all flavors of \fBpinentry\fR.
 .TP
 \fB--display\fR \fISTRING\fR, \fB--ttyname\fR \fISTRING\fR, \fB--ttytype\fR \fISTRING\fR, \fB--lc-type\fR \fISTRING\fR, \fB--lc-messages\fR \fISTRING\fR
 These options are used to pass localization information to
-\fBpinentry-curses\fR.  They are required because
-\fBpinentry-curses\fR is usually called by
+\fBpinentry-tty\fR.  They are required because
+\fBpinentry-tty\fR is usually called by
 some background process which does not have any information on the
 locale and terminal to use.  Assuan protocol options are an
 alternative way to pass these information.
 .SH "SEE ALSO"
 .BR pinentry-gtk-2 (1),
 .BR pinentry-qt4 (1),
-.BR pinentry-tty (1),
+.BR pinentry-curses (1),
 .BR gpg (1),
 .BR gpg-agent (1)
 .PP
 The full documentation for
-.B pinentry-curses
+.B pinentry-tty
 is maintained as a Texinfo manual.  If the
 .B pinentry-doc
 package is installed, the command
@@ -74,4 +75,6 @@ package is installed, the command
 .PP
 should give you access to the complete manual.
 .SH AUTHOR
-This manual page was written by Peter Eisentraut for the Debian project.
+This manual page was written by Daniel Kahn Gillmor for the Debian
+project, derived from other pinentry manual pages written by Peter
+Eisentraut.
