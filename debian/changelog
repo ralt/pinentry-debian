@@ -5,7 +5,7 @@ pinentry (0.9.2-1) unstable; urgency=medium
     symlinks.
 
   [ Daniel Kahn Gillmor ]
-  * new upstream version
+  * new upstream version (Closes: #516489)
   * add pinentry-tty package (Closes: #782888)
   * debian/copyright: use DEP5
 
