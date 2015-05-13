@@ -1,0 +1,30 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Wed, 13 May 2015 15:27:28 -0400
+Subject: curses app should terminate when tty fails
+
+This should address https://bugs.debian.org/559936 in the same way
+that Mutt dealt with a similar issue.
+---
+ pinentry/pinentry-curses.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/pinentry/pinentry-curses.c b/pinentry/pinentry-curses.c
+index 60fd9da..135d714 100644
+--- a/pinentry/pinentry-curses.c
++++ b/pinentry/pinentry-curses.c
+@@ -849,10 +849,14 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
+ 
+       switch (c)
+ 	{
+-#ifndef HAVE_DOSISH_SYSTEM
+ 	case ERR:
++#ifndef HAVE_DOSISH_SYSTEM
+ 	  continue;
++#else
++          done = -2;
++          break;
+ #endif
++
+ 	case KEY_LEFT:
+ 	case KEY_UP:
+ 	  switch (diag.pos)
