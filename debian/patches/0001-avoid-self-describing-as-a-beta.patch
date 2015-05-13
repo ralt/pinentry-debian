@@ -1,0 +1,33 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Wed, 13 May 2015 16:09:21 -0400
+Subject: avoid self-describing as a beta
+
+Using autoreconf against the source as distributed in tarball form
+invariably results in a package that thinks it's a "beta" package,
+which produces the "THIS IS A DEVELOPMENT VERSION" warning string.
+
+since we use dh_autoreconf, i need this patch to avoid producing
+builds that announce themselves as DEVELOPMENT VERSIONs.
+
+See discussion at:
+
+ http://lists.gnupg.org/pipermail/gnupg-devel/2014-November/029065.html
+---
+ autogen.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index 7effd56..5e8ca15 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -228,8 +228,8 @@ if [ "$myhost" = "find-version" ]; then
+       rvd=$((0x$(echo ${rev} | head -c 4)))
+     else
+       ingit=no
+-      beta=yes
+-      tmp="-unknown"
++      beta=no
++      tmp=""
+       rev="0000000"
+       rvd="0"
+     fi

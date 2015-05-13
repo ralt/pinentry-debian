@@ -5,6 +5,7 @@ Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Peter Eisentraut <petere@debian.org>,
            Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 Build-Depends: debhelper (>= 9),
+               dh-autoreconf,
                libglib2.0-dev (>= 2.15.5),
                libgtk2.0-dev (>= 2.4.0),
                libncurses5-dev,
