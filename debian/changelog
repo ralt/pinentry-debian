@@ -8,6 +8,7 @@ pinentry (0.9.2-1) unstable; urgency=medium
   * new upstream version (Closes: #516489)
   * add pinentry-tty package (Closes: #782888)
   * debian/copyright: use DEP5
+  * use --enable-pinentry-qt4-clipboard (Closes: #637029)
 
  -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 13 May 2015 11:45:38 -0400
 
