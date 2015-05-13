@@ -1,3 +1,4 @@
 0001-avoid-self-describing-as-a-beta.patch
 0002-curses-app-should-terminate-when-tty-fails.patch
 0003-Fix-linking-order-to-work-when-linked-with-as-needed.patch
+0004-avoid-implicit-declaration-of-function-addnwstr.patch
