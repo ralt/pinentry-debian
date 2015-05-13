@@ -36,6 +36,9 @@
 /* Define to 1 if you have the `rt' library (-lrt). */
 #undef HAVE_LIBRT
 
+/* The pinentries should optionally cache the passphrase using libsecret. */
+#undef HAVE_LIBSECRET
+
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 

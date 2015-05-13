@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 # Makefile.am - PIN entry curses frontend.
-# Copyright (C) 2002 g10 Code GmbH
+# Copyright (C) 2002, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -117,9 +117,10 @@ am_pinentry_tty_OBJECTS = pinentry-tty.$(OBJEXT)
 pinentry_tty_OBJECTS = $(am_pinentry_tty_OBJECTS)
 pinentry_tty_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-pinentry_tty_DEPENDENCIES = ../pinentry/libpinentry.a \
-	../assuan/libassuan.a ../secmem/libsecmem.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+pinentry_tty_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../pinentry/libpinentry.a ../assuan/libassuan.a \
+	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -185,6 +186,8 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COMMON_CFLAGS = @COMMON_CFLAGS@
+COMMON_LIBS = @COMMON_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -296,8 +299,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = -I$(top_srcdir)/pinentry
-LDADD = ../pinentry/libpinentry.a \
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/pinentry
+LDADD = $(COMMON_LIBS) ../pinentry/libpinentry.a \
 	../assuan/libassuan.a ../secmem/libsecmem.a \
 	$(LIBCAP) $(LIBICONV)
 

@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 # Makefile.am - PIN entry GTK+ frontend.
-# Copyright (C) 2002 g10 Code GmbH
+# Copyright (C) 2002, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -123,10 +123,10 @@ am__DEPENDENCIES_1 =
 @FALLBACK_CURSES_TRUE@	../pinentry/libpinentry-curses.a \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1) \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1)
-pinentry_gtk_2_DEPENDENCIES = ../pinentry/libpinentry.a \
-	../assuan/libassuan.a ../secmem/libsecmem.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2)
+pinentry_gtk_2_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../pinentry/libpinentry.a ../assuan/libassuan.a \
+	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -192,6 +192,8 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COMMON_CFLAGS = @COMMON_CFLAGS@
+COMMON_LIBS = @COMMON_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -307,10 +309,11 @@ top_srcdir = @top_srcdir@
 @FALLBACK_CURSES_TRUE@ncurses_include = $(NCURSES_INCLUDE)
 @FALLBACK_CURSES_FALSE@libcurses = 
 @FALLBACK_CURSES_TRUE@libcurses = ../pinentry/libpinentry-curses.a $(LIBCURSES) $(LIBICONV)
-AM_CPPFLAGS = $(GTK2CFLAGS) $(ncurses_include) \
+AM_CPPFLAGS = $(COMMON_CFLAGS) $(GTK2CFLAGS) $(ncurses_include) \
 	-I$(top_srcdir)/secmem -I$(top_srcdir)/pinentry
 
-LDADD = ../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a \
+LDADD = $(COMMON_LIBS) \
+	../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a \
 	$(LIBCAP) $(GTK2LIBS) $(libcurses)
 
 pinentry_gtk_2_SOURCES = pinentry-gtk-2.c \

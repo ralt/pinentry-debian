@@ -1,3 +1,148 @@
+2015-05-11  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.2.
+
+	Return better error codes.
+	* assuan/assuan.h (ASSUAN_Too_Short): New
+	(ASSUAN_ENOENT, ASSUAN_ENOTTY): New.
+	* pinentry/pinentry-curses.c: Include assuan.h.
+	(dialog_create, dialog_run): Set specific error codes.
+	* pinentry/pinentry.h (struct pinentry): Add field specific_err.
+	* pinentry/pinentry.c (cmd_getpin): Return specific_err.
+	(cmd_confirm, cmd_message): Ditto.
+
+	curses: Reset tty state on failed dialog creation.
+	* pinentry/pinentry-curses.c (dialog_run): Cleanup on dialog_create
+	error.
+
+	gtk: Use a description string from gpg-agent for libsecret.
+	* pinentry/pinentry.h (struct pinentry): Add field default_pwmngr.
+	* pinentry/pinentry.c (option_handler): Set it.
+	* gtk+-2/pinentry-gtk-2.c (create_window) [HAVE_LIBSECRET]: Use new
+	string.
+
+	gtk: Silence compiler warning.
+
+2015-05-07  Neal H. Walfield  <neal@gnu.org>
+
+	Don't use asprintf.
+	* pinentry/password-cache.c (keygrip_to_label): Don't use asprintf.
+
+	Improve documentation.
+	* doc/pinentry.texi: Improve description of SETKEYINFO's format.
+
+	Minor documentation cleanups.
+
+	Add support for saving the passphrase with libsecret.
+	* configure.ac (COMMON_CFLAGS): New variable.  AC_SUBST it.
+	(COMMON_LIBS): Likewise.  AC_SUBST it.
+	(LIBSECRET_CFLAGS): Likewise.
+	(LIBSECRET_LIBS): Likewise.
+	(--enable-libsecret): Add option to enable support for libsecret.  If
+	enabled, check for its presense.
+	* pinentry/password-cache.h: New field.
+	* pinentry/password-cache.c: New field.
+	* pinentry/pinentry.h (struct pinentry): Add fields pin_from_cache,
+	allow_external_password_cache, tried_password_cache, keyinfo, and
+	may_cache_password.
+	* pinentry/pinentry.c: Include "password-cache.h".
+	(pinentry): Initialize new fields.
+	(option_handler): Handle the "allow-external-password-cache" option.
+	(cmd_setkeyinfo): Implement it.
+	(cmd_getpin): Read the password from the cache, if appropriate.  Save
+	it to the cache, if appropriate.
+	* pinentry/Makefile.am (AM_CPPFLAGS): Add $(COMMON_CFLAGS).
+	(LDADD): Add $(COMMON_LIBS).
+	(libpinentry_a_SOURCES): Add password-cache.h
+	password-cache.c.
+	* gtk+-2/pinentry-gtk-2.c (may_save_passphrase_toggled): New function.
+	(create_window): Take additional parameter, the pinentry's context.
+	Update callers.
+	[HAVE_LIBSECRET]: Show a checkbox asking whether the passphrase should
+	be saved.
+	* gtk+-2/Makefile.am (AM_CPPFLAGS): Add $(COMMON_CFLAGS).
+	(LDADD): Add $(COMMON_LIBS).
+	* curses/Makefile.am (AM_CPPFLAGS): Add $(COMMON_CFLAGS).
+	(LDADD): Add $(COMMON_LIBS).
+	* tty/Makefile.am (AM_CPPFLAGS): Add $(COMMON_CFLAGS).
+	(LDADD): Add $(COMMON_LIBS).
+	* doc/pinentry.texi (Protocol): Update documentation.  Describe the
+	protocol and provide some justification.
+
+2015-05-07  Werner Koch  <wk@gnupg.org>
+
+	w32: Do not build gtk pinentry by default.
+	* autogen.rc: Remove obsolete options.
+
+2015-05-07  Neal H. Walfield  <neal@gnu.org>
+
+	Align secmem_realloc behavior with realloc's.
+	* secmem/secmem.c (secmem_realloc): If passed a NULL pointer, then
+	call secmem_malloc instead of crashing.
+
+2015-05-05  Werner Koch  <wk@gnupg.org>
+
+	w32: Minor changes to the dialog.
+	* w32/main.c (set_bitmap): New.
+	(dlg_proc): Show error prompt in red.
+	* w32/pinentry-w32.rc: Add icons and chnage dialog.
+	* w32/logo-128.bmp: New.
+	* w32/logo-32.bmp: New.
+	* w32/logo-48.bmp: New.
+	* w32/logo-64.bmp: New.
+	* w32/logo-96.bmp: New.
+
+	pinentry-tty: Fix problem with zero length prompt.
+	* tty/pinentry-tty.c (read_password): Use default prompt also for an
+	empty prompt argument.
+
+2015-05-01  Neal H. Walfield  <neal@gnu.org>
+
+	Improve documentation.
+	Improve documentation: clean up wording and add some minor
+	improvements to the content.
+
+	Improve comment.
+	* tty/pinentry-tty.c (tty_cmd_handler): Add comment.
+
+	When reading the pin, correctly handle backspace.
+	* tty/pinentry-tty.c (read_password): Handle backspace.
+
+	Improve prompt for pin.
+	* tty/pinentry-tty.c (read_password): Improve prompt for pin.
+
+2015-05-01  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	fix small memory leak in pinentry-curses.
+	* pinentry/pinentry-curses.c: free internally allocated local string.
+
+	pinentry-tty: make confirm actions work.
+	* tty/pinentry-tty.c: treat the situation where no PIN is requested
+	  and one_button is not set as a confirmation prompt.
+
+	pinentry-tty: fix segfault on MESSAGE or CONFIRM.
+	* tty/pinentry-tty.c: avoid prompting for a PIN when one was not asked
+	  for.
+
+	pinentry-tty: handle designated tty outside of read_password.
+	* tty/pinentry-tty.c: reorganize, wrapping read_password in tty
+	  open/close.
+
+2015-04-16  Yuri D'Elia  <wavexx@users.sourceforge.net>
+
+	gtk: Make Escape key work.
+	* gtk+-2/pinentry-gtk-2.c: Include gdk/gdkkeysyms.h.
+	(enter_callback): Pass confirm_value_t to button_clicked.
+	(confirm_button_clicked): Use confirm_value_t cast.
+	(cancel_callback): New.
+	(create_window): Add accelerator for the Escape key.
+
+2015-04-14  Werner Koch  <wk@gnupg.org>
+
+	Add stub command SETKEYINFO.
+	* pinentry/pinentry.c (cmd_setkeyinfo): New.
+	(register_commands): Addd command.
+
 2015-03-18  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.1.

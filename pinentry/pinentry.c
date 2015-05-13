@@ -47,6 +47,7 @@
 #include "secmem-util.h"
 #include "argparse.h"
 #include "pinentry.h"
+#include "password-cache.h"
 
 #ifdef HAVE_W32CE_SYSTEM
 #define getpid() GetCurrentProcessId ()
@@ -67,6 +68,7 @@ struct pinentry pinentry =
     NULL,	/* Cancel button.  */
     NULL,	/* PIN.  */
     2048,	/* PIN length.  */
+    0,          /* pin_from_cache.  */
     0,		/* Display.  */
     0,		/* TTY name.  */
     0,		/* TTY type.  */
@@ -84,6 +86,7 @@ struct pinentry pinentry =
     0,		/* Canceled.  */
     0,		/* Close button flag.  */
     0,          /* Locale error flag. */
+    0,          /* Specific error flag. */
     0,          /* One-button flag.  */
     NULL,       /* Repeat passphrase flag.  */
     NULL,       /* Repeat error string.  */
@@ -98,6 +101,11 @@ struct pinentry pinentry =
     NULL,        /* default_ok  */
     NULL,        /* default_cancel  */
     NULL,        /* default_prompt  */
+    NULL,        /* default_pwmngr  */
+    0,           /* allow_external_password_cache.  */
+    0,           /* tried_password_cached.  */
+    NULL,        /* keyinfo  */
+    0,           /* may_cache_password. */
     NULL         /* Assuan context.  */
   };
 
@@ -711,6 +719,17 @@ option_handler (ASSUAN_CONTEXT ctx, const char *key, const char *value)
       if (!pinentry.default_prompt)
 	return ASSUAN_Out_Of_Core;
     }
+  else if (!strcmp (key, "default-pwmngr"))
+    {
+      pinentry.default_pwmngr = strdup (value);
+      if (!pinentry.default_pwmngr)
+	return ASSUAN_Out_Of_Core;
+    }
+  else if (!strcmp (key, "allow-external-password-cache") && !*value)
+    {
+      pinentry.allow_external_password_cache = 1;
+      pinentry.tried_password_cache = 0;
+    }
   else
     return ASSUAN_Invalid_Option;
   return 0;
@@ -767,6 +786,25 @@ cmd_setprompt (ASSUAN_CONTEXT ctx, char *line)
   if (pinentry.prompt)
     free (pinentry.prompt);
   pinentry.prompt = newp;
+  return 0;
+}
+
+
+/* The data provided at LINE may be used by pinentry implementations
+   to identify a key for caching strategies of its own.  The empty
+   string and --clear mean that the key does not have a stable
+   identifier.  */
+static int
+cmd_setkeyinfo (ASSUAN_CONTEXT ctx, char *line)
+{
+  if (pinentry.keyinfo)
+    free (pinentry.keyinfo);
+
+  if (*line && strcmp(line, "--clear") != 0)
+    pinentry.keyinfo = strdup (line);
+  else
+    pinentry.keyinfo = NULL;
+
   return 0;
 }
 
@@ -943,16 +981,64 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
 {
   int result;
   int set_prompt = 0;
+  int just_read_password_from_cache = 0;
 
   pinentry.pin = secmem_malloc (pinentry.pin_len);
   if (!pinentry.pin)
     return ASSUAN_Out_Of_Core;
+
+  /* Try reading from the password cache.  */
+  if (/* If repeat passphrase is set, then we don't want to read from
+	 the cache.  */
+      ! pinentry.repeat_passphrase
+      /* Are we allowed to read from the cache?  */
+      && pinentry.allow_external_password_cache
+      && pinentry.keyinfo
+      /* Only read from the cache if we haven't already tried it.  */
+      && ! pinentry.tried_password_cache)
+    {
+      char *password;
+
+      pinentry.tried_password_cache = 1;
+
+      password = password_cache_lookup (pinentry.keyinfo);
+      if (password)
+	/* There is a cached password.  Try it.  */
+	{
+	  int len = strlen(password) + 1;
+	  if (len > pinentry.pin_len)
+	    len = pinentry.pin_len;
+
+	  memcpy (pinentry.pin, password, len);
+	  pinentry.pin[len] = '\0';
+
+	  secmem_free (password);
+
+	  pinentry.pin_from_cache = 1;
+
+	  assuan_write_status (ctx, "PASSWORD_FROM_CACHE", "");
+
+	  /* Result is the length of the password not including the
+	     NUL terminator.  */
+	  result = len - 1;
+
+	  just_read_password_from_cache = 1;
+
+	  goto out;
+	}
+    }
+
+  /* The password was not cached (or we are not allowed to / cannot
+     use the cache).  Prompt the user.  */
+  pinentry.pin_from_cache = 0;
+
   if (!pinentry.prompt)
     {
       pinentry.prompt = pinentry.default_prompt?pinentry.default_prompt:"PIN:";
       set_prompt = 1;
     }
   pinentry.locale_err = 0;
+  pinentry.specific_err = 0;
   pinentry.close_button = 0;
   pinentry.repeat_okay = 0;
   pinentry.one_button = 0;
@@ -984,9 +1070,12 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
 	  secmem_free (pinentry.pin);
 	  pinentry.pin = NULL;
 	}
+      if (pinentry.specific_err)
+        return pinentry.specific_err;
       return pinentry.locale_err? ASSUAN_Locale_Problem: ASSUAN_Canceled;
     }
 
+ out:
   if (result)
     {
       if (pinentry.repeat_okay)
@@ -994,6 +1083,15 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
       result = assuan_send_data (ctx, pinentry.pin, result);
       if (!result)
 	result = assuan_send_data (ctx, NULL, 0);
+
+      if (/* GPG Agent says it's okay.  */
+	  pinentry.allow_external_password_cache && pinentry.keyinfo
+	  /* We didn't just read it from the cache.  */
+	  && ! just_read_password_from_cache
+	  /* And the user said it's okay.  */
+	  && pinentry.may_cache_password)
+	/* Cache the password.  */
+	password_cache_save (pinentry.keyinfo, pinentry.pin);
     }
 
   if (pinentry.pin)
@@ -1022,6 +1120,7 @@ cmd_confirm (ASSUAN_CONTEXT ctx, char *line)
   pinentry.quality_bar = 0;
   pinentry.close_button = 0;
   pinentry.locale_err = 0;
+  pinentry.specific_err = 0;
   pinentry.canceled = 0;
   result = (*pinentry_cmd_handler) (&pinentry);
   if (pinentry.error)
@@ -1034,7 +1133,8 @@ cmd_confirm (ASSUAN_CONTEXT ctx, char *line)
     assuan_write_status (ctx, "BUTTON_INFO", "close");
 
   return result ? 0
-                : (pinentry.locale_err? ASSUAN_Locale_Problem
+                : (pinentry.specific_err? pinentry.specific_err :
+                   pinentry.locale_err? ASSUAN_Locale_Problem
                                       : (pinentry.one_button
                                          ? 0
                                          : (pinentry.canceled
@@ -1052,6 +1152,7 @@ cmd_message (ASSUAN_CONTEXT ctx, char *line)
   pinentry.quality_bar = 0;
   pinentry.close_button = 0;
   pinentry.locale_err = 0;
+  pinentry.specific_err = 0;
   result = (*pinentry_cmd_handler) (&pinentry);
   if (pinentry.error)
     {
@@ -1063,7 +1164,8 @@ cmd_message (ASSUAN_CONTEXT ctx, char *line)
     assuan_write_status (ctx, "BUTTON_INFO", "close");
 
   return result ? 0
-                : (pinentry.locale_err? ASSUAN_Locale_Problem
+                : (pinentry.specific_err? pinentry.specific_err :
+                   pinentry.locale_err? ASSUAN_Locale_Problem
                                       : 0);
 }
 
@@ -1111,6 +1213,7 @@ register_commands (ASSUAN_CONTEXT ctx)
     {
       { "SETDESC",    0,  cmd_setdesc },
       { "SETPROMPT",  0,  cmd_setprompt },
+      { "SETKEYINFO", 0,  cmd_setkeyinfo },
       { "SETREPEAT",  0,  cmd_setrepeat },
       { "SETREPEATERROR",0, cmd_setrepeaterror },
       { "SETERROR",   0,  cmd_seterror },

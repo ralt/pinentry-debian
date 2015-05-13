@@ -1,6 +1,6 @@
 # configure.ac
 # Copyright (C) 1999 Robert Bihlmeyer <robbe@orcus.priv.at>
-# Copyright (C) 2001, 2002, 2003, 2004, 2007 g10 Code GmbH
+# Copyright (C) 2001, 2002, 2003, 2004, 2007, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -26,7 +26,7 @@ min_automake_version="1.14"
 # (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
 # bump the version number immediately after the release, do another
 # commit, and a push so that the git magic is able to work.
-m4_define(mym4_version, [0.9.1])
+m4_define(mym4_version, [0.9.2])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -167,8 +167,14 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(seteuid stpcpy mmap)
 GNUPG_CHECK_MLOCK
 
+# Common libraries and cflags.
+COMMON_CFLAGS=
+COMMON_LIBS=
+AC_SUBST(COMMON_CFLAGS)
+AC_SUBST(COMMON_LIBS)
+
 dnl Checks for libassuan.
-dnl -> None required becuase we use a stripped down version of libassuan.
+dnl -> None required because we use a stripped down version of libassuan.
 
 
 dnl Checks for libsecmem.
@@ -310,6 +316,45 @@ if test "$pinentry_gtk_2" != "no"; then
 fi
 AM_CONDITIONAL(BUILD_PINENTRY_GTK_2, test "$pinentry_gtk_2" = "yes")
 
+dnl
+dnl Check for libsecret.
+dnl
+AC_ARG_ENABLE(libsecret,
+            AC_HELP_STRING([--enable-libsecret],
+	    [optionally cache passphrases using libsecret]),
+            libsecret=$enableval, libsecret=maybe)
+
+dnl check for pkg-config
+if test "$libsecret" != "no"; then
+        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+	if test x"${PKG_CONFIG}" = xno ; then
+		libsecret=no
+	fi
+fi
+
+dnl check if the module libsecret exists
+if test "$libsecret" != "no"; then
+	AC_MSG_CHECKING([for libsecret])
+	"${PKG_CONFIG}" --exists 'libsecret-1'
+	if test $? -ne 0 ; then
+		AC_MSG_RESULT([no])
+		AC_MSG_WARN([pkg-config could not find the modules libsecret-1])
+		libsecret=no
+	else
+		AC_MSG_RESULT([yes])
+		LIBSECRET_CFLAGS=`"${PKG_CONFIG}" --cflags 'libsecret-1'`
+		LIBSECRET_LIBS=`"${PKG_CONFIG}" --libs 'libsecret-1'`
+		libsecret=yes
+	fi
+fi
+AM_CONDITIONAL(BUILD_WITH_LIBSECRET, test "$libsecret" = "yes")
+if test "$libsecret" = "yes"; then
+  AC_DEFINE(HAVE_LIBSECRET, 1,
+    [The pinentries should optionally cache the passphrase using libsecret.])
+
+  COMMON_CFLAGS="$COMMON_CFLAGS $LIBSECRET_CFLAGS"
+  COMMON_LIBS="$COMMON_LIBS $LIBSECRET_LIBS"
+fi
 
 dnl
 dnl Check for Qt4 pinentry program.
@@ -452,6 +497,8 @@ AC_MSG_NOTICE([
 	W32 Pinentry .....: $pinentry_w32
 
 	Fallback to Curses: $fallback_curses
+
+	libsecret ........: $libsecret
 
 	Default Pinentry .: $PINENTRY_DEFAULT
 ])
