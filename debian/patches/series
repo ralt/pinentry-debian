@@ -1,1 +1,2 @@
 0001-curses-app-should-terminate-when-tty-fails.patch
+0002-Fix-linking-order-to-work-when-linked-with-as-needed.patch
