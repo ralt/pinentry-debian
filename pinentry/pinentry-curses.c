@@ -47,6 +47,7 @@
 #endif /*HAVE_WCHAR_H*/
 
 #include "pinentry.h"
+#include "assuan.h"
 
 /* FIXME: We should allow configuration of these button labels and in
    any case use the default_ok, default_cancel values if available.
@@ -199,6 +200,8 @@ utf8_to_local (char *lc_ctype, char *string)
   memset (&ps, 0, sizeof(mbstate_t));
   mbsrtowcs (wcs, &p, len, &ps);
 
+  free (local);
+
  leave:
   if (old_ctype)
     {
@@ -240,6 +243,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
         if (!what)							\
 	  {								\
 	    err = 1;							\
+            pinentry->specific_err = ASSUAN_Locale_Problem;             \
 	    goto out;							\
 	  }								\
       }									\
@@ -260,6 +264,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
 	  if (!new)							\
 	    {								\
 	      err = 1;							\
+              pinentry->specific_err = ASSUAN_Out_Of_Core;              \
 	      goto out;							\
 	    }								\
 	  new[0] = '<';							\
@@ -272,6 +277,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
       if (!dialog->which)						\
         {								\
 	  err = 1;							\
+          pinentry->specific_err = ASSUAN_Locale_Problem;               \
 	  goto out;							\
 	}								\
     }									\
@@ -337,6 +343,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
   if (y > size_y)
     {
       err = 1;
+      pinentry->specific_err = ASSUAN_Too_Short;
       goto out;
     }
 
@@ -391,6 +398,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
   if (x > size_x)
     {
       err = 1;
+      pinentry->specific_err = ASSUAN_Too_Short;
       goto out;
     }
 
@@ -736,13 +744,17 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
     {
       ttyfi = fopen (tty_name, "r");
       if (!ttyfi)
-	return -1;
+        {
+          pinentry->specific_err = ASSUAN_ENOENT;
+          return -1;
+        }
       ttyfo = fopen (tty_name, "w");
       if (!ttyfo)
 	{
 	  int err = errno;
 	  fclose (ttyfi);
 	  errno = err;
+          pinentry->specific_err = ASSUAN_ENOENT;
 	  return -1;
 	}
       screen = newterm (tty_type, ttyfo, ttyfi);
@@ -755,6 +767,7 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
           if (!(isatty(fileno(stdin)) && isatty(fileno(stdout))))
             {
               errno = ENOTTY;
+              pinentry->specific_err = ASSUAN_ENOTTY;
               return -1;
             }
 	  init_screen = 1;
@@ -794,9 +807,27 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
     }
   refresh ();
 
-  /* XXX */
+  /* Create the dialog.  */
   if (dialog_create (pinentry, &diag))
-    return -2;
+    {
+      /* Note: pinentry->specific_err has already been set.  */
+      endwin ();
+      if (screen)
+        delscreen (screen);
+
+#ifdef HAVE_NCURSESW
+      if (old_ctype)
+        {
+          setlocale (LC_CTYPE, old_ctype);
+          free (old_ctype);
+        }
+#endif
+      if (ttyfi)
+        fclose (ttyfi);
+      if (ttyfo)
+        fclose (ttyfo);
+      return -2;
+    }
   dialog_switch_pos (&diag, diag.pin ? DIALOG_POS_PIN : DIALOG_POS_OK);
 
 #ifndef HAVE_DOSISH_SYSTEM

@@ -1,6 +1,6 @@
 /* pinentry-gtk-2.c
    Copyright (C) 1999 Robert Bihlmeyer <robbe@orcus.priv.at>
-   Copyright (C) 2001, 2002, 2007 g10 Code GmbH
+   Copyright (C) 2001, 2002, 2007, 2015 g10 Code GmbH
    Copyright (C) 2004 by Albrecht Dreﬂ <albrecht.dress@arcor.de>
 
    pinentry-gtk-2 is a pinentry application for the Gtk+-2 widget set.
@@ -24,7 +24,15 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <gdk/gdkkeysyms.h>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7 )
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#endif
 #include <gtk/gtk.h>
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7 )
+# pragma GCC diagnostic pop
+#endif
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -223,16 +231,32 @@ button_clicked (GtkWidget *widget, gpointer data)
 static void
 enter_callback (GtkWidget *widget, GtkWidget *anentry)
 {
-  button_clicked (widget, "ok");
+  button_clicked (widget, (gpointer) CONFIRM_OK);
 }
 
 
 static void
 confirm_button_clicked (GtkWidget *widget, gpointer data)
 {
-  confirm_value = (int)(long) data;
+  confirm_value = (confirm_value_t) data;
   gtk_main_quit ();
 }
+
+
+static void
+cancel_callback (GtkAccelGroup *acc, GObject *accelerable,
+                 guint keyval, GdkModifierType modifier, gpointer data)
+{
+  int confirm_mode = !!data;
+
+  if (confirm_mode)
+    confirm_button_clicked (GTK_WIDGET (accelerable),
+                            (gpointer)CONFIRM_CANCEL);
+  else
+    button_clicked (GTK_WIDGET (accelerable),
+                    (gpointer)CONFIRM_CANCEL);
+}
+
 
 
 static gchar *
@@ -311,6 +335,18 @@ changed_text_handler (GtkWidget *widget)
 }
 
 
+#ifdef HAVE_LIBSECRET
+static void
+may_save_passphrase_toggled (GtkWidget *widget, gpointer data)
+{
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON (widget);
+  pinentry_t ctx = (pinentry_t) data;
+
+  ctx->may_cache_password = gtk_toggle_button_get_active (button);
+}
+#endif
+
+
 static gboolean
 timeout_cb (gpointer data)
 {
@@ -322,12 +358,13 @@ timeout_cb (gpointer data)
 
 
 static GtkWidget *
-create_window (int confirm_mode)
+create_window (pinentry_t ctx, int confirm_mode)
 {
   GtkWidget *w;
   GtkWidget *win, *box;
   GtkWidget *wvbox, *chbox, *bbox;
   GtkAccelGroup *acc;
+  GClosure *acc_cl;
   gchar *msg;
 
   tooltips = gtk_tooltips_new ();
@@ -534,6 +571,29 @@ create_window (int confirm_mode)
   gtk_box_set_spacing (GTK_BOX (bbox), 6);
   gtk_box_pack_start (GTK_BOX (wvbox), bbox, TRUE, FALSE, 0);
 
+#ifdef HAVE_LIBSECRET
+  if (ctx->allow_external_password_cache && ctx->keyinfo)
+    /* Only show this if we can cache passwords and we have a stable
+       key identifier.  */
+    {
+      if (pinentry->default_pwmngr)
+        {
+          msg = pinentry_utf8_validate (pinentry->default_pwmngr);
+          w = gtk_check_button_new_with_mnemonic (msg);
+          g_free (msg);
+        }
+      else
+        w = gtk_check_button_new_with_label ("Save passphrase using libsecret");
+
+      gtk_box_pack_start (GTK_BOX (box), w, TRUE, FALSE, 0);
+      gtk_widget_show (w);
+
+      g_signal_connect (G_OBJECT (w), "toggled",
+                        G_CALLBACK (may_save_passphrase_toggled),
+			(gpointer) ctx);
+    }
+#endif
+
   if (!pinentry->one_button)
     {
       if (pinentry->cancel)
@@ -561,6 +621,11 @@ create_window (int confirm_mode)
                         G_CALLBACK (confirm_mode ? confirm_button_clicked
                                     : button_clicked),
 			(gpointer) CONFIRM_CANCEL);
+
+      acc_cl = g_cclosure_new (G_CALLBACK (cancel_callback),
+			       (confirm_mode? "":NULL), NULL);
+      gtk_accel_group_connect (acc, GDK_KEY_Escape, 0, 0, acc_cl);
+
       GTK_WIDGET_SET_FLAGS (w, GTK_CAN_DEFAULT);
     }
 
@@ -638,7 +703,7 @@ gtk_cmd_handler (pinentry_t pe)
   pinentry = pe;
   confirm_value = CONFIRM_CANCEL;
   passphrase_ok = 0;
-  w = create_window (want_pass ? 0 : 1);
+  w = create_window (pe, want_pass ? 0 : 1);
   gtk_main ();
   gtk_widget_destroy (w);
   while (gtk_events_pending ())

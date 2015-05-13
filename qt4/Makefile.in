@@ -16,7 +16,7 @@
 
 # Makefile.am
 # Copyright (C) 2002 g10 Code GmbH, Klarälvdalens Datakonsult AB
-# Copyright (C) 2008 g10 Code GmbH
+# Copyright (C) 2008, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -127,8 +127,9 @@ am__DEPENDENCIES_1 =
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1) \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1)
 pinentry_qt4_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	../pinentry/libpinentry.a $(top_builddir)/assuan/libassuan.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) ../pinentry/libpinentry.a \
+	$(top_builddir)/assuan/libassuan.a \
 	$(top_builddir)/secmem/libsecmem.a $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -208,6 +209,8 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COMMON_CFLAGS = @COMMON_CFLAGS@
+COMMON_LIBS = @COMMON_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -324,11 +327,13 @@ EXTRA_DIST = document-encrypt.png pinentry.qrc
 @FALLBACK_CURSES_TRUE@ncurses_include = $(NCURSES_INCLUDE)
 @FALLBACK_CURSES_FALSE@libcurses = 
 @FALLBACK_CURSES_TRUE@libcurses = ../pinentry/libpinentry-curses.a $(LIBCURSES) $(LIBICONV)
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem \
+AM_CPPFLAGS = $(COMMON_CFLAGS) \
+	-I$(top_srcdir) -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem \
 	$(ncurses_include) -I$(top_srcdir)/pinentry
 
 AM_CXXFLAGS = $(QT4_CORE_CFLAGS) $(QT4_GUI_CFLAGS)
-pinentry_qt4_LDADD = $(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) \
+pinentry_qt4_LDADD = $(COMMON_LIBS) \
+	$(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) \
 	../pinentry/libpinentry.a $(top_builddir)/assuan/libassuan.a \
 	$(top_builddir)/secmem/libsecmem.a $(LIBCAP)
 

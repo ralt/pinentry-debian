@@ -3,13 +3,13 @@ pinentry.texi.
 
 INFO-DIR-SECTION GNU Utilities
 START-INFO-DIR-ENTRY
-* pinentry: (pinentry).    Ask securely for a passphrase or PIN.
+* pinentry: (pinentry).    Securely ask for a passphrase or PIN.
 END-INFO-DIR-ENTRY
 
 This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.9.1, last updated 21 March 2013, of 'The 'PINEntry'
-Manual', for version 0.9.1.
+   This is edition 0.9.2, last updated 11 May 2015, of 'The 'PINEntry'
+Manual', for version 0.9.2.
 
    Published by g10 Code GmbH
 Hüttenstr.  61
@@ -35,12 +35,14 @@ This manual documents how to use the PINENTRY and its protocol.
 passphrases.  It is usually invoked by GPG-AGENT (*note Invoking the
 gpg-agent: (gnupg)Invoking GPG-AGENT, for details).
 
-   PINENTRY comes in 3 flavors to fit the look and feel of the used GUI
-toolkit: A GTK+ based one named 'pinentry-gtk', a QT based one named
-'pinentry-qt' and a non-graphical one based on curses and named
-'pinentry-curses'.  Not all of them might be available on your
-installation.  If curses is supported on your system, the GUI based
-flavors fall back to curses when the 'DISPLAY' variable is not set.
+   PINENTRY comes in several flavors to fit the look and feel of the
+used GUI toolkit: A GTK+ based one named 'pinentry-gtk'; a QT based one
+named 'pinentry-qt'; and, two non-graphical ones 'pinentry-curses',
+which uses curses, and 'pinentry-tty', which doesn't require anything
+more than a simple terminal.  Not all of them are necessarily available
+on your installation.  If curses is supported on your system, the
+GUI-based flavors fall back to curses when the 'DISPLAY' variable is not
+set.
 
 * Menu:
 
@@ -70,7 +72,7 @@ File: pinentry.info,  Node: Using pinentry,  Next: Protocol,  Prev: Top,  Up: To
 You may run PINENTRY directly from the command line and pass the
 commands according to the Assuan protocol via stdin/stdout.
 
-   Here is a list of options supported by all 3 flavors of pinentry
+   Here is a list of options supported by all flavors of pinentry:
 
 '--version'
      Print the program version and licensing information.
@@ -100,7 +102,7 @@ commands according to the Assuan protocol via stdin/stdout.
      Give up waiting for input from the user after the specified number
      of seconds and return an error.  The error returned is the same as
      if the Cancel button was selected.  To disable the timeout and wait
-     indefinately then set to 0, the default.
+     indefinitely, set this to 0, which is the default.
 
 '--display STRING'
 '--ttyname STRING'
@@ -109,52 +111,53 @@ commands according to the Assuan protocol via stdin/stdout.
 '--lc-messages STRING'
      These options are used to pass localization information to
      PINENTRY.  They are required because PINENTRY is usually called by
-     some background process which does not have any information on the
-     locale and terminal to use.  Assuan protocol options are an
-     alternative way to pass these information.
+     some background process which does not have any information about
+     the locale and terminal to use.  It is also possible to pass these
+     options using Assuan protocol options.
 
 
 File: pinentry.info,  Node: Protocol,  Next: Copying,  Prev: Using pinentry,  Up: Top
 
-2 pinentry's Assuan Protocol
+2 PINENTRY's Assuan Protocol
 ****************************
 
-The PIN-Entry should never service more than one connection at once.  It
-is reasonable to exec the PIN-Entry prior to a request.
+The PINENTRY should never service more than one connection at once.  It
+is reasonable to exec the PINENTRY prior to a request.
 
-   The PIN-Entry does not need to stay in memory because the GPG-AGENT
-has the ability to cache passphrases.  The usual way to run the
-PIN-Entry is by setting up a pipe (and not a socket) and then fork/exec
-the PIN-Entry.  The communication is then done by means of the protocol
-described here until the client is satisfied with the result.
+   The PINENTRY does not need to stay in memory because the GPG-AGENT
+has the ability to cache passphrases.  The usual way to run the PINENTRY
+is by setting up a pipe (not a socket) and then fork/exec the PINENTRY.
+The communication is then done by means of the protocol described here
+until the client is satisfied with the result.
 
-   Although it is called a PIN-Entry, it does allow to enter reasonably
-long strings (at least 2048 characters are supported by every pinentry).
-The client using the PIN-Entry has to check for correctness.
+   Although it is called a PINENTRY, it allows entering reasonably long
+strings (strings that are up to 2048 characters long are supported by
+every pinentry).  The client using the PINENTRY has to check for
+correctness.
 
    Note that all strings are expected to be encoded as UTF-8; PINENTRY
 takes care of converting it to the locally used codeset.  To include
-linefeeds or other special characters, you may percent-escape them (i.e.
-a line feed is encoded as '%0A', the percent sign itself is encoded as
-'%25').
+linefeeds or other special characters, you may percent-escape them
+(e.g., a line feed is encoded as '%0A', the percent sign itself is
+encoded as '%25', etc.).
 
-   Here is the list of supported commands:
+   The following is a list of supported commands:
 
 'Set the timeout before returning an error'
             C: SETTIMEOUT 30
             S: OK
 
-'Set the descriptive text to be displayed'
+'Set the descriptive text to display'
             C: SETDESC Enter PIN for Richard Nixon <nobody@trickydicky.gov>
             S: OK
 
-'Set the prompt to be shown'
+'Set the prompt to show'
      When asking for a PIN, set the text just before the widget for
      passphrase entry.
             C: SETPROMPT PIN:
             S: OK
 
-     You should use an underscore in the text only if you known that a
+     You should use an underscore in the text only if you know that a
      modern version of pinentry is used.  Modern versions underline the
      next character after the underscore and use the first such
      underlined character as a keyboard accelerator.  Use a double
@@ -182,8 +185,8 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
             C: SETCANCEL No
             S: OK
 
-     In case tree buttons are required, use the follwing command to set
-     the text (UTF-8) for the non-affirmative response button.  The
+     In case three buttons are required, use the following command to
+     set the text (UTF-8) for the non-affirmative response button.  The
      affirmative button text is still set using SETOK and the CANCEL
      button text with SETCANCEL. See SETPROMPT on how to use an keyboard
      accelerator.
@@ -192,7 +195,7 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
 
 'Set the Error text'
      This is used by the client to display an error message.  In
-     contrast to the other commands this error message is automatically
+     contrast to the other commands, the error message is automatically
      reset with a GETPIN or CONFIRM, and is only displayed when asking
      for a PIN.
             C: SETERROR Invalid PIN entered - please try again
@@ -209,9 +212,9 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
             S: OK
 
      If a custom label for the quality bar is required, just add that
-     label as an argument as percent escaped string.  You will need this
-     feature to translate the label because pinentry has no internal
-     gettext except for stock strings from the toolkit library.
+     label as an argument as a percent-escaped string.  You will need
+     this feature to translate the label because PINENTRY has no
+     internal gettext except for stock strings from the toolkit library.
 
      If you want to show a tooltip for the quality bar, you may use
             C: SETQUALITYBAR_TT string
@@ -241,7 +244,7 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
      To show a message, you can use this command:
             C: MESSAGE
             S: OK
-     alternativly you may add an option to confirm:
+     alternatively you may add an option to confirm:
             C: CONFIRM --one-button
             S: OK
      The client should use SETDESC to set an appropriate text before
@@ -266,8 +269,8 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
      character set to use for this terminal.
 
 'Set the default strings'
-     To avoid having transaltions in Pinentry proper, the caller may set
-     certain translated strings which are used by Pinentry as default
+     To avoid having translations in Pinentry proper, the caller may set
+     certain translated strings which are used by PINENTRY as default
      strings.
 
             C: OPTION default-ok=_Korrekt
@@ -278,6 +281,51 @@ a line feed is encoded as '%0A', the percent sign itself is encoded as
             S: OK
      The strings are subject to accelerator marking, see SETPROMPT for
      details.
+
+'Passphrase caching'
+
+     Some environments, such as GNOME, cache passwords and passphrases.
+     The PINENTRY should only use an external cache if the
+     'allow-external-password-cache' option was set and a stable key
+     identifier (using SETKEYINFO) was provided.  In this case, if the
+     passphrase was read from the cache, the PINENTRY should send the
+     'PASSWORD_FROM_CACHE' status message before returning the
+     passphrase.  This indicates to GPG Agent that it should not
+     increment the passphrase retry counter.
+
+            C: OPTION allow-external-password-cache
+            S: OK
+            C: SETKEYINFO key-grip
+            S: OK
+            C: getpin
+            S: S PASSWORD_FROM_CACHE
+            S: D 1234
+            C: OK
+
+     Note: if 'allow-external-password-cache' is not specified, an
+     external password cache must not be used: this can lead to subtle
+     bugs.  In particular, if this option is not specified, then GPG
+     Agent does not recognize the 'PASSWORD_FROM_CACHE' status message
+     and will count trying a cached password against the password retry
+     count.  If the password retry count is 1, then the user will never
+     have the opportunity to correct the cached password.
+
+     Note: it is strongly recommended that a pinentry supporting this
+     feature provide the user an option to enable it manually.  That is,
+     saving a passphrase in an external password manager should be
+     opt-in.
+
+     The key identifier provided SETKEYINFO must be considered opaque
+     and may change in the future.  It currently has the form
+     'X/HEXSTRING' where 'X' is either 'n', 's', or 'u'.  In the former
+     two cases, the HEXSTRING corresponds to the key grip.  The key grip
+     is not the OpenPGP Key ID, but it can be mapped to the key using
+     the following:
+
+            # gpg2 --with-keygrip --list-secret-keys
+
+     and searching the output for the key grip.  The same command-line
+     options can also be used with gpgsm.
 
 
 File: pinentry.info,  Node: Copying,  Next: Option Index,  Prev: Protocol,  Up: Top
@@ -680,11 +728,11 @@ Index
 
 
 Tag Table:
-Node: Top807
-Node: Using pinentry1998
-Node: Protocol3836
-Node: Copying10272
-Node: Option Index29437
-Node: Index30519
+Node: Top805
+Node: Using pinentry2087
+Node: Protocol3936
+Node: Copying12386
+Node: Option Index31551
+Node: Index32633
 
 End Tag Table

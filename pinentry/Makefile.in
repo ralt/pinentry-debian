@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 # Pinentry support library Makefile
-# Copyright (C) 2002 g10 Code GmbH
+# Copyright (C) 2002, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -124,7 +124,8 @@ am_libpinentry_curses_a_OBJECTS = pinentry-curses.$(OBJEXT)
 libpinentry_curses_a_OBJECTS = $(am_libpinentry_curses_a_OBJECTS)
 libpinentry_a_AR = $(AR) $(ARFLAGS)
 libpinentry_a_LIBADD =
-am_libpinentry_a_OBJECTS = pinentry.$(OBJEXT) argparse.$(OBJEXT)
+am_libpinentry_a_OBJECTS = pinentry.$(OBJEXT) argparse.$(OBJEXT) \
+	password-cache.$(OBJEXT)
 libpinentry_a_OBJECTS = $(am_libpinentry_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -192,6 +193,8 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COMMON_CFLAGS = @COMMON_CFLAGS@
+COMMON_LIBS = @COMMON_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -307,8 +310,11 @@ EXTRA_DIST =
 @BUILD_LIBPINENTRY_CURSES_FALSE@pinentry_curses = 
 @BUILD_LIBPINENTRY_CURSES_TRUE@pinentry_curses = libpinentry-curses.a
 noinst_LIBRARIES = libpinentry.a $(pinentry_curses)
-AM_CPPFLAGS = -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem
-libpinentry_a_SOURCES = pinentry.h pinentry.c argparse.c argparse.h
+LDADD = $(COMMON_LIBS)
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem
+libpinentry_a_SOURCES = pinentry.h pinentry.c argparse.c argparse.h \
+	password-cache.h password-cache.c
+
 libpinentry_curses_a_SOURCES = pinentry-curses.h pinentry-curses.c
 all: all-am
 
@@ -365,6 +371,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argparse.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/password-cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-curses.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry.Po@am__quote@
 

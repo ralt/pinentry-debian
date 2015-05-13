@@ -1,5 +1,7 @@
 /* pinentry-curses.c - A secure curses dialog for PIN entry, library version
    Copyright (C) 2014 Serge Voilokov
+   Copyright (C) 2015 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+   Copyright (C) 2015 g10 Code GmbH
 
    This file is part of PINENTRY.
 
@@ -59,65 +61,78 @@ cbreak (int fd)
 }
 
 static int
-read_password (pinentry_t pinentry, const char *tty_name, const char *tty_type)
+confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 {
-  FILE *ttyfi = stdin;
-  FILE *ttyfo = stdout;
-  int count;
-
-  if (tty_name)
+  char buf[32], *ret;
+  pinentry->canceled = 1;
+  fprintf (ttyfo, "%s [y/N]? ", pinentry->ok ? pinentry->ok : "OK");
+  fflush (ttyfo);
+  buf[0] = '\0';
+  ret = fgets (buf, sizeof(buf), ttyfi);
+  if (ret && (buf[0] == 'y' || buf[0] == 'Y'))
     {
-      ttyfi = fopen (tty_name, "r");
-      if (!ttyfi)
-        return -1;
-
-      ttyfo = fopen (tty_name, "w");
-      if (!ttyfo)
-        {
-          int err = errno;
-          fclose (ttyfi);
-          errno = err;
-          return -1;
-        }
+      pinentry->canceled = 0;
+      return 1;
     }
+  return 0;
+}
+
+
+static int
+read_password (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
+{
+  int count;
+  int done;
+  char *prompt = NULL;
 
   if (cbreak (fileno (ttyfi)) == -1)
     {
       int err = errno;
-      if (tty_name)
-        {
-          fclose (ttyfi);
-          fclose (ttyfo);
-        }
       fprintf (stderr, "cbreak failure, exiting\n");
       errno = err;
       return -1;
     }
 
-  fprintf (ttyfo, "%s\n%s:\n",
+  prompt = pinentry->prompt;
+  if (! prompt || !*prompt)
+    prompt = "PIN";
+
+  fprintf (ttyfo, "%s\n%s%s ",
            pinentry->description? pinentry->description:"",
-           pinentry->prompt? pinentry->prompt:"PIN? ");
+           prompt,
+	   /* Make sure the prompt ends in a : or a question mark.  */
+	   (prompt[strlen(prompt) - 1] == ':'
+	    || prompt[strlen(prompt) - 1] == '?') ? "" : ":");
   fflush (ttyfo);
 
   memset (pinentry->pin, 0, pinentry->pin_len);
 
-  count = 0;
-  while (count+1 < pinentry->pin_len)
+  done = count = 0;
+  while (!done && count < pinentry->pin_len - 1)
     {
       char c = fgetc (ttyfi);
-      if (c == '\n')
-        break;
 
-      fflush (ttyfo);
-      pinentry->pin[count++] = c;
+      switch (c)
+	{
+	case '\n':
+	  done = 1;
+	  break;
+
+	case 0x7f:
+	  /* Backspace.  */
+	  if (count > 0)
+	    count --;
+	  break;
+
+	default:
+	  pinentry->pin[count ++] = c;
+	  break;
+	}
     }
+  pinentry->pin[count] = '\0';
+  fputc('\n', stdout);
 
   tcsetattr (fileno(ttyfi), TCSANOW, &o_term);
-  if (tty_name)
-    {
-      fclose (ttyfi);
-      fclose (ttyfo);
-    }
   return strlen (pinentry->pin);
 }
 
@@ -158,7 +173,9 @@ catchsig(int sig)
 int
 tty_cmd_handler(pinentry_t pinentry)
 {
-  int rc;
+  int rc = 0;
+  FILE *ttyfi = stdin;
+  FILE *ttyfo = stdout;
 
 #ifndef HAVE_DOSISH_SYSTEM
   timed_out = 0;
@@ -174,8 +191,50 @@ tty_cmd_handler(pinentry_t pinentry)
     }
 #endif
 
-  rc = read_password (pinentry, pinentry->ttyname, pinentry->ttytype);
-  do_touch_file (pinentry);
+  if (pinentry->ttyname)
+    {
+      ttyfi = fopen (pinentry->ttyname, "r");
+      if (!ttyfi)
+        rc = -1;
+      else
+        {
+          ttyfo = fopen (pinentry->ttyname, "w");
+          if (!ttyfo)
+            {
+              int err = errno;
+              fclose (ttyfi);
+              errno = err;
+              rc = -1;
+            }
+        }
+    }
+
+  if (rc == 0)
+    {
+      if (pinentry->pin)
+        rc = read_password (pinentry, ttyfi, ttyfo);
+      else
+        {
+          fprintf (ttyfo, "%s\n",
+                   pinentry->description? pinentry->description:"");
+          fflush (ttyfo);
+
+	  /* If pinentry->one_button is set, then
+	     pinentry->description contains an informative message,
+	     which the user needs to dismiss.  Since we are showing
+	     this in a terminal, there is no window to dismiss.  */
+          if (! pinentry->one_button)
+            rc = confirm (pinentry, ttyfi, ttyfo);
+        }
+      do_touch_file (pinentry);
+    }
+
+  if (pinentry->ttyname)
+    {
+      fclose (ttyfi);
+      fclose (ttyfo);
+    }
+
   return rc;
 }
 
