@@ -1,8 +1,9 @@
-pinentry (0.9.2-2) unstable; urgency=medium
+pinentry (0.9.3-1) unstable; urgency=medium
 
+  * New upstream release.
   * Help pinentry-qt4 show up above existing windows (Closes: #581617)
 
- -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sat, 30 May 2015 23:35:00 -0400
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 01 Jun 2015 19:09:28 -0400
 
 pinentry (0.9.2-1) unstable; urgency=medium
 
