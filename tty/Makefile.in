@@ -117,9 +117,9 @@ am_pinentry_tty_OBJECTS = pinentry-tty.$(OBJEXT)
 pinentry_tty_OBJECTS = $(am_pinentry_tty_OBJECTS)
 pinentry_tty_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-pinentry_tty_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../pinentry/libpinentry.a ../assuan/libassuan.a \
-	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+pinentry_tty_DEPENDENCIES = ../pinentry/libpinentry.a \
+	../assuan/libassuan.a ../secmem/libsecmem.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -202,6 +202,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
+GNOME3CFLAGS = @GNOME3CFLAGS@
+GNOME3LIBS = @GNOME3LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -225,7 +227,9 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
+NCURSES_LIBS = @NCURSES_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -299,10 +303,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/pinentry
-LDADD = $(COMMON_LIBS) ../pinentry/libpinentry.a \
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/secmem -I$(top_srcdir)/pinentry
+LDADD = ../pinentry/libpinentry.a \
 	../assuan/libassuan.a ../secmem/libsecmem.a \
-	$(LIBCAP) $(LIBICONV)
+	$(COMMON_LIBS) $(LIBCAP) $(LIBICONV)
 
 pinentry_tty_SOURCES = pinentry-tty.c
 all: all-am

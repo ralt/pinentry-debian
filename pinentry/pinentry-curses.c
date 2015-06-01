@@ -1,5 +1,5 @@
 /* pinentry-curses.c - A secure curses dialog for PIN entry, library version
-   Copyright (C) 2002 g10 Code GmbH
+   Copyright (C) 2002, 2015 g10 Code GmbH
 
    This file is part of PINENTRY.
 
@@ -22,7 +22,11 @@
 #include <config.h>
 #endif
 #include <assert.h>
+#ifdef HAVE_NCURSESW
+#include <ncursesw/curses.h>
+#else
 #include <curses.h>
+#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -84,7 +88,6 @@ struct dialog
   int pin_size;
   /* Cursor location in PIN field.  */
   int pin_loc;
-  char *pin;
   int pin_max;
   /* Length of PIN.  */
   int pin_len;
@@ -98,6 +101,8 @@ struct dialog
   int notok_y;
   int notok_x;
   char *notok;
+
+  pinentry_t pinentry;
 };
 typedef struct dialog *dialog_t;
 
@@ -235,6 +240,8 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
   CH *error = NULL;
   CH *prompt = NULL;
 
+  dialog->pinentry = pinentry;
+
 #define COPY_OUT(what)							\
   do									\
     if (pinentry->what)							\
@@ -253,13 +260,24 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
   COPY_OUT (error);
   COPY_OUT (prompt);
 
+  /* There is no pinentry->default_notok.  Map it to
+     pinentry->notok.  */
+#define default_notok notok
 #define MAKE_BUTTON(which,default)					\
   do									\
     {									\
       char *new = NULL;							\
-      if (pinentry->which)						\
+      if (pinentry->default_##which || pinentry->which)			\
         {								\
-          int len = strlen (pinentry->which);				\
+	  int len;							\
+	  char *msg;							\
+	  int i, j;							\
+									\
+	  msg = pinentry->which;					\
+	  if (! msg)							\
+	    msg = pinentry->default_##which;				\
+          len = strlen (msg);						\
+									\
           new = malloc (len + 3);				       	\
 	  if (!new)							\
 	    {								\
@@ -267,10 +285,22 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
               pinentry->specific_err = ASSUAN_Out_Of_Core;              \
 	      goto out;							\
 	    }								\
-	  new[0] = '<';							\
-	  memcpy (&new[1], pinentry->which, len);			\
-          new[len + 1] = '>';						\
-	  new[len + 2] = '\0';						\
+									\
+	  new[0] = '<'; 						\
+	  for (i = 0, j = 1; i < len; i ++, j ++)			\
+	    {								\
+	      if (msg[i] == '_')					\
+		{							\
+		  i ++;							\
+		  if (msg[i] == 0)					\
+		    /* _ at end of string.  */				\
+		    break;						\
+		}							\
+	      new[j] = msg[i];						\
+	    }								\
+									\
+	  new[j] = '>';							\
+	  new[j + 1] = 0;						\
         }								\
       dialog->which = pinentry_utf8_to_local (pinentry->lc_ctype,	\
 					      new ? new : default);	\
@@ -403,7 +433,6 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
     }
 
   dialog->pos = DIALOG_POS_NONE;
-  dialog->pin = pinentry->pin;
   dialog->pin_max = pinentry->pin_len;
   dialog->pin_loc = 0;
   dialog->pin_len = 0;
@@ -531,7 +560,7 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
       move (dialog->ok_y, dialog->ok_x);
       addstr (dialog->ok);
 
-      if (dialog->notok)
+      if (! pinentry->pin && dialog->notok)
 	{
 	  dialog->notok_y = ypos;
 	  /* Calculating the left edge of the middle button, rounding up.  */
@@ -662,15 +691,20 @@ dialog_switch_pos (dialog_t diag, dialog_pos_t new_pos)
 
 /* XXX Assume that field width is at least > 5.  */
 static void
-dialog_input (dialog_t diag, int chr)
+dialog_input (dialog_t diag, int alt, int chr)
 {
   int old_loc = diag->pin_loc;
-  assert (diag->pin);
+  assert (diag->pinentry->pin);
   assert (diag->pos == DIALOG_POS_PIN);
+
+  if (alt && chr == KEY_BACKSPACE)
+    /* Remap alt-backspace to control-W.  */
+    chr = 'w' - 'a' + 1;
 
   switch (chr)
     {
     case KEY_BACKSPACE:
+    case 'h' - 'a' + 1: /* control-h.  */
       if (diag->pin_len > 0)
 	{
 	  diag->pin_len--;
@@ -684,10 +718,63 @@ dialog_input (dialog_t diag, int chr)
 	}
       break;
 
+    case 'l' - 'a' + 1: /* control-l */
+      /* Refresh the screen.  */
+      endwin ();
+      refresh ();
+      break;
+
+    case 'u' - 'a' + 1: /* control-u */
+      /* Erase the whole line.  */
+      if (diag->pin_len > 0)
+	{
+	  diag->pin_len = 0;
+	  diag->pin_loc = 0;
+	}
+      break;
+
+    case 'w' - 'a' + 1: /* control-w.  */
+      while (diag->pin_len > 0
+	     && diag->pinentry->pin[diag->pin_len - 1] == ' ')
+	{
+	  diag->pin_len --;
+	  diag->pin_loc --;
+	  if (diag->pin_loc < 0)
+	    {
+	      diag->pin_loc += diag->pin_size;
+	      if (diag->pin_loc > diag->pin_len)
+		diag->pin_loc = diag->pin_len;
+	    }
+	}
+      while (diag->pin_len > 0
+	     && diag->pinentry->pin[diag->pin_len - 1] != ' ')
+	{
+	  diag->pin_len --;
+	  diag->pin_loc --;
+	  if (diag->pin_loc < 0)
+	    {
+	      diag->pin_loc += diag->pin_size;
+	      if (diag->pin_loc > diag->pin_len)
+		diag->pin_loc = diag->pin_len;
+	    }
+	}
+
+      break;
+
     default:
       if (chr > 0 && chr < 256 && diag->pin_len < diag->pin_max)
 	{
-	  diag->pin[diag->pin_len] = (char) chr;
+	  /* Make sure there is enough room for this character and a
+	     following NUL byte.  */
+	  if (! pinentry_setbufferlen (diag->pinentry, diag->pin_len + 2))
+	    {
+	      /* Bail.  Here we use a simple approach.  It would be
+                 better to have a pinentry_bug function.  */
+              assert (!"setbufferlen failed");
+              abort ();
+	    }
+
+	  diag->pinentry->pin[diag->pin_len] = (char) chr;
 	  diag->pin_len++;
 	  diag->pin_loc++;
 	  if (diag->pin_loc == diag->pin_size && diag->pin_len < diag->pin_max)
@@ -724,6 +811,7 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
   SCREEN *screen = 0;
   int done = 0;
   char *pin_utf8;
+  int alt = 0;
 #ifndef HAVE_DOSISH_SYSTEM
   int no_input = 1;
 #endif
@@ -828,7 +916,8 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
         fclose (ttyfo);
       return -2;
     }
-  dialog_switch_pos (&diag, diag.pin ? DIALOG_POS_PIN : DIALOG_POS_OK);
+  dialog_switch_pos (&diag,
+		     diag.pinentry->pin ? DIALOG_POS_PIN : DIALOG_POS_OK);
 
 #ifndef HAVE_DOSISH_SYSTEM
   wtimeout (stdscr, 70);
@@ -849,16 +938,25 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
 
       switch (c)
 	{
-#ifndef HAVE_DOSISH_SYSTEM
 	case ERR:
+#ifndef HAVE_DOSISH_SYSTEM
 	  continue;
+#else
+          done = -2;
+          break;
 #endif
+
+	case 27: /* Alt was pressed.  */
+	  alt = 1;
+	  /* Get the next key press.  */
+	  continue;
+
 	case KEY_LEFT:
 	case KEY_UP:
 	  switch (diag.pos)
 	    {
 	    case DIALOG_POS_OK:
-	      if (diag.pin)
+	      if (diag.pinentry->pin)
 		dialog_switch_pos (&diag, DIALOG_POS_PIN);
 	      break;
 	    case DIALOG_POS_NOTOK:
@@ -912,7 +1010,7 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
 	      dialog_switch_pos (&diag, DIALOG_POS_CANCEL);
 	      break;
 	    case DIALOG_POS_CANCEL:
-	      if (diag.pin)
+	      if (diag.pinentry->pin)
 		dialog_switch_pos (&diag, DIALOG_POS_PIN);
 	      else
 		dialog_switch_pos (&diag, DIALOG_POS_OK);
@@ -946,13 +1044,20 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
 
 	default:
 	  if (diag.pos == DIALOG_POS_PIN)
-	    dialog_input (&diag, c);
+	    dialog_input (&diag, alt, c);
 	}
 #ifndef HAVE_DOSISH_SYSTEM
       no_input = 0;
 #endif
+      if (c != -1)
+	alt = 0;
     }
   while (!done);
+
+  if (diag.pinentry->pin)
+    /* NUL terminate the passphrase.  dialog_run makes sure there is
+       enough space for the terminating NUL byte.  */
+    diag.pinentry->pin[diag.pin_len] = 0;
 
   set_cursor_state (1);
   endwin ();
@@ -994,7 +1099,10 @@ dialog_run (pinentry_t pinentry, const char *tty_name, const char *tty_type)
   if (done == -2)
     pinentry->canceled = 1;
 
-  return diag.pin ? (done < 0 ? -1 : diag.pin_len) : (done < 0 ? 0 : 1);
+  if (diag.pinentry->pin)
+    return done < 0 ? -1 : diag.pin_len;
+  else
+    return done < 0 ? 0 : 1;
 }
 
 

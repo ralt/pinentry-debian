@@ -8,14 +8,14 @@ END-INFO-DIR-ENTRY
 
 This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.9.2, last updated 11 May 2015, of 'The 'PINEntry'
-Manual', for version 0.9.2.
+   This is edition 0.9.3, last updated 1 June 2015, of 'The 'PINEntry'
+Manual', for version 0.9.3.
 
    Published by g10 Code GmbH
 Hüttenstr.  61
 40699 Erkrath, Germany
 
-   Copyright (C) 2002, 2005 g10 Code GmbH
+   Copyright (C) 2002, 2005, 2015 g10 Code GmbH
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU General Public License as published by the
@@ -51,6 +51,7 @@ set.
 Developer information
 
 * Protocol::            The Assuan protocol description.
+* Implementation Details:: For those extending or writing a new pinentry.
 
 Miscellaneous
 
@@ -116,7 +117,7 @@ commands according to the Assuan protocol via stdin/stdout.
      options using Assuan protocol options.
 
 
-File: pinentry.info,  Node: Protocol,  Next: Copying,  Prev: Using pinentry,  Up: Top
+File: pinentry.info,  Node: Protocol,  Next: Implementation Details,  Prev: Using pinentry,  Up: Top
 
 2 PINENTRY's Assuan Protocol
 ****************************
@@ -328,7 +329,174 @@ encoded as '%25', etc.).
      options can also be used with gpgsm.
 
 
-File: pinentry.info,  Node: Copying,  Next: Option Index,  Prev: Protocol,  Up: Top
+File: pinentry.info,  Node: Implementation Details,  Next: Copying,  Prev: Protocol,  Up: Top
+
+3 Implementation Details
+************************
+
+The pinentry source code can be divided into three categories.  There is
+a backend module, which lives in 'pinentry/', there are utility
+functions, e.g., in 'secmem/', and there are various frontends.
+
+   All of the low-level logic lives in the backend.  This frees the
+frontends from having to implement, e.g., the Assuan protocol.  When the
+backend receives an option, it updates the state in a 'pinentry_t'
+struct.  The frontend is called when the client either calls 'GETPIN',
+'CONFIRM' or 'MESSAGE'.  In these cases, the backend invokes the
+'pinentry_cmd_handler', which is passed the 'pinentry_t' struct.
+
+   When the callback is invoked, the frontend should create a window
+based on the state in the 'pinentry_t' struct.  For instance, the title
+to use for the dialog's window (if any) is stored in the 'title' field.
+If the is 'NULL', the frontend should choose a reasonable default value.
+(Default is not always provided, because different tool kits and
+environments have different reasonable defaults.)
+
+   The widget needs to support a number of different interactions with
+the user.  Each of them is described below.
+
+'Passphrase Confirmation'
+
+     When creating a new key, the passphrase should be entered twice.
+     The client (typically GPG Agent) indicates this to the PINENTRY by
+     invoking 'SETREPEAT'.  In this case, the backend sets the
+     'repeat_passphrase' field to a copy of the passed string.  The
+     value of this field should be used to label a second text input.
+
+     It is the frontend's responsibility to check that the passwords
+     match.  If they don't match, the frontend should display an error
+     message and continue to prompt the user.
+
+     If the passwords do match, then, when the user presses the okay
+     button, the 'repeat_okay' field should be set to '1' (this causes
+     the backend to emit the 'S PIN_REPEATED' status message).
+
+'Message Box'
+
+     Sometimes GPG Agent needs to display a message.  In this case, the
+     'pin' variable is 'NULL'.
+
+     At the Assuan level, this mode is selected by using either the
+     'MESSAGE' or the 'CONFIRM' command instead of the 'GETPIN' command.
+     The 'MESSAGE' command never shows the cancel or an other button.
+     The same holds for 'CONFIRM' if it was passed the "-one-button"
+     argument.  If 'CONFIRM' was not passed this argument, the dialog
+     for 'CONFIRM' should show both the 'ok' and the 'cancel' buttons
+     and optionally the 'notok' button.  The frontend can determine
+     whether the dialog is a one-button dialog by inspecting the
+     'one_button' variable.
+
+'Passphrase Entry'
+
+     If neither of the above cases holds, then GPG Agent is simply
+     requesting the passphrase.  In this case, the 'ok' and 'cancel'
+     buttons should be displayed.
+
+   The layout of the three variants is quite similar.  Here are the
+relevant elements that describe the layout:
+
+'title'
+     The window's title.
+
+'description'
+     The reason for the dialog.  When requesting a passphrase, this
+     describes the key.  When showing a message box, this is the message
+     to show.
+
+'error'
+     If GPG Agent determines that the passphrase was incorrect, it will
+     call 'GETPIN' again (up to a configurable number of times) to again
+     prompt the user.  In this case, this variable contains a
+     description of the error message.  This text should typically be
+     highlighted in someway.
+
+'prompt'
+     The string to associate with the passphrase entry box.
+
+'repeat_passphrase'
+     The string to associate with the second passphrase entry box.  The
+     second passphrase entry box should only be shown if this is not
+     'NULL'.
+
+'ok, default-ok'
+     The string to show in the 'ok' button.
+
+     If there are any '_' characters, the following character should be
+     used as an accelerator.  (A double underscore means a plain
+     underscore should be shown.)  If the frontend does not support
+     accelerators, then the underscores should be removed manually.
+
+     There is a subtle difference between 'ok' and 'default-ok'.
+     'default-ok' means that a stylized OK button should be used.  For
+     instance, it could include a check mark.  'ok' means that the
+     button's meaning is not consistent with such an icon and, as such,
+     no icon should be used.  Thus, if the 'ok' button should have the
+     text "No password required" then 'ok' should be used because a
+     check mark icon doesn't make sense.
+
+     If this variable is 'NULL', the frontend should choose a reasonable
+     default.
+
+     If both variables are set, the 'ok' variant takes precedence.
+
+'cancel, default-cancel'
+     Like the 'ok' and 'default-ok' buttons except these strings are
+     used for the cancel button.
+
+     This button should not be shown if 'one_button' is set.
+
+     'default-notok' Like the 'default-ok' button except this string is
+     used for the other button.
+
+     This button should only be displayed when showing a message box.
+     If these variables are 'NULL' or 'one_button' is set, this button
+     should not be displayed.
+
+'quality_bar'
+     If this is set, a widget should be used to show the password's
+     quality.  The value of this field is a label for the widget.
+
+     Note: to update the password quality, whenever the password
+     changes, call the 'pinentry_inq_quality' function and then update
+     the password quality widget correspondingly.
+
+'quality_bar_tt'
+     A tooltip for the quality bar.
+
+'default_pwmngr'
+     If 'may_cache_password' and 'keyinfo' are set and the user
+     consents, then the PINENTRY may cache the password with an external
+     manager.  Note: getting the user's consent is essential, because
+     password managers often provide a different level of security.  If
+     the above condition is true and 'tried_password_cache' is false,
+     then a check box with the specified string should be displayed.
+     The check box must default to off.
+
+   When the handler is done, it should store the passphrase in 'pin', if
+appropriate.  This variable is allocated in secure memory.  Use
+'pinentry_setbufferlen' to size the buffer.
+
+   The actual return code is dependent on whether the dialog is in
+message mode or in passphrase mode.
+
+   If the dialog is in message mode and the user pressed ok, return 1.
+Otherwise, return 0.  If an error occured, indicate this by setting it
+in 'specific_err' or setting 'locale_err' to '1' (for locale specific
+errors).  If the dialog was canceled, then the handler should set the
+'canceled' variable to '1'.  If the not ok button was pressed, don't do
+anything else.
+
+   If the dialog is in passphrase mode return '1' if the user entered a
+password and pressed ok.  If an error occured, return '-1' and set
+'specific_err' or 'locale_err', as above.  If the user canceled the
+dialog box, return '-1'.
+
+   If the window was closed, then the handler should set the
+'close_button' variable and otherwise act as if the cancel button was
+pressed.
+
+
+File: pinentry.info,  Node: Copying,  Next: Option Index,  Prev: Implementation Details,  Up: Top
 
 GNU General Public License
 **************************
@@ -728,11 +896,12 @@ Index
 
 
 Tag Table:
-Node: Top805
-Node: Using pinentry2087
-Node: Protocol3936
-Node: Copying12386
-Node: Option Index31551
-Node: Index32633
+Node: Top811
+Node: Using pinentry2167
+Node: Protocol4016
+Node: Implementation Details12481
+Node: Copying19601
+Node: Option Index38780
+Node: Index39862
 
 End Tag Table

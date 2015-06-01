@@ -1,3 +1,235 @@
+2015-06-01  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.3.
+
+2015-05-31  Stanislav Ochotnicky  <sochotnicky@redhat.com>
+
+	Fix qt4 pinentry window created in the background.
+	This is probably just a workaround. Proper fix is being investigated.
+	See:
+	https://bugzilla.redhat.com/show_bug.cgi?id=589532
+	http://stackoverflow.com/questions/2788518/calling-activatewindow-on-qdia
+
+2015-05-20  Werner Koch  <wk@gnupg.org>
+
+	Improve configure log messages for ncurses/ncursesw.
+	* m4/pkg.m4: Print the moule name not the variable name.
+
+	Allow building without ncursesw and other minor fixes.
+	* pinentry/password-cache.c (password_cache_clear): s/debug/g_debug/.
+	* pinentry/pinentry-curses.c (dialog_input): Actually bail out.
+	(dialog_run) [!HAVE_NCURSESW]: Define alt.
+
+2015-05-19  Neal H. Walfield  <neal@gnu.org>
+
+	gtk+-2: Make sure the save-passphrase-externally checkbox is not checked.
+	* gtk+-2/pinentry-gtk-2.c (create_window): Make sure the check button
+	to save the passphrase externally is not checked by default.
+
+	Provide an Assuan command to clear a cached password.
+	* pinentry/password-cache.c (password_cache_clear): New function.
+	* pinentry/password-cache.h (password_cache_clear): New declaration.
+	* pinentry/pinentry.c (cmd_getinfo): New function.
+	(register_commands): Have the Assuan command "CLEARPASSPHRASE" call
+	it.
+
+	If there is an error message, show it and don't read from the cache.
+	* pinentry/pinentry.c (cmd_getpin): If PINENTRY.ERROR is not NULL,
+	don't read the password from the cache.
+
+2015-05-18  Neal H. Walfield  <neal@gnu.org>
+
+	curses: When creating the button text, respect underscores.
+	* pinentry/pinentry-curses.c (MAKE_BUTTON): When creating the button
+	text, respect underscores.
+
+	curses: Make control-l repaint the screen.
+	* pinentry/pinentry-curses.c (dialog_input): Make control-l repaint
+	the screen.
+
+	curses: Make control-h an alias for backspace.
+	* pinentry/pinentry-curses.c (dialog_input): Add control-h an alias
+	for backspace.
+
+	When checking for ncurses, first try using PKG_CHECK_MODULES.
+	* m4/curses.m4: When checking for ncurses, first try using
+	PKG_CHECK_MODULES.
+
+	Purge dead code enabled by ENABLE_ENHANCED.
+
+2015-05-16  Neal H. Walfield  <neal@gnu.org>
+
+	gtk+-2: If gtk fails to initialize, fallback to the curses backend.
+	* gtk+-2/pinentry-gtk-2.c (main): Use gtk_init_check instead of
+	gtk_init.  If gtk_init_check fails, fallback to the curses backend.
+
+	curses: Handle control-u, control-w and alt-backspace.
+	* pinentry/pinentry-curses.c (dialog_input): Take additional argument,
+	alt.  Update callers.  If passed control-u, erase the whole line.  If
+	passed alt-backspace or control-w, erase any white space the the
+	previous word.
+	(dialog_run): Detect when alt is pressed.
+
+	secmem: Clear the buffer before returning it from secmem_malloc.
+	* secmem/secmem.c (secmem_malloc): In case wipememory2 gets optimized
+	away in secmem_free, clear the buffer before returning it.
+
+	curses: NUL terminate the pin entry buffer.
+	* pinentry/pinentry-curses.c (dialog_run): NUL terminate the pin entry
+	buffer.
+
+	curses: Make sure the pin entry buffer is larger enough.
+	* pinentry/pinentry-curses.c (dialog_input): Make sure the pin entry
+	buffer is large enough.
+
+	curses: Avoid aliasing the pin buffer.
+	* pinentry/pinentry-curses.c (struct dialog): Remove field pin.  Add
+	field pinentry.
+	(dialog_create): Don't set DIALOG->PIN to PINENTRY->PIN.  Set
+	DIALOG->PINENTRY to PINENTRY and access PIN via
+	DIALOG->PINENTRY->PIN.  Update other users.
+
+	gtk+-2: When the dialog is destroyed, remove any pending timers.
+	* gtk+-2/pinentry-gtk-2.c (timeout_source): New variable.
+	(timeout_cb): Set it to 0.
+	(create_window): When setting up the timeout, save the source
+	identifier in TIMEOUT_SOURCE.
+	(gtk_cmd_handler): If TIMEOUT_SOURCE is not 0, remove the timeout.
+
+	curses: If an error occurs while reading input, cancel the operation.
+	* pinentry/pinentry-curses.c (dialog_run) [! HAVE_DOSISH_SYSTEM]: If
+	an error occurs while reading input, cancel the operation.
+
+	Patch-by: Julien Cristau and Daniel Kahn Gillmor.
+
+	tty: ok takes precedence over default-ok.  Likewise for cancel.
+	* tty/pinentry-tty.c (confirm): When creating the ok button,
+	pinentry->ok takes precedence over pinentry->default-ok.  Likewise for
+	pinentry->cancel and pinentry->default_cancel.
+
+	Don't use a static initializer to initialize PINENTRY.
+	* pinentry/pinentry.c (pinentry): Don't use a static initializer.
+	(pinentry_reset): Initialize PINENTRY here.
+	(pinentry_parse_opts): Call pinentry_reset here.
+	(pinentry_assuan_reset_handler): New function.
+	(pinentry_loop2): Register it as the assuan reset handler.
+
+	Don't emit the LC_CTYPE-not-set warning more than once.
+	* pinentry/pinentry.c (lc_ctype_unknown_warning): New variable.
+	(pinentry_utf8_to_local): Only emit the LC_CTYPE warning if
+	lc_ctype_unknown_warning is not set.  After emitted such a warning,
+	set lc_ctype_unknown_warning.
+	(pinentry_local_to_utf8): Likewise.
+
+	curses: Use default-ok and default-cancel if set.
+	* pinentry/pinentry-curses.c (default_notok): New macro.
+	(MAKE_BUTTON): Also check if default variant is set.
+
+	curses: Don't show the notok button in pin entry mode.
+	* pinentry/pinentry-curses.c (dialog_create): Don't show the notok
+	button in pin entry mode.
+
+2015-05-16  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	Avoid implicit declaration of function addnwstr.
+	* pinentry/pinentry-curses.c [HAVE_NCURSESW]: Include <ncursesw/curses.h>.
+	[! HAVE_NCURSESW]: Only include <curses.h> in this case.
+
+2015-05-13  Neal H. Walfield  <neal@gnu.org>
+
+	tty: Handle the case where the user needs to repeat the passphrase.
+	* tty/pinentry-tty.c: Include "memory.h".
+	(read_password): Break into two functions: read_password and password.
+	(read_password): Just read the password from the terminal and return
+	it in secure memory (or NULL if the user canceled the entry or there
+	was an error).
+	(password): Improve output.  Handle the repeat passphrase case (i.e.,
+	when pinentry->repeat_passphrase is set).
+	* tty/Makefile.am (AM_CPPFLAGS): Add "-I$(top_srcdir)/secmem".
+
+	Add a new helper function, pinentry_setbuffer_use.
+	* pinentry/pinentry.c (pinentry_setbuffer_use): New function.
+	* pinentry/pinentry.h (pinentry_setbuffer_use): New declaration.
+
+	tty: Always call do_touch_file if we (potentially) touched the screen.
+	* tty/pinentry-tty.c (tty_cmd_handler): Always call do_touch_file.
+
+	tty: Improve confirmation mode functionality.
+	* tty/pinentry-tty.c: Include <ctype.h>.
+	(UNDERLINE_START): Define.
+	(ALERT_START): Define.
+	(NORMAL_RESTORE): Define.
+	(button): New function.
+	(confirm): Rewrite to include all confirmation mode functionality.
+	(tty_cmd_handler): Don't include any confirmation mode functionality.
+	Just call confirm.
+
+	Fix linking order to work when linked with --as-needed.
+	* curses/Makefile.am (LDADD): Add $(COMMON_LIBS) after all of the
+	local objects and object archives.
+	* gnome3/Makefile.am (LDADD): Likewise.
+	* gtk+-2/Makefile.am (LDADD): Likewise.
+	* qt4/Makefile.am (pinentry_qt4_LDADD): Likewise.
+	* tty/Makefile.am (LDADD): Likewise.
+
+	Reported-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+
+	Don't interpret the handler's return value as the passphrase's length.
+	* pinentry/pinentry.c (cmd_getpin): Don't interpret the return value
+	as the passphrase length.  Use strlen instead.
+
+	Make the management of pinentry.pin more explicit.
+	* pinentry/pinentry.c: Include <assert.h>.
+	(pinentry): Set pin_len to 0.
+	(pinentry_setbufferlen): If len is less than 2048, set it to 2048.
+	Add an assertion.
+	(pinentry_setbuffer_clear): New function that releases the pin buffer.
+	(pinentry_setbuffer_init): New function that initializes the pin
+	buffer.
+	(cmd_getpin): Use pinentry_setbuffer_init and pinentry_setbuffer_clear
+	instead of manual memory management.
+	(cmd_confirm): Use pinentry_setbuffer_clear instead of manual memory
+	management.
+
+	Better document struct pinentry.
+	* pinentry/pinentry.h (struct pinentry): Better document the various
+	fields.
+
+2015-05-12  Neal H. Walfield  <neal@gnu.org>
+
+	Fix some documentation details.
+	* doc/pinentry.texi: Fix some details.
+
+	Add a GNOME3 pinentry based on gcr.
+	* configure.ac (--enable-pinentry-gnome3): Option to enable the GNOME3
+	pinentry.
+	(pinentry_gnome_3): Set to yes if enabled and gcr-3 and gcr-base-3 gcr
+	is available.
+	(GNOME3CFLAGS): Define and AC_SUBST.
+	(GNOME3LIBS): Define and AC_SUBST.
+	(GCR_API_SUBJECT_TO_CHANGE): Define.
+	(BUILD_PINENTRY_GNOME_3): Define.
+	* Makefile.am (pinentry_gnome_3): Define.
+	(SUBDIRS): Add ${pinentry_gnome_3}.
+	* gnome3/Makefile.am: New file.
+	* gnome3/pinentry-gnome3.c: New file.
+
+	Add new chapter to documentation describing implementation details.
+	* doc/pinentry.texi: Add new chapter describing some implementation
+	details.
+
+	Simplify code.
+	* pinentry/pinentry.c (cmd_confirm): Don't use nested ternary
+	expressions.
+
+	Implement cmd_confirm in terms of cmd_message.
+	* pinentry/pinentry.c (cmd_confirm): Implement cmd_confirm in terms of
+	cmd_message.
+
+	Fix memory allocation in pinentry_setbufferlen.
+	* pinentry/pinentry.c (pinentry_setbufferlen): Set PIN->PIN to a
+	buffer that is LEN bytes large, not 2 * PIN->PIN_LENGTH.
+
 2015-05-11  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.2.

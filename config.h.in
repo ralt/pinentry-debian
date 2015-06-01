@@ -11,6 +11,9 @@
 /* The GUI pinentries should fall back to curses if X is not available. */
 #undef FALLBACK_CURSES
 
+/* Nod nod */
+#undef GCR_API_SUBJECT_TO_CHANGE
+
 /* Defined if the mlock() call does not work */
 #undef HAVE_BROKEN_MLOCK
 
