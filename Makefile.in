@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 # Makefile.am
-# Copyright (C) 2002, 2012 g10 Code GmbH
+# Copyright (C) 2002, 2012, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -180,7 +180,8 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = assuan secmem pinentry curses tty gtk+-2 qt4 w32 doc
+DIST_SUBDIRS = assuan secmem pinentry curses tty gtk+-2 gnome3 qt4 w32 \
+	doc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -249,6 +250,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = gitlog-to-changelog
+GNOME3CFLAGS = @GNOME3CFLAGS@
+GNOME3LIBS = @GNOME3LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -272,7 +275,9 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
+NCURSES_LIBS = @NCURSES_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -358,12 +363,15 @@ EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 @BUILD_PINENTRY_TTY_TRUE@pinentry_tty = tty
 @BUILD_PINENTRY_GTK_2_FALSE@pinentry_gtk_2 = 
 @BUILD_PINENTRY_GTK_2_TRUE@pinentry_gtk_2 = gtk+-2
+@BUILD_PINENTRY_GNOME_3_FALSE@pinentry_gnome_3 = 
+@BUILD_PINENTRY_GNOME_3_TRUE@pinentry_gnome_3 = gnome3
 @BUILD_PINENTRY_QT4_FALSE@pinentry_qt4 = 
 @BUILD_PINENTRY_QT4_TRUE@pinentry_qt4 = qt4
 @BUILD_PINENTRY_W32_FALSE@pinentry_w32 = 
 @BUILD_PINENTRY_W32_TRUE@pinentry_w32 = w32
 SUBDIRS = assuan secmem pinentry ${pinentry_curses} ${pinentry_tty} \
-	  ${pinentry_gtk_2} ${pinentry_qt4} ${pinentry_w32} doc
+	${pinentry_gtk_2} ${pinentry_gnome_3} ${pinentry_qt4} \
+	${pinentry_w32} doc
 
 gen_start_date = 2012-08-08T00:00:00
 all: config.h

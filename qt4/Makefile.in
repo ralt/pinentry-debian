@@ -126,11 +126,11 @@ am__DEPENDENCIES_1 =
 @FALLBACK_CURSES_TRUE@	../pinentry/libpinentry-curses.a \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1) \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1)
-pinentry_qt4_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) ../pinentry/libpinentry.a \
+pinentry_qt4_DEPENDENCIES = ../pinentry/libpinentry.a \
 	$(top_builddir)/assuan/libassuan.a \
-	$(top_builddir)/secmem/libsecmem.a $(am__DEPENDENCIES_1)
+	$(top_builddir)/secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -225,6 +225,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
+GNOME3CFLAGS = @GNOME3CFLAGS@
+GNOME3LIBS = @GNOME3LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -248,7 +250,9 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
+NCURSES_LIBS = @NCURSES_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -332,10 +336,10 @@ AM_CPPFLAGS = $(COMMON_CFLAGS) \
 	$(ncurses_include) -I$(top_srcdir)/pinentry
 
 AM_CXXFLAGS = $(QT4_CORE_CFLAGS) $(QT4_GUI_CFLAGS)
-pinentry_qt4_LDADD = $(COMMON_LIBS) \
-	$(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) \
+pinentry_qt4_LDADD = \
 	../pinentry/libpinentry.a $(top_builddir)/assuan/libassuan.a \
-	$(top_builddir)/secmem/libsecmem.a $(LIBCAP)
+	$(top_builddir)/secmem/libsecmem.a \
+	$(COMMON_LIBS) $(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) $(LIBCAP)
 
 BUILT_SOURCES = \
 	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc

@@ -123,9 +123,9 @@ am__DEPENDENCIES_1 =
 @FALLBACK_CURSES_TRUE@	../pinentry/libpinentry-curses.a \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1) \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1)
-pinentry_gtk_2_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../pinentry/libpinentry.a ../assuan/libassuan.a \
-	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+pinentry_gtk_2_DEPENDENCIES = ../pinentry/libpinentry.a \
+	../assuan/libassuan.a ../secmem/libsecmem.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -208,6 +208,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
+GNOME3CFLAGS = @GNOME3CFLAGS@
+GNOME3LIBS = @GNOME3LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -231,7 +233,9 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
+NCURSES_LIBS = @NCURSES_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -312,9 +316,8 @@ top_srcdir = @top_srcdir@
 AM_CPPFLAGS = $(COMMON_CFLAGS) $(GTK2CFLAGS) $(ncurses_include) \
 	-I$(top_srcdir)/secmem -I$(top_srcdir)/pinentry
 
-LDADD = $(COMMON_LIBS) \
-	../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a \
-	$(LIBCAP) $(GTK2LIBS) $(libcurses)
+LDADD = ../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a \
+	$(COMMON_LIBS) $(LIBCAP) $(GTK2LIBS) $(libcurses)
 
 pinentry_gtk_2_SOURCES = pinentry-gtk-2.c \
 	gtksecentry.c gtksecentry.h gseal-gtk-compat.h

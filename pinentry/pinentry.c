@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 #ifndef HAVE_W32CE_SYSTEM
 # include <locale.h>
 #endif
@@ -56,60 +57,122 @@
 /* Keep the name of our program here. */
 static char this_pgmname[50];
 
+struct pinentry pinentry;
 
-struct pinentry pinentry =
-  {
-    NULL,	/* Title.  */
-    NULL,	/* Description.  */
-    NULL,	/* Error.  */
-    NULL,	/* Prompt.  */
-    NULL,	/* Ok button.  */
-    NULL,	/* Not-Ok button.  */
-    NULL,	/* Cancel button.  */
-    NULL,	/* PIN.  */
-    2048,	/* PIN length.  */
-    0,          /* pin_from_cache.  */
-    0,		/* Display.  */
-    0,		/* TTY name.  */
-    0,		/* TTY type.  */
-    0,		/* TTY LC_CTYPE.  */
-    0,		/* TTY LC_MESSAGES.  */
-    0,		/* Debug mode.  */
-    60,		/* Pinentry timeout in seconds.  */
-#ifdef ENABLE_ENHANCED
-    0,		/* Enhanced mode.  */
-#endif
-    1,		/* Global grab.  */
-    0,		/* Parent Window ID.  */
-    NULL,       /* Touch file.  */
-    0,		/* Result.  */
-    0,		/* Canceled.  */
-    0,		/* Close button flag.  */
-    0,          /* Locale error flag. */
-    0,          /* Specific error flag. */
-    0,          /* One-button flag.  */
-    NULL,       /* Repeat passphrase flag.  */
-    NULL,       /* Repeat error string.  */
-    0,          /* Correctly repeated flag.  */
-    NULL,       /* Quality-Bar flag and description.  */
-    NULL,       /* Quality-Bar tooltip.  */
-    PINENTRY_COLOR_DEFAULT,
-    0,
-    PINENTRY_COLOR_DEFAULT,
-    PINENTRY_COLOR_DEFAULT,
-    0,
-    NULL,        /* default_ok  */
-    NULL,        /* default_cancel  */
-    NULL,        /* default_prompt  */
-    NULL,        /* default_pwmngr  */
-    0,           /* allow_external_password_cache.  */
-    0,           /* tried_password_cached.  */
-    NULL,        /* keyinfo  */
-    0,           /* may_cache_password. */
-    NULL         /* Assuan context.  */
-  };
+static void
+pinentry_reset (int use_defaults)
+{
+  /* GPG Agent sets these options once when it starts the pinentry.
+     Don't reset them.  */
+  int grab = pinentry.grab;
+  char *ttyname = pinentry.ttyname;
+  char *ttytype = pinentry.ttytype;
+  char *lc_ctype = pinentry.lc_ctype;
+  char *lc_messages = pinentry.lc_messages;
+  int allow_external_password_cache = pinentry.allow_external_password_cache;
+  char *default_ok = pinentry.default_ok;
+  char *default_cancel = pinentry.default_cancel;
+  char *default_prompt = pinentry.default_prompt;
+  char *default_pwmngr = pinentry.default_pwmngr;
+  char *touch_file = pinentry.touch_file;
 
+  /* These options are set from the command line.  Don't reset
+     them.  */
+  int debug = pinentry.debug;
+  char *display = pinentry.display;
+  int parent_wid = pinentry.parent_wid;
+
+  pinentry_color_t color_fg = pinentry.color_fg;
+  int color_fg_bright = pinentry.color_fg_bright;
+  pinentry_color_t color_bg = pinentry.color_bg;
+  pinentry_color_t color_so = pinentry.color_so;
+  int color_so_bright = pinentry.color_so_bright;
+
+  int timout = pinentry.timeout;
+
+  /* Free any allocated memory.  */
+  if (use_defaults)
+    {
+      free (pinentry.ttyname);
+      free (pinentry.ttytype);
+      free (pinentry.lc_ctype);
+      free (pinentry.lc_messages);
+      free (pinentry.default_ok);
+      free (pinentry.default_cancel);
+      free (pinentry.default_prompt);
+      free (pinentry.default_pwmngr);
+      free (pinentry.touch_file);
+      free (pinentry.display);
+    }
+
+  free (pinentry.title);
+  free (pinentry.description);
+  free (pinentry.error);
+  free (pinentry.prompt);
+  free (pinentry.ok);
+  free (pinentry.notok);
+  free (pinentry.cancel);
+  secmem_free (pinentry.pin);
+  free (pinentry.repeat_passphrase);
+  free (pinentry.repeat_error_string);
+  free (pinentry.quality_bar);
+  free (pinentry.quality_bar_tt);
+  free (pinentry.keyinfo);
+
+  /* Reset the pinentry structure.  */
+  memset (&pinentry, 0, sizeof (pinentry));
+
+  if (use_defaults)
+    {
+      /* Pinentry timeout in seconds.  */
+      pinentry.timeout = 60;
+
+      /* Global grab.  */
+      pinentry.grab = 1;
+
+      pinentry.color_fg = PINENTRY_COLOR_DEFAULT;
+      pinentry.color_fg_bright = 0;
+      pinentry.color_bg = PINENTRY_COLOR_DEFAULT;
+      pinentry.color_so = PINENTRY_COLOR_DEFAULT;
+      pinentry.color_so_bright = 0;
+    }
+  else
+    /* Restore the options.  */
+    {
+      pinentry.grab = grab;
+      pinentry.ttyname = ttyname;
+      pinentry.ttytype = ttytype;
+      pinentry.lc_ctype = lc_ctype;
+      pinentry.lc_messages = lc_messages;
+      pinentry.allow_external_password_cache = allow_external_password_cache;
+      pinentry.default_ok = default_ok;
+      pinentry.default_cancel = default_cancel;
+      pinentry.default_prompt = default_prompt;
+      pinentry.default_pwmngr = default_pwmngr;
+      pinentry.touch_file = touch_file;
+
+      pinentry.debug = debug;
+      pinentry.display = display;
+      pinentry.parent_wid = parent_wid;
+
+      pinentry.color_fg = color_fg;
+      pinentry.color_fg_bright = color_fg_bright;
+      pinentry.color_bg = color_bg;
+      pinentry.color_so = color_so;
+      pinentry.color_so_bright = color_so_bright;
+
+      pinentry.timeout = timout;
+    }
+}
+
+static void
+pinentry_assuan_reset_handler (ASSUAN_CONTEXT ctx)
+{
+  pinentry_reset (0);
+}
 
+static int lc_ctype_unknown_warning = 0;
+
 #if defined FALLBACK_CURSES || defined PINENTRY_CURSES || defined PINENTRY_GTK
 char *
 pinentry_utf8_to_local (const char *lc_ctype, const char *text)
@@ -128,8 +191,12 @@ pinentry_utf8_to_local (const char *lc_ctype, const char *text)
      string.  */
   if (!lc_ctype)
     {
-      fprintf (stderr, "%s: no LC_CTYPE known - assuming UTF-8\n",
-               this_pgmname);
+      if (! lc_ctype_unknown_warning)
+	{
+	  fprintf (stderr, "%s: no LC_CTYPE known - assuming UTF-8\n",
+		   this_pgmname);
+	  lc_ctype_unknown_warning = 1;
+	}
       return strdup (text);
     }
 
@@ -190,8 +257,12 @@ pinentry_local_to_utf8 (char *lc_ctype, char *text, int secure)
      string.  */
   if (!lc_ctype)
     {
-      fprintf (stderr, "%s: no LC_CTYPE known - assuming UTF-8\n",
-               this_pgmname);
+      if (! lc_ctype_unknown_warning)
+	{
+	  fprintf (stderr, "%s: no LC_CTYPE known - assuming UTF-8\n",
+		   this_pgmname);
+	  lc_ctype_unknown_warning = 1;
+	}
       output_buf = secure? secmem_malloc (input_len) : malloc (input_len);
       if (output_buf)
         strcpy (output_buf, input);
@@ -354,13 +425,23 @@ char *
 pinentry_setbufferlen (pinentry_t pin, int len)
 {
   char *newp;
-  if (len < pinentry.pin_len)
+
+  if (pin->pin_len)
+    assert (pin->pin);
+  else
+    assert (!pin->pin);
+
+  if (len < 2048)
+    len = 2048;
+
+  if (len <= pin->pin_len)
     return NULL;
-  newp = secmem_realloc (pin->pin, 2 * pin->pin_len);
+
+  newp = secmem_realloc (pin->pin, len);
   if (newp)
     {
       pin->pin = newp;
-      pin->pin_len *= 2;
+      pin->pin_len = len;
     }
   else
     {
@@ -371,6 +452,50 @@ pinentry_setbufferlen (pinentry_t pin, int len)
   return newp;
 }
 
+static void
+pinentry_setbuffer_clear (pinentry_t pin)
+{
+  if (! pin->pin)
+    {
+      assert (pin->pin_len == 0);
+      return;
+    }
+
+  assert (pin->pin_len > 0);
+
+  secmem_free (pin->pin);
+  pin->pin = NULL;
+  pin->pin_len = 0;
+}
+
+static void
+pinentry_setbuffer_init (pinentry_t pin)
+{
+  pinentry_setbuffer_clear (pin);
+  pinentry_setbufferlen (pin, 0);
+}
+
+/* passphrase better be alloced with secmem_alloc.  */
+void
+pinentry_setbuffer_use (pinentry_t pin, char *passphrase, int len)
+{
+  if (! passphrase)
+    {
+      assert (len == 0);
+      pinentry_setbuffer_clear (pin);
+
+      return;
+    }
+
+  if (passphrase && len == 0)
+    len = strlen (passphrase) + 1;
+
+  if (pin->pin)
+    secmem_free (pin->pin);
+
+  pin->pin = passphrase;
+  pin->pin_len = len;
+}
 
 /* Initialize the secure memory subsystem, drop privileges and return.
    Must be called early. */
@@ -521,9 +646,6 @@ pinentry_parse_opts (int argc, char *argv[])
     ARGPARSE_s_s('N', "ttytype",  "|NAME|Set the tty terminal type"),
     ARGPARSE_s_s('C', "lc-ctype", "|STRING|Set the tty LC_CTYPE value"),
     ARGPARSE_s_s('M', "lc-messages", "|STRING|Set the tty LC_MESSAGES value"),
-#ifdef ENABLE_ENHANCED
-    ARGPARSE_s_n('e', "enhanced", "Ask for timeout and insurance, too"),
-#endif
     ARGPARSE_s_i('o', "timeout",
                  "|SECS|Timeout waiting for input after this many seconds"),
     ARGPARSE_s_n('g', "no-global-grab",
@@ -536,6 +658,8 @@ pinentry_parse_opts (int argc, char *argv[])
 
   set_strusage (my_strusage);
 
+  pinentry_reset (1);
+
   while (arg_parse  (&pargs, opts))
     {
       switch (pargs.r_opt)
@@ -543,11 +667,6 @@ pinentry_parse_opts (int argc, char *argv[])
         case 'd':
           pinentry.debug = 1;
           break;
-#ifdef ENABLE_ENHANCED
-        case 'e':
-          pinentry.enhanced = 1;
-          break;
-#endif
         case 'g':
           pinentry.grab = 0;
           break;
@@ -983,7 +1102,7 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
   int set_prompt = 0;
   int just_read_password_from_cache = 0;
 
-  pinentry.pin = secmem_malloc (pinentry.pin_len);
+  pinentry_setbuffer_init (&pinentry);
   if (!pinentry.pin)
     return ASSUAN_Out_Of_Core;
 
@@ -995,7 +1114,10 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
       && pinentry.allow_external_password_cache
       && pinentry.keyinfo
       /* Only read from the cache if we haven't already tried it.  */
-      && ! pinentry.tried_password_cache)
+      && ! pinentry.tried_password_cache
+      /* If the last read resulted in an error, then don't read from
+	 the cache.  */
+      && ! pinentry.error)
     {
       char *password;
 
@@ -1065,11 +1187,7 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
 
   if (result < 0)
     {
-      if (pinentry.pin)
-	{
-	  secmem_free (pinentry.pin);
-	  pinentry.pin = NULL;
-	}
+      pinentry_setbuffer_clear (&pinentry);
       if (pinentry.specific_err)
         return pinentry.specific_err;
       return pinentry.locale_err? ASSUAN_Locale_Problem: ASSUAN_Canceled;
@@ -1080,7 +1198,7 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
     {
       if (pinentry.repeat_okay)
         assuan_write_status (ctx, "PIN_REPEATED", "");
-      result = assuan_send_data (ctx, pinentry.pin, result);
+      result = assuan_send_data (ctx, pinentry.pin, strlen(pinentry.pin));
       if (!result)
 	result = assuan_send_data (ctx, NULL, 0);
 
@@ -1094,11 +1212,7 @@ cmd_getpin (ASSUAN_CONTEXT ctx, char *line)
 	password_cache_save (pinentry.keyinfo, pinentry.pin);
     }
 
-  if (pinentry.pin)
-    {
-      secmem_free (pinentry.pin);
-      pinentry.pin = NULL;
-    }
+  pinentry_setbuffer_clear (&pinentry);
 
   return result;
 }
@@ -1122,6 +1236,7 @@ cmd_confirm (ASSUAN_CONTEXT ctx, char *line)
   pinentry.locale_err = 0;
   pinentry.specific_err = 0;
   pinentry.canceled = 0;
+  pinentry_setbuffer_clear (&pinentry);
   result = (*pinentry_cmd_handler) (&pinentry);
   if (pinentry.error)
     {
@@ -1132,41 +1247,28 @@ cmd_confirm (ASSUAN_CONTEXT ctx, char *line)
   if (pinentry.close_button)
     assuan_write_status (ctx, "BUTTON_INFO", "close");
 
-  return result ? 0
-                : (pinentry.specific_err? pinentry.specific_err :
-                   pinentry.locale_err? ASSUAN_Locale_Problem
-                                      : (pinentry.one_button
-                                         ? 0
-                                         : (pinentry.canceled
-                                            ? ASSUAN_Canceled
-                                            : ASSUAN_Not_Confirmed)));
+  if (result)
+    return 0;
+
+  if (pinentry.specific_err)
+    return pinentry.specific_err;
+
+  if (pinentry.locale_err)
+    return ASSUAN_Locale_Problem;
+
+  if (pinentry.one_button)
+    return 0;
+
+  if (pinentry.canceled)
+    return ASSUAN_Canceled;
+  return ASSUAN_Not_Confirmed;
 }
 
 
 static int
 cmd_message (ASSUAN_CONTEXT ctx, char *line)
 {
-  int result;
-
-  pinentry.one_button = 1;
-  pinentry.quality_bar = 0;
-  pinentry.close_button = 0;
-  pinentry.locale_err = 0;
-  pinentry.specific_err = 0;
-  result = (*pinentry_cmd_handler) (&pinentry);
-  if (pinentry.error)
-    {
-      free (pinentry.error);
-      pinentry.error = NULL;
-    }
-
-  if (pinentry.close_button)
-    assuan_write_status (ctx, "BUTTON_INFO", "close");
-
-  return result ? 0
-                : (pinentry.specific_err? pinentry.specific_err :
-                   pinentry.locale_err? ASSUAN_Locale_Problem
-                                      : 0);
+  return cmd_confirm (ctx, "--one-button");
 }
 
 /* GETINFO <what>
@@ -1199,6 +1301,30 @@ cmd_getinfo (assuan_context_t ctx, char *line)
   return rc;
 }
 
+/* CLEARPASSPHRASE <cacheid>
+
+   Clear the cache passphrase associated with the key identified by
+   cacheid.
+ */
+static int
+cmd_clear_passphrase (ASSUAN_CONTEXT ctx, char *line)
+{
+  if (! line)
+    return ASSUAN_Invalid_Value;
+
+  /* Remove leading and trailing white space.  */
+  while (*line == ' ')
+    line ++;
+  while (line[strlen (line) - 1] == ' ')
+    line[strlen (line) - 1] = 0;
+
+  switch (password_cache_clear (line))
+    {
+    case 1: return 0;
+    case 0: return ASSUAN_Invalid_Value;
+    default: return ASSUAN_General_Error;
+    }
+}
 
 /* Tell the assuan library about our commands.  */
 static int
@@ -1228,6 +1354,7 @@ register_commands (ASSUAN_CONTEXT ctx)
       { "GETINFO",    0,  cmd_getinfo },
       { "SETTITLE",   0,  cmd_settitle },
       { "SETTIMEOUT",   0,  cmd_settimeout },
+      { "CLEARPASSPHRASE", 0, cmd_clear_passphrase },
       { NULL }
     };
   int i, j, rc;
@@ -1282,6 +1409,7 @@ pinentry_loop2 (int infd, int outfd)
 #if 0
   assuan_set_log_stream (ctx, stderr);
 #endif
+  assuan_register_reset_notify (ctx, pinentry_assuan_reset_handler);
 
   for (;;)
     {

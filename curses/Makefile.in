@@ -118,9 +118,9 @@ am_pinentry_curses_OBJECTS = pinentry-curses.$(OBJEXT)
 pinentry_curses_OBJECTS = $(am_pinentry_curses_OBJECTS)
 pinentry_curses_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-pinentry_curses_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	../pinentry/libpinentry.a ../pinentry/libpinentry-curses.a \
-	../assuan/libassuan.a ../secmem/libsecmem.a \
+pinentry_curses_DEPENDENCIES = ../pinentry/libpinentry.a \
+	../pinentry/libpinentry-curses.a ../assuan/libassuan.a \
+	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -204,6 +204,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
+GNOME3CFLAGS = @GNOME3CFLAGS@
+GNOME3LIBS = @GNOME3LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -227,7 +229,9 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
+NCURSES_LIBS = @NCURSES_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -302,10 +306,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = $(COMMON_CFLAGS) $(NCURSES_INCLUDE) -I$(top_srcdir)/pinentry
-LDADD = $(COMMON_LIBS) \
-	../pinentry/libpinentry.a ../pinentry/libpinentry-curses.a \
+LDADD = ../pinentry/libpinentry.a ../pinentry/libpinentry-curses.a \
 	../assuan/libassuan.a ../secmem/libsecmem.a \
-	$(LIBCAP) $(LIBCURSES) $(LIBICONV)
+	$(COMMON_LIBS) $(LIBCAP) $(LIBCURSES) $(LIBICONV)
 
 pinentry_curses_SOURCES = pinentry-curses.c
 all: all-am
