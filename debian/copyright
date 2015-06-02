@@ -41,7 +41,7 @@ Copyright: 1997 Janos Farkas (chexum@shadow.banki.hu)o
  1997,98,99 Stephan Kulow (coolo@kde.org)
  2002 g10 Code GmbH
 License: GPL-2+
- 
+
 Files: pinentry/argparse.c
 Copyright:  1998-2001, 2006-2008, 2012 Free Software Foundation, Inc.
  1997-2001, 2006-2008, 2013-2015 Werner Koch
