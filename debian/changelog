@@ -2,6 +2,7 @@ pinentry (0.9.3-1) unstable; urgency=medium
 
   * New upstream release.
   * Help pinentry-qt4 show up above existing windows (Closes: #581617)
+  * add new pinentry-gnome3 package.
 
  -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 01 Jun 2015 19:09:28 -0400
 

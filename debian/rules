@@ -8,6 +8,7 @@ override_dh_auto_configure:
 		--enable-pinentry-curses \
 		--enable-pinentry-qt4 \
 		--enable-pinentry-gtk2 \
+		--enable-pinentry-gnome3 \
 		--enable-pinentry-qt4-clipboard
 
 override_dh_installdocs:

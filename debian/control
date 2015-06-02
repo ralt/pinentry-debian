@@ -6,6 +6,7 @@ Uploaders: Peter Eisentraut <petere@debian.org>,
            Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
+               libgcr-3-dev,
                libglib2.0-dev (>= 2.15.5),
                libgtk2.0-dev (>= 2.4.0),
                libncurses5-dev,
@@ -98,16 +99,38 @@ Description: GTK+-2-based PIN or pass-phrase entry dialog for GnuPG
  particular software.
  .
  The program contained in this package implements a PIN entry dialog
- using the GTK+ tool kit version 2, so it is especially suitable for
- users of GNOME.  If the X Window System is not active then an
- alternative text-mode dialog will be used.  There are sibling packages
- that implement PIN entry dialogs using other tool kits.
+ using the GTK+ tool kit version 2.  If the X Window System is not
+ active then an alternative text-mode dialog will be used.  There are
+ sibling packages that implement PIN entry dialogs using other tool
+ kits.
+
+Package: pinentry-gnome3
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Suggests: pinentry-doc
+Provides: pinentry, pinentry-x11
+Enhances: gnupg-agent
+Description: GNOME 3 PIN or pass-phrase entry dialog for GnuPG
+ This package contains a program that allows for secure entry of PINs or
+ pass phrases.  That means it tries to take care that the entered
+ information is not swapped to disk or temporarily stored anywhere.
+ This functionality is particularly useful for entering pass phrases
+ when using encryption software such as GnuPG or e-mail clients using
+ the same.  It uses an open protocol and is therefore not tied to
+ particular software.
+ .
+ The program contained in this package implements a PIN entry dialog
+ designed for use with GNOME 3.  It tries to follow the Gnome Human
+ Interface Guidelines as much as possible.  If the X Window System is
+ not active then an alternative text-mode dialog will be used.  There
+ are sibling packages that implement PIN entry dialogs using other
+ tool kits.
 
 Package: pinentry-doc
 Section: doc
 Architecture: all
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Suggests: pinentry-curses, pinentry-gtk2, pinentry-qt4
+Suggests: pinentry-curses, pinentry-gnome3, pinentry-gtk2, pinentry-qt4
 Description: documentation for pinentry packages
  This package contains the documentation for the pinentry packages,
  a suite of programs that allow secure entry of PINs or pass phrases.

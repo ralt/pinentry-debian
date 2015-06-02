@@ -1,0 +1,75 @@
+.TH PINENTRY-GNOME3 1 "01 Jun 2015"
+.SH NAME
+pinentry\-gnome3 \- PIN or pass-phrase entry dialog for GnuPG
+.PP
+.SH SYNOPSIS
+\fBpinentry-gnome3\fB [\fIOPTION\fR...]
+.SH DESCRIPTION
+\fBpinentry\-gnome3\fR is a program that allows for secure entry of PINs or
+pass phrases.  That means it tries to take care that the entered
+information is not swapped to disk or temporarily stored anywhere.
+This functionality is particularly useful for entering pass phrases
+when using encryption software such as GnuPG or e-mail clients using
+the same.  It uses an open protocol and is therefore not tied to
+particular software.
+.PP
+\fBpinentry-gnome3\fR implements a PIN entry dialog based on GNOME 3,
+which aims to follow the GNOME Human Interface Guidelines as closely
+as possible.  If the X Window System is not active then an alternative
+text-mode dialog will be used.  There are other flavors that implement
+PIN entry dialogs using other tool kits.
+.PP
+\fBpinentry\-gnome3\fR is typically used internally by \fBgpg-agent\fR.
+Users don't normally have a reason to call it directly.
+.SH OPTIONS
+.TP
+\fB\-\-version\fR
+Print the program version and licensing information.
+.TP
+\fB\-\-help\fR
+Print a usage message summarizing the most useful command-line options.
+.TP
+\fB\-\-debug\fR, \fB\-d\fR
+Turn on some debugging.  Mostly useful for the maintainers.  Note
+that this may reveal sensitive information like the entered pass phrase.
+.TP
+\fB\-\-enhanced\fR, \fB\-e\fR
+Ask for timeouts and insurance, too.  Note that this is currently
+not fully supported.
+.TP
+\fB\-\-no\-global\-grab\fR, \fB\-g\fR
+Grab the keyboard only when the window is focused.  Use this
+option if you are debugging software using \fBpinentry\-gnome3\fR;
+otherwise you may not be able to to access your X session anymore (unless
+you have other means to connect to the machine to kill
+\fBpinentry\-gnome3\fR).
+.TP
+\fB\-\-parent\-wid\fR \fIN\fR
+Use window ID \fIN\fR as the parent window for positioning the window.
+Note, that this is not fully supported by all flavors of \fBpinentry\fR.
+.TP
+\fB--display\fR \fISTRING\fR, \fB--ttyname\fR \fISTRING\fR, \fB--ttytype\fR \fISTRING\fR, \fB--lc-type\fR \fISTRING\fR, \fB--lc-messages\fR \fISTRING\fR
+These options are used to pass localization information to
+\fBpinentry-gnome3\fR.  They are required because
+\fBpinentry-gnome3\fR is usually called by
+some background process which does not have any information on the
+locale and terminal to use.  Assuan protocol options are an
+alternative way to pass these information.
+.SH "SEE ALSO"
+.BR pinentry-curses (1),
+.BR pinentry-gtk-2 (1),
+.BR pinentry-tty (1),
+.BR gpg (1),
+.BR gpg-agent (1)
+.PP
+The full documentation for
+.B pinentry-gnome3
+is maintained as a Texinfo manual.  If the
+.B pinentry-doc
+package is installed, the command
+.IP
+.B info pinentry
+.PP
+should give you access to the complete manual.
+.SH AUTHOR
+This manual page was written by Daniel Kahn Gillmor for the Debian project, adapted from other pinentry manual pages written by Peter Eisentraut.
