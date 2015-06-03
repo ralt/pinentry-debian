@@ -1,2 +1,3 @@
 0001-avoid-self-describing-as-a-beta.patch
 0002-use-g_debug-format-.-safely.patch
+0003-pinentry_setbufferlen-returns-pin-when-already-large.patch

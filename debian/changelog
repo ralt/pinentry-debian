@@ -1,3 +1,9 @@
+pinentry (0.9.3-2) unstable; urgency=medium
+
+  * fix pinentry-curses text entry (Closes: #787639)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 03 Jun 2015 13:25:16 -0400
+
 pinentry (0.9.3-1) unstable; urgency=medium
 
   * New upstream release.
