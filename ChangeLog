@@ -1,3 +1,32 @@
+2015-06-05  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.4.
+
+2015-06-05  Neal H. Walfield  <neal@gnu.org>
+
+	secmem: When clearing memory, don't clear beyond the end of the buffer.
+	* secmem/secmem.c (secmem_malloc): Only clear the user memory; don't
+	clear beyond the end of the buffer.
+
+2015-06-04  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	Make pinentry_setbufferlen always return the pin buffer.
+	* pinentry/pinentry.c (pinentry_setbufferlen): When the pin buffer is
+	already large enough, return the buffer instead of NULL.
+
+2015-06-02  Werner Koch  <wk@gnupg.org>
+
+	Fixed compiler warnings - mostly unused parameter.
+
+	Add more GCC warnings flags.
+	* configure.ac: Add GCC specific -W flags.
+
+2015-06-02  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	use g_debug(format, ...) safely.
+	* pinentry/password-cache.c (password_cache_clear): use g_debug safely
+	  in case error->message is malformed.
+
 2015-06-01  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.3.
