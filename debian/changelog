@@ -1,3 +1,9 @@
+pinentry (0.9.3-3) unstable; urgency=medium
+
+  * fix secmem buffer over-clearing (Closes: #787690)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 04 Jun 2015 23:48:26 -0400
+
 pinentry (0.9.3-2) unstable; urgency=medium
 
   * fix pinentry-curses text entry (Closes: #787639)
