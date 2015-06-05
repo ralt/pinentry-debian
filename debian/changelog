@@ -1,3 +1,9 @@
+pinentry (0.9.4-1) unstable; urgency=medium
+
+  * New upstream version (most d/patches applied upstream)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 05 Jun 2015 17:33:37 -0400
+
 pinentry (0.9.3-3) unstable; urgency=medium
 
   * fix secmem buffer over-clearing (Closes: #787690)
