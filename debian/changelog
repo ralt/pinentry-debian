@@ -1,3 +1,9 @@
+pinentry (0.9.4-2) unstable; urgency=medium
+
+  * rely on user's choice of password-manager with pinentry-gnome3
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 09 Jun 2015 07:12:16 -0400
+
 pinentry (0.9.4-1) unstable; urgency=medium
 
   * New upstream version (most d/patches applied upstream)
