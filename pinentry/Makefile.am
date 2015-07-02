@@ -27,11 +27,17 @@ else
 pinentry_curses =
 endif
 
+if BUILD_LIBPINENTRY_EMACS
+pinentry_emacs_sources = pinentry-emacs.h pinentry-emacs.c
+else
+pinentry_emacs_sources =
+endif
+
 noinst_LIBRARIES = libpinentry.a $(pinentry_curses)
 
 LDADD = $(COMMON_LIBS)
-AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/secmem
 
 libpinentry_a_SOURCES = pinentry.h pinentry.c argparse.c argparse.h \
-	password-cache.h password-cache.c
+	password-cache.h password-cache.c $(pinentry_emacs_sources)
 libpinentry_curses_a_SOURCES = pinentry-curses.h pinentry-curses.c

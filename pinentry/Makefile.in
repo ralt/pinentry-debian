@@ -102,7 +102,8 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/gpg-error.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/libassuan.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -124,8 +125,13 @@ am_libpinentry_curses_a_OBJECTS = pinentry-curses.$(OBJEXT)
 libpinentry_curses_a_OBJECTS = $(am_libpinentry_curses_a_OBJECTS)
 libpinentry_a_AR = $(AR) $(ARFLAGS)
 libpinentry_a_LIBADD =
+am__libpinentry_a_SOURCES_DIST = pinentry.h pinentry.c argparse.c \
+	argparse.h password-cache.h password-cache.c pinentry-emacs.h \
+	pinentry-emacs.c
+@BUILD_LIBPINENTRY_EMACS_TRUE@am__objects_1 =  \
+@BUILD_LIBPINENTRY_EMACS_TRUE@	pinentry-emacs.$(OBJEXT)
 am_libpinentry_a_OBJECTS = pinentry.$(OBJEXT) argparse.$(OBJEXT) \
-	password-cache.$(OBJEXT)
+	password-cache.$(OBJEXT) $(am__objects_1)
 libpinentry_a_OBJECTS = $(am_libpinentry_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -157,7 +163,7 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libpinentry_curses_a_SOURCES) $(libpinentry_a_SOURCES)
 DIST_SOURCES = $(libpinentry_curses_a_SOURCES) \
-	$(libpinentry_a_SOURCES)
+	$(am__libpinentry_a_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -211,6 +217,11 @@ EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
 GNOME3CFLAGS = @GNOME3CFLAGS@
 GNOME3LIBS = @GNOME3LIBS@
+GPG_ERROR_CFLAGS = @GPG_ERROR_CFLAGS@
+GPG_ERROR_CONFIG = @GPG_ERROR_CONFIG@
+GPG_ERROR_LIBS = @GPG_ERROR_LIBS@
+GPG_ERROR_MT_CFLAGS = @GPG_ERROR_MT_CFLAGS@
+GPG_ERROR_MT_LIBS = @GPG_ERROR_MT_LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -220,6 +231,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBASSUAN_CFLAGS = @LIBASSUAN_CFLAGS@
+LIBASSUAN_CONFIG = @LIBASSUAN_CONFIG@
+LIBASSUAN_LIBS = @LIBASSUAN_LIBS@
 LIBCAP = @LIBCAP@
 LIBCURSES = @LIBCURSES@
 LIBICONV = @LIBICONV@
@@ -313,11 +327,13 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = 
 @BUILD_LIBPINENTRY_CURSES_FALSE@pinentry_curses = 
 @BUILD_LIBPINENTRY_CURSES_TRUE@pinentry_curses = libpinentry-curses.a
+@BUILD_LIBPINENTRY_EMACS_FALSE@pinentry_emacs_sources = 
+@BUILD_LIBPINENTRY_EMACS_TRUE@pinentry_emacs_sources = pinentry-emacs.h pinentry-emacs.c
 noinst_LIBRARIES = libpinentry.a $(pinentry_curses)
 LDADD = $(COMMON_LIBS)
-AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/secmem
 libpinentry_a_SOURCES = pinentry.h pinentry.c argparse.c argparse.h \
-	password-cache.h password-cache.c
+	password-cache.h password-cache.c $(pinentry_emacs_sources)
 
 libpinentry_curses_a_SOURCES = pinentry-curses.h pinentry-curses.c
 all: all-am
@@ -377,6 +393,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/argparse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/password-cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-curses.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-emacs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry.Po@am__quote@
 
 .c.o:

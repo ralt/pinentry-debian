@@ -2336,7 +2336,9 @@ AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
 m4_include([m4/curses.m4])
+m4_include([m4/gpg-error.m4])
 m4_include([m4/iconv.m4])
+m4_include([m4/libassuan.m4])
 m4_include([m4/pkg.m4])
 m4_include([m4/qt.m4])
 m4_include([acinclude.m4])

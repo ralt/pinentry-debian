@@ -27,7 +27,7 @@
 
 #include <string.h>
 
-#include "assuan.h"
+#include <assuan.h>
 
 #include "memory.h"
 
@@ -145,6 +145,7 @@ create_prompt (pinentry_t pe, int confirm)
   /* XXX: gcr expects a string; we have a int.  */
   // gcr_prompt_set_caller_window (prompt, pe->parent_wid);
 
+#ifdef HAVE_LIBSECRET
   if (! confirm && pe->allow_external_password_cache && pe->keyinfo)
     {
       if (pe->default_pwmngr)
@@ -157,6 +158,7 @@ create_prompt (pinentry_t pe, int confirm)
 	gcr_prompt_set_choice_label
 	  (prompt, "Automatically unlock this key, whenever I'm logged in");
     }
+#endif
 
   return prompt;
 }
@@ -187,7 +189,7 @@ gnome3_cmd_handler (pinentry_t pe)
       if (error)
 	/* Error.  */
 	{
-	  pe->specific_err = ASSUAN_General_Error;
+	  pe->specific_err = gpg_error (GPG_ERR_ASS_GENERAL);
 	  g_error_free (error);
 	  ret = -1;
 	}
@@ -202,6 +204,11 @@ gnome3_cmd_handler (pinentry_t pe)
 
 	  if (pe->repeat_passphrase)
 	    pe->repeat_okay = 1;
+
+#ifdef HAVE_LIBSECRET
+	  if (pe->allow_external_password_cache && pe->keyinfo)
+	    pe->may_cache_password = gcr_prompt_get_choice_chosen (prompt);
+#endif
 
 	  ret = 1;
 	}
@@ -224,7 +231,7 @@ gnome3_cmd_handler (pinentry_t pe)
       reply = gcr_prompt_confirm_run (prompt, NULL, &error);
       if (error)
 	{
-	  pe->specific_err = ASSUAN_General_Error;
+	  pe->specific_err = gpg_error (GPG_ERR_ASS_GENERAL);
 	  ret = 0;
 	}
       else if (reply == GCR_PROMPT_REPLY_CONTINUE
@@ -255,7 +262,10 @@ main (int argc, char *argv[])
 
 #ifdef FALLBACK_CURSES
   if (pinentry_have_display (argc, argv))
-    gtk_init (&argc, &argv);
+    {
+      if (! gtk_init_check (&argc, &argv))
+	pinentry_cmd_handler = curses_cmd_handler;
+    }
   else
     pinentry_cmd_handler = curses_cmd_handler;
 #else

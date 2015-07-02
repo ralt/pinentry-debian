@@ -8,8 +8,8 @@ END-INFO-DIR-ENTRY
 
 This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.9.4, last updated 1 June 2015, of 'The 'PINEntry'
-Manual', for version 0.9.4.
+   This is edition 0.9.5, last updated 30 June 2015, of 'The 'PINEntry'
+Manual', for version 0.9.5.
 
    Published by g10 Code GmbH
 Hüttenstr.  61
@@ -410,8 +410,16 @@ relevant elements that describe the layout:
      description of the error message.  This text should typically be
      highlighted in someway.
 
-'prompt'
+'prompt, default-prompt'
      The string to associate with the passphrase entry box.
+
+     There is a subtle difference between 'prompt' and 'default-prompt'.
+     'default-prompt' means that a stylized prompt (e.g., an icon
+     suggesting a prompt) may be used.  'prompt' means that the entry's
+     meaning is not consistent with such a style and, as such, no icon
+     should be used.
+
+     If both variables are set, the 'prompt' variant takes precedence.
 
 'repeat_passphrase'
      The string to associate with the second passphrase entry box.  The
@@ -896,12 +904,12 @@ Index
 
 
 Tag Table:
-Node: Top811
-Node: Using pinentry2167
-Node: Protocol4016
-Node: Implementation Details12481
-Node: Copying19601
-Node: Option Index38780
-Node: Index39862
+Node: Top812
+Node: Using pinentry2168
+Node: Protocol4017
+Node: Implementation Details12482
+Node: Copying19994
+Node: Option Index39173
+Node: Index40255
 
 End Tag Table

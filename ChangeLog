@@ -1,3 +1,157 @@
+2015-07-01  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.5.
+
+	w32: Adjust for use of standard libassuan.
+	* autogen.rc: Add gpg-error and libassuan prefix options.
+	* w32/Makefile.am (AM_CPPFLAGS): Use COMMON_FLAGS.
+	(pinentry_w32_LDADD): Use COMMON_LIBS.
+
+	Distribute files in m4/
+
+2015-06-24  Gergely Imreh  <imrehg@gmail.com>
+
+	curses: remove hard-wired ncursesw include path.
+	* pinentry/pinentry-curses.c: pkg-config finds the correct include
+	paths so should not hard-wire the path for the ncursesw header file.
+
+2015-06-23  Neal H. Walfield  <neal@gnu.org>
+
+	emacs: Don't link against ../assuan/libassuan.a.
+	* emacs/Makefile.am (LDADD): Don't link against ../assuan/libassuan.a.
+	We now use the system libassuan.
+
+	curses: Recognize ASCII DEL as backspace.
+	* pinentry/pinentry-curses.c (dialog_input): Recognize ASCII DEL as
+	backspace.
+
+2015-06-17  Daiki Ueno  <ueno@gnu.org>
+
+	Add inside-Emacs mode to GUI pinentry programs.
+	* configure.ac: Add --enable-pinentry-emacs and
+	--enable-inside-emacs option.
+	(BUILD_LIBPINENTRY_EMACS): New conditional.
+	(BUILD_PINENTRY_EMACS): New conditional.
+	(INSIDE_EMACS): New conditional.
+	* Makefile.am (pinentry_emacs): New.
+	(SUBDIRS): Add "emacs" subdir if PINENTRY_EMACS is set.
+
+	* pinentry/pinentry-emacs.h: New file.
+	* pinentry/pinentry-emacs.c: New file.
+	* pinentry/Makefile.am: New file.
+	* pinentry/pinentry.c (option_handler): Handle the allow-emacs-prompt
+	Assuan option.
+
+	* emacs/pinentry-emacs.c: New file.
+	* emacs/Makefile.am: New file.
+
+2015-06-16  Neal H. Walfield  <neal@gnu.org>
+
+	If we fail to initialize gtk, fallback to the curses frontend.
+	* gnome3/pinentry-gnome3.c (main): Use gtk_init_check instead of
+	gtk_init.  If it fails, fallback to the curses frontend.
+
+	Fix comment for pinentry_cmd_handler_t.
+	* pinentry/pinentry.h (pinentry_cmd_handler_t): Fix comment.
+
+	Describe default-prompt in the implementation section of the manual.
+	* doc/pinentry.texi (Implementation Details): Describe default-prompt.
+
+	Remove internal mini-libassuan implementation and link to libassuan.
+	* assuan/ChangeLog-old: Remove file.
+	* assuan/Makefile.am: Remove file.
+	* assuan/README.1st: Remove file.
+	* assuan/assuan-buffer.c: Remove file.
+	* assuan/assuan-defs.h: Remove file.
+	* assuan/assuan-handler.c: Remove file.
+	* assuan/assuan-listen.c: Remove file.
+	* assuan/assuan-pipe-server.c: Remove file.
+	* assuan/assuan-util.c: Remove file.
+	* assuan/assuan.h: Remove file.
+	* assuan/mkerrors: Remove file.
+
+	* configure.ac: Check for libgpg-error and libassuan.
+	(COMMON_CFLAGS): Add $GPG_ERROR_CFLAGS and $LIBASSUAN_CFLAGS.
+	(COMMAND_LIBS): Add $GPG_ERROR_LIBS and $LIBASSUAN_LIBS.
+	(GPG_ERR_ENABLE_GETTEXT_MACROS): Define this macro.
+	(GPG_ERR_ENABLE_ERRNO_MACROS): Likewise.
+	(GNUPG_LIBASSUAN_VERSION): Likewise.
+	(AC_CONFIG_FILES): Don't generate assuan/Makefile.
+	(config.h): Define GPG_ERR_SOURCE_DEFAULT.
+	* Makefile.am (SUBDIRS): Remove assuan.
+	* curses/Makefile.am (LDADD): Remove ../assuan/libassuan.a.
+	* gnome3/Makefile.am (AM_CPPFLAGS): Remove -I$(top_srcdir)/assuan.
+	(LDADD): Remove ../assuan/libassuan.a.
+	* gtk+-2/Makefile.am (LDADD): Remove ../assuan/libassuan.a.
+	* pinentry/Makefile.am: Remove -I$(top_srcdir)/assuan.
+	* qt4/Makefile.am (AM_CPPFLAGS): Remove -I$(top_srcdir)/assuan.
+	(pinentry_qt4_LDADD): Remove $(top_builddir)/assuan/libassuan.a.
+	* tty/Makefile.am (LDADD): Remove ../assuan/libassuan.a.
+
+	* gnome3/pinentry-gnome3.c: Include <assuan.h>, not "assuan.h".
+	Replace ASSUAN_General_Error, etc. with gpg_error or
+	gpg_error_from_syserror.
+	* pinentry/pinentry-curses.c: Likewise.
+	* pinentry/pinentry.c: Likewise.
+	(pinentry_assuan_reset_handler): Change return type to gpg_error_t.
+	Change type of argument CTX from ASSUAN_CONTEXT to assuan_context_t.
+	Return 0.
+	(pinentry_inq_quality): Change variable CTX's type from ASSUAN_CONTEXT
+	to assuan_context_t.
+	(assuan_malloc_hooks): New variable.
+	(pinentry_init): Call gpgrt_check_version.  Change use of
+	assuan_set_malloc_hooks to match libassuan's semantics.
+	(option_handler): Return a gpg_error_t, not an int.  Replace use of
+	ASSUAN_Out_Of_Core, etc. with gpg_error or gpg_error_from_syserror.
+	(cmd_setdesc): Return a gpg_error_t, not an int.  Change argument
+	CTX's type from ASSUAN_CONTEXT to assuan_context_t.  Replace use of
+	ASSUAN_Out_Of_Core, etc. with gpg_error or gpg_error_from_syserror.
+	GPG_ERR_ENOMEM), etc.
+	(cmd_setprompt): Likewise.
+	(cmd_setkeyinfo): Likewise.
+	(cmd_setrepeat): Likewise.
+	(cmd_setrepeaterror): Likewise.
+	(cmd_seterror): Likewise.
+	(cmd_setok): Likewise.
+	(cmd_setnotok): Likewise.
+	(cmd_setcancel): Likewise.
+	(cmd_settimeout): Likewise.
+	(cmd_settitle): Likewise.
+	(cmd_setqualitybar): Likewise.
+	(cmd_setqualitybar_tt): Likewise.
+	(cmd_getpin): Likewise.
+	(cmd_confirm): Likewise.
+	(cmd_message): Likewise.
+	(cmd_getinfo): Likewise.
+	(cmd_clear_passphrase): Likewise.
+	(register_commands): Likewise.  Change use of assuan_register_command
+	to match libassuan's semantics.
+	(pinentry_loop2): Change variable RC's type from int to gpg_error_t.
+	Change variable CTX's type from ASSUAN_CONTEXT to assuan_context_t.
+	Use assuan_new to initialize CTX.  Change use of
+	assuan_init_pipe_server to match libassuan's semantics.  Replace use
+	of assuan_strerror with gpg_strerror.  Call assuan_release instead of
+	assuan_deinit_server.
+
+2015-06-16  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt4: Fix GCC compile warnings.
+	* qt4/qsecurelineedit.cpp (QSecureLineEdit::sizeHint),
+	(QSecureLineEdit::minimumSizeHint): Remove unused Q_D macros.
+	(QSecureLineEdit::setCursorPosition, QSecureLineEditPrivate::setText),
+	(QSecureLineEditPrivate::hasAcceptableInput): Explicitly cast length to int.
+	(QSecureLineEditPrivate::maskString): Use unsigned type for strIndex.
+	(QSecureLineEditPrivate::maskString): Remove uneccesary casts.
+	* qt4/secstring.cpp (toUtf8): Remove unused variable.
+
+2015-06-07  Neal H. Walfield  <neal@gnu.org>
+
+	gnome3: Actually respect the user's choice of using a password manager.
+	* gnome3/pinentry-gnome3.c (create_prompt) [HAVE_LIBSECRET]: Only show
+	the libsecret prompt in this case.
+	(gnome3_cmd_handler) [HAVE_LIBSECRET]: Set PE->MAY_CACHE_PASSWORD
+	according to the user's choice.
+
 2015-06-05  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.4.
