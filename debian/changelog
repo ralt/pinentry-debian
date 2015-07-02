@@ -1,3 +1,10 @@
+pinentry (0.9.5-1) unstable; urgency=medium
+
+  * new upstream release
+  * build-depends on libgpg-error and libassuan now
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 02 Jul 2015 18:01:23 -0400
+
 pinentry (0.9.4-2) unstable; urgency=medium
 
   * rely on user's choice of password-manager with pinentry-gnome3
