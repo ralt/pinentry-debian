@@ -14,17 +14,17 @@
 
 @SET_MAKE@
 
-# Assuan Makefile for test purposes
-# Copyright (C) 2001 Free Software Foundation, Inc.
+# Makefile.am - PIN entry emacs frontend.
+# Copyright (C) 2002, 2015 g10 Code GmbH
 #
-# This file is part of GnuPG.
+# This file is part of PINENTRY.
 #
-# GnuPG is free software; you can redistribute it and/or modify
+# PINENTRY is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
-# GnuPG is distributed in the hope that it will be useful,
+# PINENTRY is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
@@ -97,12 +97,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = assuan
+bin_PROGRAMS = pinentry-emacs$(EXEEXT)
+subdir = emacs
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/gpg-error.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/libassuan.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -111,19 +113,15 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-LIBRARIES = $(noinst_LIBRARIES)
-AR = ar
-ARFLAGS = cru
-AM_V_AR = $(am__v_AR_@AM_V@)
-am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
-am__v_AR_0 = @echo "  AR      " $@;
-am__v_AR_1 = 
-libassuan_a_AR = $(AR) $(ARFLAGS)
-libassuan_a_LIBADD =
-am_libassuan_a_OBJECTS = assuan-util.$(OBJEXT) assuan-errors.$(OBJEXT) \
-	assuan-buffer.$(OBJEXT) assuan-handler.$(OBJEXT) \
-	assuan-listen.$(OBJEXT) assuan-pipe-server.$(OBJEXT)
-libassuan_a_OBJECTS = $(am_libassuan_a_OBJECTS)
+am__installdirs = "$(DESTDIR)$(bindir)"
+PROGRAMS = $(bin_PROGRAMS)
+am_pinentry_emacs_OBJECTS = pinentry-emacs.$(OBJEXT)
+pinentry_emacs_OBJECTS = $(am_pinentry_emacs_OBJECTS)
+pinentry_emacs_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+pinentry_emacs_DEPENDENCIES = ../pinentry/libpinentry.a \
+	../secmem/libsecmem.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -152,8 +150,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libassuan_a_SOURCES)
-DIST_SOURCES = $(libassuan_a_SOURCES)
+SOURCES = $(pinentry_emacs_SOURCES)
+DIST_SOURCES = $(pinentry_emacs_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -207,6 +205,11 @@ EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
 GNOME3CFLAGS = @GNOME3CFLAGS@
 GNOME3LIBS = @GNOME3LIBS@
+GPG_ERROR_CFLAGS = @GPG_ERROR_CFLAGS@
+GPG_ERROR_CONFIG = @GPG_ERROR_CONFIG@
+GPG_ERROR_LIBS = @GPG_ERROR_LIBS@
+GPG_ERROR_MT_CFLAGS = @GPG_ERROR_MT_CFLAGS@
+GPG_ERROR_MT_LIBS = @GPG_ERROR_MT_LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -216,6 +219,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBASSUAN_CFLAGS = @LIBASSUAN_CFLAGS@
+LIBASSUAN_CONFIG = @LIBASSUAN_CONFIG@
+LIBASSUAN_LIBS = @LIBASSUAN_LIBS@
 LIBCAP = @LIBCAP@
 LIBCURSES = @LIBCURSES@
 LIBICONV = @LIBICONV@
@@ -306,25 +312,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = mkerrors ChangeLog-old
-AM_CPPFLAGS = -I.. -I$(top_srcdir)/include
-BUILT_SOURCES = assuan-errors.c
-MOSTLYCLEANFILES = assuan-errors.c
-noinst_LIBRARIES = libassuan.a
+AM_CPPFLAGS = $(COMMON_CFLAGS) $(NEMACS_INCLUDE) -I$(top_srcdir)/pinentry
+LDADD = ../pinentry/libpinentry.a ../secmem/libsecmem.a \
+	$(COMMON_LIBS) $(LIBCAP) $(LIBEMACS) $(LIBICONV)
 
-#libassuan_a_LDFLAGS =
-libassuan_a_SOURCES = \
-	assuan.h \
-	assuan-defs.h \
-	assuan-util.c \
-	assuan-errors.c \
-	assuan-buffer.c \
-	assuan-handler.c \
-	assuan-listen.c \
-	assuan-pipe-server.c
-
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+pinentry_emacs_SOURCES = pinentry-emacs.c
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
@@ -337,9 +330,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu assuan/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu emacs/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu assuan/Makefile
+	  $(AUTOMAKE) --gnu emacs/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -358,14 +351,52 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
+	fi; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p \
+	  ; then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' \
+	    -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	    } \
+	; done
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' \
+	`; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(bindir)" && rm -f $$files
 
-libassuan.a: $(libassuan_a_OBJECTS) $(libassuan_a_DEPENDENCIES) $(EXTRA_libassuan_a_DEPENDENCIES) 
-	$(AM_V_at)-rm -f libassuan.a
-	$(AM_V_AR)$(libassuan_a_AR) libassuan.a $(libassuan_a_OBJECTS) $(libassuan_a_LIBADD)
-	$(AM_V_at)$(RANLIB) libassuan.a
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+pinentry-emacs$(EXEEXT): $(pinentry_emacs_OBJECTS) $(pinentry_emacs_DEPENDENCIES) $(EXTRA_pinentry_emacs_DEPENDENCIES) 
+	@rm -f pinentry-emacs$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(pinentry_emacs_OBJECTS) $(pinentry_emacs_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -373,12 +404,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-buffer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-errors.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-handler.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-listen.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-pipe-server.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/assuan-util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-emacs.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -477,12 +503,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LIBRARIES)
+check: check-am
+all-am: Makefile $(PROGRAMS)
 installdirs:
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+	for dir in "$(DESTDIR)$(bindir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -502,7 +529,6 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
-	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -513,10 +539,9 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -542,7 +567,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-am
 
@@ -581,26 +606,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-noinstLIBRARIES cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
+	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
+	distclean distclean-compile distclean-generic distclean-tags \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-binPROGRAMS install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
+	ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS
 
-
-assuan-errors.c : assuan.h
-	$(srcdir)/mkerrors < $(srcdir)/assuan.h > assuan-errors.c
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

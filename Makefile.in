@@ -113,7 +113,8 @@ DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
 	$(top_srcdir)/build-aux/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/gpg-error.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/libassuan.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -180,8 +181,8 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = assuan secmem pinentry curses tty gtk+-2 gnome3 qt4 w32 \
-	doc
+DIST_SUBDIRS = m4 secmem pinentry curses tty emacs gtk+-2 gnome3 qt4 \
+	w32 doc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -252,6 +253,11 @@ EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = gitlog-to-changelog
 GNOME3CFLAGS = @GNOME3CFLAGS@
 GNOME3LIBS = @GNOME3LIBS@
+GPG_ERROR_CFLAGS = @GPG_ERROR_CFLAGS@
+GPG_ERROR_CONFIG = @GPG_ERROR_CONFIG@
+GPG_ERROR_LIBS = @GPG_ERROR_LIBS@
+GPG_ERROR_MT_CFLAGS = @GPG_ERROR_MT_CFLAGS@
+GPG_ERROR_MT_LIBS = @GPG_ERROR_MT_LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -261,6 +267,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBASSUAN_CFLAGS = @LIBASSUAN_CFLAGS@
+LIBASSUAN_CONFIG = @LIBASSUAN_CONFIG@
+LIBASSUAN_LIBS = @LIBASSUAN_LIBS@
 LIBCAP = @LIBCAP@
 LIBCURSES = @LIBCURSES@
 LIBICONV = @LIBICONV@
@@ -361,6 +370,8 @@ EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 @BUILD_PINENTRY_CURSES_TRUE@pinentry_curses = curses
 @BUILD_PINENTRY_TTY_FALSE@pinentry_tty = 
 @BUILD_PINENTRY_TTY_TRUE@pinentry_tty = tty
+@BUILD_PINENTRY_EMACS_FALSE@pinentry_emacs = 
+@BUILD_PINENTRY_EMACS_TRUE@pinentry_emacs = emacs
 @BUILD_PINENTRY_GTK_2_FALSE@pinentry_gtk_2 = 
 @BUILD_PINENTRY_GTK_2_TRUE@pinentry_gtk_2 = gtk+-2
 @BUILD_PINENTRY_GNOME_3_FALSE@pinentry_gnome_3 = 
@@ -369,9 +380,9 @@ EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 @BUILD_PINENTRY_QT4_TRUE@pinentry_qt4 = qt4
 @BUILD_PINENTRY_W32_FALSE@pinentry_w32 = 
 @BUILD_PINENTRY_W32_TRUE@pinentry_w32 = w32
-SUBDIRS = assuan secmem pinentry ${pinentry_curses} ${pinentry_tty} \
-	${pinentry_gtk_2} ${pinentry_gnome_3} ${pinentry_qt4} \
-	${pinentry_w32} doc
+SUBDIRS = m4 secmem pinentry ${pinentry_curses} ${pinentry_tty} \
+	${pinentry_emacs} ${pinentry_gtk_2} ${pinentry_gnome_3} \
+	${pinentry_qt4} ${pinentry_w32} doc
 
 gen_start_date = 2012-08-08T00:00:00
 all: config.h

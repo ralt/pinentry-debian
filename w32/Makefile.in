@@ -103,7 +103,8 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curses.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/gpg-error.m4 $(top_srcdir)/m4/iconv.m4 \
+	$(top_srcdir)/m4/libassuan.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -116,8 +117,9 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_pinentry_w32_OBJECTS = main.$(OBJEXT)
 pinentry_w32_OBJECTS = $(am_pinentry_w32_OBJECTS)
+am__DEPENDENCIES_1 =
 pinentry_w32_DEPENDENCIES = pinentry-w32.o ../pinentry/libpinentry.a \
-	../assuan/libassuan.a ../secmem/libsecmem.a
+	../secmem/libsecmem.a $(am__DEPENDENCIES_1)
 pinentry_w32_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(pinentry_w32_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
@@ -203,6 +205,11 @@ EXEEXT = @EXEEXT@
 GITLOG_TO_CHANGELOG = @GITLOG_TO_CHANGELOG@
 GNOME3CFLAGS = @GNOME3CFLAGS@
 GNOME3LIBS = @GNOME3LIBS@
+GPG_ERROR_CFLAGS = @GPG_ERROR_CFLAGS@
+GPG_ERROR_CONFIG = @GPG_ERROR_CONFIG@
+GPG_ERROR_LIBS = @GPG_ERROR_LIBS@
+GPG_ERROR_MT_CFLAGS = @GPG_ERROR_MT_CFLAGS@
+GPG_ERROR_MT_LIBS = @GPG_ERROR_MT_LIBS@
 GREP = @GREP@
 GTK2CFLAGS = @GTK2CFLAGS@
 GTK2LIBS = @GTK2LIBS@
@@ -212,6 +219,9 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LIBASSUAN_CFLAGS = @LIBASSUAN_CFLAGS@
+LIBASSUAN_CONFIG = @LIBASSUAN_CONFIG@
+LIBASSUAN_LIBS = @LIBASSUAN_LIBS@
 LIBCAP = @LIBCAP@
 LIBCURSES = @LIBCURSES@
 LIBICONV = @LIBICONV@
@@ -304,7 +314,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 logos = logo-32.bmp logo-48.bmp logo-64.bmp logo-96.bmp logo-128.bmp
 EXTRA_DIST = $(logos)
-AM_CPPFLAGS = -I$(top_srcdir)/assuan -I$(top_srcdir)/secmem \
+AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/secmem \
 	      -I$(top_srcdir)/pinentry
 
 pinentry_w32_SOURCES = main.c pinentry-w32.rc resource.h
@@ -312,7 +322,8 @@ pinentry_w32_SOURCES = main.c pinentry-w32.rc resource.h
 # Note: For testing you should add -mconsole to LDFLAGS.
 pinentry_w32_LDFLAGS = -mwindows
 pinentry_w32_LDADD = pinentry-w32.o \
-	../pinentry/libpinentry.a ../assuan/libassuan.a ../secmem/libsecmem.a
+	../pinentry/libpinentry.a ../secmem/libsecmem.a \
+        $(COMMON_LIBS)
 
 all: all-am
 

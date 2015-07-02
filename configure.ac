@@ -26,7 +26,7 @@ min_automake_version="1.14"
 # (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
 # bump the version number immediately after the release, do another
 # commit, and a push so that the git magic is able to work.
-m4_define(mym4_version, [0.9.4])
+m4_define(mym4_version, [0.9.5])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -223,14 +223,51 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(seteuid stpcpy mmap)
 GNUPG_CHECK_MLOCK
 
+dnl Checks for standard types.
+AC_TYPE_UINT32_T
+
 # Common libraries and cflags.
 COMMON_CFLAGS=
 COMMON_LIBS=
 AC_SUBST(COMMON_CFLAGS)
 AC_SUBST(COMMON_LIBS)
 
+dnl Checks for libgpg-error
+#
+# libgpg-error is a library with error codes shared between GnuPG
+# related projects.
+#
+NEED_GPG_ERROR_VERSION=1.16
+have_gpg_error=no
+
+AM_PATH_GPG_ERROR("$NEED_GPG_ERROR_VERSION",
+                  have_gpg_error=yes,have_gpg_error=no)
+COMMON_CFLAGS="$GPG_ERROR_CFLAGS $COMMON_CFLAGS"
+COMMON_LIBS="$GPG_ERROR_LIBS $COMMON_LIBS"
+
+AC_DEFINE_UNQUOTED(GPG_ERR_ENABLE_GETTEXT_MACROS, 1,
+                   [Under Windows we use the gettext code from libgpg-error])
+
+AC_DEFINE_UNQUOTED(GPG_ERR_ENABLE_ERRNO_MACROS, 1,
+                   [Under WindowsCE we use the strerror replacement from libgpg-error.])
+
+
 dnl Checks for libassuan.
-dnl -> None required because we use a stripped down version of libassuan.
+#
+# libassuan is used for IPC
+#
+NEED_LIBASSUAN_API=2
+NEED_LIBASSUAN_VERSION=2.1.0
+have_libassuan=no
+AM_PATH_LIBASSUAN("$NEED_LIBASSUAN_API:$NEED_LIBASSUAN_VERSION",
+                  have_libassuan=yes,have_libassuan=no)
+if test "$have_libassuan" = "yes"; then
+  AC_DEFINE_UNQUOTED(GNUPG_LIBASSUAN_VERSION, "$libassuan_version",
+                     [version of the libassuan library])
+fi
+
+COMMON_CFLAGS="$LIBASSUAN_CFLAGS $COMMON_CFLAGS"
+COMMON_LIBS="$LIBASSUAN_LIBS $COMMON_LIBS"
 
 
 dnl Checks for libsecmem.
@@ -325,6 +362,57 @@ if test "$pinentry_curses" = "yes" \
 *** using the --with-libiconv-prefix=PREFIX option to configure.
 ***]])
   fi
+fi
+
+dnl
+dnl Check for emacs pinentry program.
+dnl
+AC_ARG_ENABLE(pinentry-emacs,
+            AC_HELP_STRING([--enable-pinentry-emacs], [build emacs pinentry]),
+            pinentry_emacs=$enableval, pinentry_emacs=maybe)
+AC_ARG_ENABLE(inside-emacs,
+            AC_HELP_STRING([--enable-inside-emacs], [include emacs hack]),
+            inside_emacs=$enableval, inside_emacs=maybe)
+
+if test "$pinentry_emacs" != "no" -o "$inside_emacs" != "no"; then
+  AC_MSG_CHECKING([if Unix domain socket is supported])
+  AC_TRY_COMPILE([
+#include <sys/socket.h>
+#include <sys/un.h>
+],
+	         [int s = socket (AF_UNIX, SOCK_STREAM, 0);],
+		 [_unixsock_works=yes],
+		 [_unixsock_works=no])
+  AC_MSG_RESULT($_unixsock_works)
+  if test "$_unixsock_works" = "yes"; then
+    if test "$pinentry_emacs" != "no"; then
+      pinentry_emacs=yes
+    fi
+    if test "$inside_emacs" != "no"; then
+      inside_emacs=yes
+      AC_DEFINE(INSIDE_EMACS, 1,
+                [The GUI pinentries should respect INSIDE_EMACS envvar.])
+    fi
+  else
+    if test "$pinentry_emacs" = "yes" -o "$inside_emacs" = "yes"; then
+      AC_MSG_ERROR([[
+***
+*** Support for Unix domain sockets is required.
+***]])
+    fi
+    pinentry_emacs=no
+    inside_emacs=no
+  fi
+fi
+
+AM_CONDITIONAL(BUILD_LIBPINENTRY_EMACS,
+              test "$pinentry_emacs" = "yes" -o "$inside_emacs" = "yes")
+AM_CONDITIONAL(BUILD_PINENTRY_EMACS, test "$pinentry_emacs" = "yes")
+AM_CONDITIONAL(INSIDE_EMACS, test "$inside_emacs" = "yes")
+
+if test "$pinentry_emacs" = "yes"; then
+  AC_DEFINE(PINENTRY_EMACS, 1,
+            [The Emacs version of Pinentry is to be build])
 fi
 
 
@@ -442,8 +530,8 @@ if test "$libsecret" = "yes"; then
   AC_DEFINE(HAVE_LIBSECRET, 1,
     [The pinentries should optionally cache the passphrase using libsecret.])
 
-  COMMON_CFLAGS="$COMMON_CFLAGS $LIBSECRET_CFLAGS"
-  COMMON_LIBS="$COMMON_LIBS $LIBSECRET_LIBS"
+  COMMON_CFLAGS="$LIBSECRET_CFLAGS $COMMON_CFLAGS"
+  COMMON_LIBS="$LIBSECRET_LIBS $COMMON_LIBS"
 fi
 
 dnl
@@ -561,13 +649,72 @@ else
 fi
 AC_SUBST(PINENTRY_DEFAULT)
 
+#
+# Print errors here so that they are visible all
+# together and the user can acquire them all together.
+#
+die=no
+if test "$have_gpg_error" = "no"; then
+   die=yes
+   AC_MSG_NOTICE([[
+***
+*** You need libgpg-error to build this program.
+**  This library is for example available at
+***   ftp://ftp.gnupg.org/gcrypt/libgpg-error
+*** (at least version $NEED_GPG_ERROR_VERSION is required.)
+***]])
+fi
+
+if test "$have_libassuan" = "no"; then
+   die=yes
+   AC_MSG_NOTICE([[
+***
+*** You need libassuan to build this program.
+*** This library is for example available at
+***   ftp://ftp.gnupg.org/gcrypt/libassuan/
+*** (at least version $NEED_LIBASSUAN_VERSION (API $NEED_LIBASSUAN_API) is required).
+***]])
+fi
+
+if test "$die" = "yes"; then
+    AC_MSG_ERROR([[
+***
+*** Required libraries not found. Please consult the above messages
+*** and install them before running configure again.
+***]])
+fi
+
+
+
+#
+# To avoid double inclusion of config.h which might happen at some
+# places, we add the usual double inclusion protection at the top of
+# config.h.
+#
+AH_TOP([
+#ifndef GNUPG_CONFIG_H_INCLUDED
+#define GNUPG_CONFIG_H_INCLUDED
+])
+
+#
+# Stuff which goes at the bottom of config.h.
+#
+AH_BOTTOM([
+#ifdef GPG_ERR_SOURCE_DEFAULT
+# error GPG_ERR_SOURCE_DEFAULT already defined
+#endif
+#define GPG_ERR_SOURCE_DEFAULT  GPG_ERR_SOURCE_PINENTRY
+#endif /*GNUPG_CONFIG_H_INCLUDED*/
+])
+
 
 AC_CONFIG_FILES([
-assuan/Makefile
+m4/Makefile
 secmem/Makefile
 pinentry/Makefile
 curses/Makefile
 tty/Makefile
+emacs/Makefile
 gtk+-2/Makefile
 gnome3/Makefile
 qt4/Makefile
@@ -587,12 +734,14 @@ AC_MSG_NOTICE([
 
 	Curses Pinentry ..: $pinentry_curses
 	TTY Pinentry .....: $pinentry_tty
+	Emacs Pinentry ...: $pinentry_emacs
 	GTK+-2 Pinentry ..: $pinentry_gtk_2
 	GNOME 3 Pinentry .: $pinentry_gnome_3
 	Qt4 Pinentry .....: $pinentry_qt4 $pinentry_qt4_clip_msg
 	W32 Pinentry .....: $pinentry_w32
 
 	Fallback to Curses: $fallback_curses
+	Emacs integration : $inside_emacs
 
 	libsecret ........: $libsecret
 

@@ -1,5 +1,5 @@
-# Makefile.am - PIN entry W32
-# Copyright (C) 2004 g10 Code GmbH
+# Makefile.am - PIN entry emacs frontend.
+# Copyright (C) 2002, 2015 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -19,24 +19,10 @@
 
 ## Process this file with automake to produce Makefile.in
 
-logos = logo-32.bmp logo-48.bmp logo-64.bmp logo-96.bmp logo-128.bmp
+bin_PROGRAMS = pinentry-emacs
 
-EXTRA_DIST = $(logos)
+AM_CPPFLAGS = $(COMMON_CFLAGS) $(NEMACS_INCLUDE) -I$(top_srcdir)/pinentry
+LDADD = ../pinentry/libpinentry.a ../secmem/libsecmem.a \
+	$(COMMON_LIBS) $(LIBCAP) $(LIBEMACS) $(LIBICONV)
 
-bin_PROGRAMS = pinentry-w32
-
-AM_CPPFLAGS = $(COMMON_CFLAGS) -I$(top_srcdir)/secmem \
-	      -I$(top_srcdir)/pinentry
-
-
-pinentry_w32_SOURCES = main.c pinentry-w32.rc resource.h
-
-# Note: For testing you should add -mconsole to LDFLAGS.
-pinentry_w32_LDFLAGS = -mwindows
-pinentry_w32_LDADD = pinentry-w32.o \
-	../pinentry/libpinentry.a ../secmem/libsecmem.a \
-        $(COMMON_LIBS)
-
-pinentry-w32.o: pinentry-w32.rc resource.h $(logos)
-	$(WINDRES) -I.. -v -o $@ $<
-
+pinentry_emacs_SOURCES = pinentry-emacs.c
