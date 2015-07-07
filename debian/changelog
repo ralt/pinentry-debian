@@ -1,3 +1,10 @@
+pinentry (0.9.5-2) unstable; urgency=medium
+
+  * disable emacs and emacs-fallback until we get a better description of
+    them in the upstream documentation
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 07 Jul 2015 14:43:33 -0400
+
 pinentry (0.9.5-1) unstable; urgency=medium
 
   * new upstream release
