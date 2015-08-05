@@ -108,7 +108,7 @@ Description: GTK+-2-based PIN or pass-phrase entry dialog for GnuPG
 
 Package: pinentry-gnome3
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, gcr
 Suggests: pinentry-doc
 Provides: pinentry, pinentry-x11
 Enhances: gnupg-agent
