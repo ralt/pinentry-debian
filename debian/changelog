@@ -1,3 +1,9 @@
+pinentry (0.9.5-4) unstable; urgency=medium
+
+  * use -std=gnu++11 for pinentry-qt4 (Closes: #795175)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 11 Aug 2015 13:03:19 -0400
+
 pinentry (0.9.5-3) unstable; urgency=medium
 
   * added dependency from pinentry-gnome3 to gcr (Closes: #791379)
