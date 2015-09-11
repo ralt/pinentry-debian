@@ -211,7 +211,10 @@ typedef int (*pinentry_cmd_handler_t) (pinentry_t pin);
    error.  Otherwise, 0 is returned.  */
 int pinentry_loop (void);
 
-/* The same as above but allows to specify the i/o descriptors. */
+/* The same as above but allows to specify the i/o descriptors.
+ * infd and outfd will be duplicated in this function so the caller
+ * still has to close them if necessary.
+ */
 int pinentry_loop2 (int infd, int outfd);
 
 

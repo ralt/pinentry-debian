@@ -98,8 +98,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = pinentry-qt4$(EXEEXT)
-subdir = qt4
+bin_PROGRAMS = pinentry-qt$(EXEEXT)
+subdir = qt
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -116,21 +116,20 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_pinentry_qt4_OBJECTS = pinentrydialog.$(OBJEXT) main.$(OBJEXT) \
-	secstring.$(OBJEXT) qsecurelineedit.$(OBJEXT) \
+am_pinentry_qt_OBJECTS = pinentrydialog.$(OBJEXT) main.$(OBJEXT) \
 	qrc_pinentry.$(OBJEXT) pinentryconfirm.$(OBJEXT)
-nodist_pinentry_qt4_OBJECTS =
-pinentry_qt4_OBJECTS = $(am_pinentry_qt4_OBJECTS) \
-	$(nodist_pinentry_qt4_OBJECTS)
+nodist_pinentry_qt_OBJECTS =
+pinentry_qt_OBJECTS = $(am_pinentry_qt_OBJECTS) \
+	$(nodist_pinentry_qt_OBJECTS)
 am__DEPENDENCIES_1 =
 @FALLBACK_CURSES_TRUE@am__DEPENDENCIES_2 =  \
 @FALLBACK_CURSES_TRUE@	../pinentry/libpinentry-curses.a \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1) \
 @FALLBACK_CURSES_TRUE@	$(am__DEPENDENCIES_1)
-pinentry_qt4_DEPENDENCIES = ../pinentry/libpinentry.a \
+pinentry_qt_DEPENDENCIES = ../pinentry/libpinentry.a \
 	$(top_builddir)/secmem/libsecmem.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -172,8 +171,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(pinentry_qt4_SOURCES) $(nodist_pinentry_qt4_SOURCES)
-DIST_SOURCES = $(pinentry_qt4_SOURCES)
+SOURCES = $(pinentry_qt_SOURCES) $(nodist_pinentry_qt_SOURCES)
+DIST_SOURCES = $(pinentry_qt_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -258,6 +257,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+MOC2 = @MOC2@
 NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
 NCURSES_LIBS = @NCURSES_LIBS@
@@ -271,11 +271,10 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PINENTRY_DEFAULT = @PINENTRY_DEFAULT@
+PINENTRY_QT_CFLAGS = @PINENTRY_QT_CFLAGS@
+PINENTRY_QT_LIBS = @PINENTRY_QT_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-QT4_CORE_CFLAGS = @QT4_CORE_CFLAGS@
-QT4_CORE_LIBS = @QT4_CORE_LIBS@
-QT4_GUI_CFLAGS = @QT4_GUI_CFLAGS@
-QT4_GUI_LIBS = @QT4_GUI_LIBS@
+QTCHOOSER = @QTCHOOSER@
 RANLIB = @RANLIB@
 SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
@@ -343,24 +342,22 @@ AM_CPPFLAGS = $(COMMON_CFLAGS) \
 	-I$(top_srcdir) -I$(top_srcdir)/secmem \
 	$(ncurses_include) -I$(top_srcdir)/pinentry
 
-AM_CXXFLAGS = $(QT4_CORE_CFLAGS) $(QT4_GUI_CFLAGS)
-pinentry_qt4_LDADD = \
+AM_CXXFLAGS = $(PINENTRY_QT_CFLAGS)
+pinentry_qt_LDADD = \
 	../pinentry/libpinentry.a $(top_builddir)/secmem/libsecmem.a \
-	$(COMMON_LIBS) $(QT4_CORE_LIBS) $(QT4_GUI_LIBS) $(libcurses) $(LIBCAP)
+	$(COMMON_LIBS) $(PINENTRY_QT_LIBS) $(libcurses) $(LIBCAP)
 
 BUILT_SOURCES = \
-	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
+	pinentryconfirm.moc pinentrydialog.moc
 
 CLEANFILES = \
-	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
+	pinentryconfirm.moc pinentrydialog.moc
 
-pinentry_qt4_SOURCES = pinentrydialog.h pinentrydialog.cpp \
-	main.cpp secstring.h secstring.cpp qsecurelineedit.h \
-	qsecurelineedit.cpp qrc_pinentry.cpp \
-	qsecurelineedit_p.h pinentryconfirm.cpp pinentryconfirm.h
+pinentry_qt_SOURCES = pinentrydialog.h pinentrydialog.cpp \
+	main.cpp qrc_pinentry.cpp pinentryconfirm.cpp pinentryconfirm.h
 
-nodist_pinentry_qt4_SOURCES = \
-	pinentryconfirm.moc qsecurelineedit.moc pinentrydialog.moc
+nodist_pinentry_qt_SOURCES = \
+	pinentryconfirm.moc pinentrydialog.moc
 
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -376,9 +373,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu qt4/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu qt/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu qt4/Makefile
+	  $(AUTOMAKE) --gnu qt/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -440,9 +437,9 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-pinentry-qt4$(EXEEXT): $(pinentry_qt4_OBJECTS) $(pinentry_qt4_DEPENDENCIES) $(EXTRA_pinentry_qt4_DEPENDENCIES) 
-	@rm -f pinentry-qt4$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(pinentry_qt4_OBJECTS) $(pinentry_qt4_LDADD) $(LIBS)
+pinentry-qt$(EXEEXT): $(pinentry_qt_OBJECTS) $(pinentry_qt_DEPENDENCIES) $(EXTRA_pinentry_qt_DEPENDENCIES) 
+	@rm -f pinentry-qt$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(pinentry_qt_OBJECTS) $(pinentry_qt_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -454,8 +451,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentryconfirm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentrydialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qrc_pinentry.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsecurelineedit.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/secstring.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -8,8 +8,8 @@ END-INFO-DIR-ENTRY
 
 This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.9.5, last updated 30 June 2015, of 'The 'PINEntry'
-Manual', for version 0.9.5.
+   This is edition 0.9.6, last updated 10 September 2015, of 'The
+'PINEntry' Manual', for version 0.9.6.
 
    Published by g10 Code GmbH
 Hüttenstr.  61
@@ -47,6 +47,7 @@ set.
 * Menu:
 
 * Using pinentry::      How to use the beast.
+* Front ends::          Description and comparison of the front ends
 
 Developer information
 
@@ -65,7 +66,7 @@ Indices
 * Index::	        Index of concepts and symbol names.
 
 
-File: pinentry.info,  Node: Using pinentry,  Next: Protocol,  Prev: Top,  Up: Top
+File: pinentry.info,  Node: Using pinentry,  Next: Front ends,  Prev: Top,  Up: Top
 
 1 How to use the PINENTRY
 *************************
@@ -117,9 +118,75 @@ commands according to the Assuan protocol via stdin/stdout.
      options using Assuan protocol options.
 
 
-File: pinentry.info,  Node: Protocol,  Next: Implementation Details,  Prev: Using pinentry,  Up: Top
+File: pinentry.info,  Node: Front ends,  Next: Protocol,  Prev: Using pinentry,  Up: Top
 
-2 PINENTRY's Assuan Protocol
+2 Front Ends
+************
+
+There are several different flavors of PINENTRY.  Concretely, there are
+Gtk+2, Qt 4, Gnome 3, Emacs, curses and tty variants.  These different
+implementations provide higher levels of integration with a specific
+environment.  For instance, the Gnome 3 PINENTRY uses Gnome 3 widgets to
+display the prompts.  For Gnome 3 users, this higher level of
+integration provides a more consistent aesthetic.  However, this comes
+at a cost.  Because this PINENTRY uses so many components, there is a
+larger chance of a failure.  In particular, there is a larger chance
+that the passphrase is saved in memory and that memory is exposed to an
+attacker (consider the OpenSSL Heartbeat vulnerability).
+
+   To understand how many components touch the passphrase, consider
+again the Gnome 3 implementation.  When a user presses a button on the
+keyboard, the key is passed from the kernel to the X server to the
+toolkit (Gtk+) and to the actual text entry widget.  Along the way, the
+key is saved in memory and processed.  In fact, the key presses are
+probably read using standard C library functions, which buffer the
+input.  None of this code is careful to make sure the contents of the
+memory are not leaked by keeping the data in unpagable memory and wiping
+it when the buffer is freed.  However, even if they did, there is still
+the problem that when a computer hibernates, the system writes unpagable
+memory to disk anyway.  Further, many installations are virtualized
+(e.g., running on Xen) and have little control over their actual
+environment.
+
+   The curses variant uses a significant smaller software stack and the
+tty variant uses an even smaller one.  However, if they are run in an
+X terminal, then a similar number of components are handling the
+passphrase as in the Gnome 3 case!  Thus, to be most secure, you need to
+direct GPG Agent to use a fixed virtual console.  Since you need to
+remain logged in for GPG Agent to use that console, you should run there
+and have 'screen' or 'tmux' lock the tty.
+
+   The Emacs pinentry implementation interacts with a running Emacs
+session and directs the Emacs instance to display the passphrase prompt.
+Since this doesn't work very well if there is no Emacs running, the
+generic PINENTRY backend checks if a PINENTRY-enabled Emacs should be
+used.  Specifically, it looks to see if the 'INSIDE_EMACS' variable is
+set and then attempts to establish a connection to the specified
+address.  If this is the case, then instead of, e.g., 'pinentry-gtk2'
+displaying a Gtk+2 pinentry, it interacts with the Emacs session.  This
+functionality can be explicitly disabled by passing
+'--disable-inside-emacs' to 'configure' when building PINENTRY.
+
+   Having Emacs get the passphrase is convenient, however, it is a
+significant security risk.  Emacs keeps all key presses buffered.  (You
+can see the recent key presses by typing 'C-h l' ('view-lossage') in
+emacs.)  Further, Emacs is a huge program, which doesn't provide any
+process isolation to speak of.  As such, having it handle the passphrase
+adds a huge chunk of code to the user's trusted computing base.  Because
+of this concern, Emacs doesn't enable this by default (the user has to
+run '(pinentry-start)', e.g., from his or her '.emacs' file,
+explicitly).
+
+   Similar to the inside-emacs check, the PINENTRY frontends check
+whether the 'DISPLAY' variable is set and a working X server is
+available.  If this is not the case, then they fallback to the curses
+front end.  This can also be disabled by passing
+'--disable-fallback-curses' to 'configure' at build time.
+
+
+File: pinentry.info,  Node: Protocol,  Next: Implementation Details,  Prev: Front ends,  Up: Top
+
+3 PINENTRY's Assuan Protocol
 ****************************
 
 The PINENTRY should never service more than one connection at once.  It
@@ -331,7 +398,7 @@ encoded as '%25', etc.).
 
 File: pinentry.info,  Node: Implementation Details,  Next: Copying,  Prev: Protocol,  Up: Top
 
-3 Implementation Details
+4 Implementation Details
 ************************
 
 The pinentry source code can be divided into three categories.  There is
@@ -904,12 +971,13 @@ Index
 
 
 Tag Table:
-Node: Top812
-Node: Using pinentry2168
-Node: Protocol4017
-Node: Implementation Details12482
-Node: Copying19994
-Node: Option Index39173
-Node: Index40255
+Node: Top817
+Node: Using pinentry2242
+Node: Front ends4093
+Node: Protocol7763
+Node: Implementation Details16224
+Node: Copying23736
+Node: Option Index42915
+Node: Index43997
 
 End Tag Table

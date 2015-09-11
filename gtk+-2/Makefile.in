@@ -115,8 +115,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_pinentry_gtk_2_OBJECTS = pinentry-gtk-2.$(OBJEXT) \
-	gtksecentry.$(OBJEXT)
+am_pinentry_gtk_2_OBJECTS = pinentry-gtk-2.$(OBJEXT)
 pinentry_gtk_2_OBJECTS = $(am_pinentry_gtk_2_OBJECTS)
 pinentry_gtk_2_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -242,6 +241,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+MOC2 = @MOC2@
 NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
 NCURSES_LIBS = @NCURSES_LIBS@
@@ -255,11 +255,10 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PINENTRY_DEFAULT = @PINENTRY_DEFAULT@
+PINENTRY_QT_CFLAGS = @PINENTRY_QT_CFLAGS@
+PINENTRY_QT_LIBS = @PINENTRY_QT_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-QT4_CORE_CFLAGS = @QT4_CORE_CFLAGS@
-QT4_CORE_LIBS = @QT4_CORE_LIBS@
-QT4_GUI_CFLAGS = @QT4_GUI_CFLAGS@
-QT4_GUI_LIBS = @QT4_GUI_LIBS@
+QTCHOOSER = @QTCHOOSER@
 RANLIB = @RANLIB@
 SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
@@ -328,9 +327,7 @@ AM_CPPFLAGS = $(COMMON_CFLAGS) $(GTK2CFLAGS) $(ncurses_include) \
 LDADD = ../pinentry/libpinentry.a ../secmem/libsecmem.a \
 	$(COMMON_LIBS) $(LIBCAP) $(GTK2LIBS) $(libcurses)
 
-pinentry_gtk_2_SOURCES = pinentry-gtk-2.c \
-	gtksecentry.c gtksecentry.h gseal-gtk-compat.h
-
+pinentry_gtk_2_SOURCES = pinentry-gtk-2.c
 all: all-am
 
 .SUFFIXES:
@@ -418,7 +415,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtksecentry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pinentry-gtk-2.Po@am__quote@
 
 .c.o:

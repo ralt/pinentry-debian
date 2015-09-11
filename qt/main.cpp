@@ -1,5 +1,5 @@
 /*
-   main.cpp - A (not yet) secure Qt 4 dialog for PIN entry.
+   main.cpp - A Qt dialog for PIN entry.
 
    Copyright (C) 2002, 2008 Klarälvdalens Datakonsult AB (KDAB)
    Copyright (C) 2003 g10 Code GmbH
@@ -48,6 +48,19 @@
 
 #ifdef FALLBACK_CURSES
 #include <pinentry-curses.h>
+#endif
+
+#if QT_VERSION >= 0x050000 && defined(QT_STATIC)
+  #include <QtPlugin>
+  #ifdef Q_OS_WIN
+    #include <windows.h>
+    #include <shlobj.h>
+    Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+  #elif defined(Q_OS_MAC)
+    Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+  #else
+    Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+  #endif
 #endif
 
 static QString escape_accel( const QString & s ) {
@@ -148,7 +161,7 @@ qt_cmd_handler (pinentry_t pe)
       /* else */           QLatin1String( "&Cancel" ) ;
   const QString title =
       pe->title ? from_utf8( pe->title ) :
-      /* else */  QLatin1String( "pinentry-qt4" ) ;
+      /* else */  QLatin1String( "pinentry-qt" ) ;
 
 
   if (want_pass)
@@ -162,7 +175,7 @@ qt_cmd_handler (pinentry_t pe)
           pinentry.setWindowTitle( from_utf8( pe->title ) );
 
       /* If we reuse the same dialog window.  */
-      pinentry.setPin (secqstring());
+      pinentry.setPin (QString());
 
       pinentry.setOkText (ok);
       pinentry.setCancelText (cancel);
@@ -177,8 +190,7 @@ qt_cmd_handler (pinentry_t pe)
       if (!ret)
 	return -1;
 
-      const secstring pinUtf8 = toUtf8( pinentry.pin() );
-      const char *pin = pinUtf8.data();
+      const char *pin = pinentry.pin().toUtf8().constData();
 
       int len = strlen (pin);
       if (len >= 0)
@@ -259,7 +271,7 @@ pinentry_cmd_handler_t pinentry_cmd_handler = qt_cmd_handler_ex;
 int
 main (int argc, char *argv[])
 {
-  pinentry_init ("pinentry-qt4");
+  pinentry_init ("pinentry-qt");
 
   std::auto_ptr<QApplication> app;
 
@@ -284,7 +296,7 @@ main (int argc, char *argv[])
         *new_argv = (char*)malloc (n);
       if (!new_argv || !*new_argv)
         {
-          fprintf (stderr, "pinentry-qt4: can't fixup argument list: %s\n",
+          fprintf (stderr, "pinentry-qt: can't fixup argument list: %s\n",
                    strerror (errno));
           exit (EXIT_FAILURE);
 
