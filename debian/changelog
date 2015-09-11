@@ -1,3 +1,9 @@
+pinentry (0.9.6-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 11 Sep 2015 17:14:45 -0400
+
 pinentry (0.9.5-4) unstable; urgency=medium
 
   * use -std=gnu++11 for pinentry-qt4 (Closes: #795175)
