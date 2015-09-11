@@ -1,3 +1,141 @@
+2015-09-10  Werner Koch  <wk@gnupg.org>
+
+	Release 0.9.6.
+
+2015-08-24  Neal H. Walfield  <neal@gnu.org>
+
+	tty: When reading the password, print any supplied error message.
+	* tty/pinentry-tty.c (password): Print any supplied error message.
+
+	tty: Refactor the code for printing error messages.
+	* tty/pinentry-tty.c (dump_error_text): New function to display error
+	messages.
+	(confirm): Use it.
+	(password): Likewise.
+
+2015-08-18  Andre Heinecke  <aheinecke@intevation.de>
+
+	Clarify comment about fds in pinentry_loop2.
+	* pinentry/pinentry.h (pinetry_loop2): Clarify comment.
+
+	Qt: Make it possible to build qt5 variant static.
+	* qt/main.cpp: Import static platform plugins when necessary.
+
+	Respect SYSROOT variable when looking for assuan.
+	* m4/libassuan.m4: Respect SYSROOT Variable.
+
+	Fix pinentry for Windows.
+	* pinentry/pinentry.c (pinentry_loop2): Use assuan_fdopen for pipe fds.
+	* pinentry/pinentry.h (pinentry_loop2): Mention this in the comment.
+
+2015-08-11  Neal H. Walfield  <neal@gnu.org>
+
+	tty: Correctly implement the repeat passphrase functionality.
+	* tty/pinentry-tty.c (password): If the user repeated the passphrase
+	and they matched, then set PINENTRY->REPEAT_OKAY.
+
+	tty: Fix buffer resizing bug.
+	* tty/pinentry-tty.c (read_password): Fix buffer resizing bug.
+
+2015-07-28  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt4: Rename to pinentry-qt and add Qt5 Support.
+	* qt4: Moved to qt.
+	* Makefile.am: Change qt4 suffix to qt.
+	* m4/qt.m4: Remove old qt lookup functions.
+	  (FIND_QT): New. Use pkg-config to find either Qt5 or Qt4
+	* configure.ac: Change qt4 suffix to qt. Use new FIND_QT function.
+	* qt/Makefile.am: Change qt4 suffix to qt. Use new FLAGS / LIBS.
+	* qt/pinentrydialog.cpp, qt/qrc_pinentry.cpp: Fix whitespace.
+	* .gitignore: Change qt4 paths to qt.
+	* README: Update accordingly.
+	* autogen.rc: Change qt4 to qt.
+	* qt/main.cpp (qt_cmd_handler, main): Change qt4 to qt.
+
+2015-07-28  Neal H. Walfield  <neal@gnu.org>
+
+	doc: Describe the frontends and their security implications.
+	* doc/pinentry.texi: Describe the frontends and their security
+	implications.
+
+	GnuPG-bug-id: 2034
+
+2015-07-28  Andre Heinecke  <aheinecke@intevation.de>
+
+	qt4: Replace the custom, secure entry widget with the standard widget.
+	* configure.ac: Remove enable-pinentry-qt4-clipboard option.
+	* qt4/qsecurelineedit.cpp, qt4/qsecurelineedit.h,
+	  qt4/qsecurelineedit_p.h, qt4/secstring.cpp,
+	  qt4/secstring.h: Removed.
+	* qt4/Makefile.am: Update accordingly.
+	* qt4/main.cpp (qt_cmd_handler): Use QString instead of secqstring.
+	* qt4/pinentrydialog.cpp (PinentryDialog::PinentryDialog),
+	  (PinEntryDialog::error, PinEntryDialog::pin),
+	  (PinEntryDialog::updateQuality): Use QLineEdit and QString
+	  instead of secmem variants.
+	* qt4/pinentrydialog.cpp (PinentryDialog::PinentryDialog):
+	  Set echo mode to password.
+	* qt4/pinentrydialog.h: Update accordingly.
+
+2015-07-26  Neal H. Walfield  <neal@gnu.org>
+
+	gtk2: Use gtk_widget_get_window instead of accessing the struct.
+	* gtk+-2/pinentry-gtk-2.c (make_transient): Don't directly access the
+	window field of WIN.  Use gtk_widget_get_window instead.
+	(grab_keyboard): Likewise.
+	(ungrab_keyboard): Likewise.
+
+	Patch-by: Dimitri John Ledkov <dimitri.j.ledkov@intel.com>.
+
+	gtk2: Use newer tooltips functions, if available.
+	* gtk+-2/pinentry-gtk-2.c (tooltips): Don't declare for Gtk+ >=2.12.0.
+	(create_window): Gtk+ >=2.12.0, use gtk_widget_set_tooltip_text
+	instead of gtk_tooltips_set_tip.
+
+	Patch-by: Dimitri John Ledkov <dimitri.j.ledkov@intel.com>.
+
+	Don't build the emacs pinentry program by default.
+
+	gtk2: Replace the custom, secure entry widget with the standard widget.
+	* gtk+-2/Makefile.am (pinentry_gtk_2_SOURCES): Remove gtksecentry.c,
+	gtksecentry.h and gseal-gtk-compat.h.
+	* gtk+-2/gseal-gtk-compat.h: Remove file.
+	* gtk+-2/gtksecentry.c: Remove file.
+	* gtk+-2/gtksecentry.h: Remove file.
+	* gtk+-2/pinentry-gtk-2.c: Don't include "gtksecentry.h".
+	(button_clicked): Use gtk_entry_get_text instead of
+	gtk_secure_entry_get_text.
+	(changed_text_handler): Use gtk_entry_get_text instead of
+	gtk_secure_entry_get_text and use gtk_entry_set_text instead of
+	gtk_secure_entry_set_text.
+	(create_window): Use gtk_entry_new instead of gtk_secure_entry_new.
+	Disable text visibility on ENTRY and REPEAT_ENTRY.
+	(main): Don't override the memory allocation functions.
+
+	gtk2: Simplify focus / default entry management.
+	* gtk+-2/pinentry-gtk-2.c (create_window): Don't have ENTRY or
+	REPEAT_ENTRY explicitly grab the focus.  The default is fine.  Don't
+	add the GDK_ENTER_NOTIFY_MASK and GDK_LEAVE_NOTIFY_MASK events to
+	QUALITYBAR.  Only set GTK_CAN_DEFAULT on the ok button.  In pin entry
+	mode, make the ok button the default.
+
+	gtk2: Have enter in the text entry, send the focus to the repeat entry.
+	* gtk+-2/pinentry-gtk-2.c (enter_callback): Rename anentry to
+	next_widget.  If NEXT_WIDGET is not NULL, send the focus to it.
+	Otherwise, call button_clicked.
+	(create_window): Initialize repeat_entry to NULL.  When connecting the
+	enter_callback entry to REPEAT_ENTRY, set the user data paramter to
+	NULL.  Connect the entry_callback entry to ENTRY after initializing
+	REPEAT_ENTRY (if applicable) and set the user data parameter to
+	REPEAT_ENTRY.
+
+	gtk2: Simplify: combine confirm_button_clicked and button_clicked.
+	* gtk+-2/pinentry-gtk-2.c (confirm_mode): New global static.
+	(confirm_button_clicked): Fold this function...
+	(button_clicked): ... into this one.  Update all callers.
+	(create_window): Remove argument confirm_mode.
+	(gtk_cmd_handler): Set confirm_mode.
+
 2015-07-01  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.5.

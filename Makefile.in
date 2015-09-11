@@ -181,7 +181,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = m4 secmem pinentry curses tty emacs gtk+-2 gnome3 qt4 \
+DIST_SUBDIRS = m4 secmem pinentry curses tty emacs gtk+-2 gnome3 qt \
 	w32 doc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
@@ -284,6 +284,7 @@ MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 MOC = @MOC@
+MOC2 = @MOC2@
 NCURSES_CFLAGS = @NCURSES_CFLAGS@
 NCURSES_INCLUDE = @NCURSES_INCLUDE@
 NCURSES_LIBS = @NCURSES_LIBS@
@@ -297,11 +298,10 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PINENTRY_DEFAULT = @PINENTRY_DEFAULT@
+PINENTRY_QT_CFLAGS = @PINENTRY_QT_CFLAGS@
+PINENTRY_QT_LIBS = @PINENTRY_QT_LIBS@
 PKG_CONFIG = @PKG_CONFIG@
-QT4_CORE_CFLAGS = @QT4_CORE_CFLAGS@
-QT4_CORE_LIBS = @QT4_CORE_LIBS@
-QT4_GUI_CFLAGS = @QT4_GUI_CFLAGS@
-QT4_GUI_LIBS = @QT4_GUI_LIBS@
+QTCHOOSER = @QTCHOOSER@
 RANLIB = @RANLIB@
 SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
@@ -361,7 +361,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt4
+DISTCHECK_CONFIGURE_FLAGS = --disable-pinentry-qt
 EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 	     build-aux/gitlog-to-changelog \
 	     build-aux/git-log-fix build-aux/git-log-footer
@@ -376,13 +376,13 @@ EXTRA_DIST = autogen.sh autogen.rc README.GIT ChangeLog-old \
 @BUILD_PINENTRY_GTK_2_TRUE@pinentry_gtk_2 = gtk+-2
 @BUILD_PINENTRY_GNOME_3_FALSE@pinentry_gnome_3 = 
 @BUILD_PINENTRY_GNOME_3_TRUE@pinentry_gnome_3 = gnome3
-@BUILD_PINENTRY_QT4_FALSE@pinentry_qt4 = 
-@BUILD_PINENTRY_QT4_TRUE@pinentry_qt4 = qt4
+@BUILD_PINENTRY_QT_FALSE@pinentry_qt = 
+@BUILD_PINENTRY_QT_TRUE@pinentry_qt = qt
 @BUILD_PINENTRY_W32_FALSE@pinentry_w32 = 
 @BUILD_PINENTRY_W32_TRUE@pinentry_w32 = w32
 SUBDIRS = m4 secmem pinentry ${pinentry_curses} ${pinentry_tty} \
 	${pinentry_emacs} ${pinentry_gtk_2} ${pinentry_gnome_3} \
-	${pinentry_qt4} ${pinentry_w32} doc
+	${pinentry_qt} ${pinentry_w32} doc
 
 gen_start_date = 2012-08-08T00:00:00
 all: config.h

@@ -124,6 +124,41 @@ button (char *text, char *default_text, FILE *ttyfo)
   return *highlight;
 }
 
+static void
+dump_error_text (FILE *ttyfo, const char *text)
+{
+  int lines = 0;
+
+  if (! text || ! *text)
+    return;
+
+  for (;;)
+    {
+      const char *eol = strchr (text, '\n');
+      if (! eol)
+	eol = text + strlen (text);
+
+      lines ++;
+
+      fwrite ("\n *** ", 6, 1, ttyfo);
+      fputs (ALERT_START, ttyfo);
+      fwrite (text, (size_t) (eol - text), 1, ttyfo);
+      fputs (NORMAL_RESTORE, ttyfo);
+
+      if (! *eol)
+	break;
+
+      text = eol + 1;
+    }
+
+  if (lines > 1)
+    fputc ('\n', ttyfo);
+  else
+    fwrite (" ***\n", 5, 1, ttyfo);
+
+  fputc ('\n', ttyfo);
+}
+
 static int
 confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 {
@@ -135,9 +170,7 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 
   int ret;
 
-  if (pinentry->error)
-    fprintf (ttyfo, "*** %s%s%s ***\n",
-	     ALERT_START, pinentry->error, NORMAL_RESTORE);
+  dump_error_text (ttyfo, pinentry->error);
 
   msg = pinentry->description;
   if (! msg)
@@ -246,6 +279,8 @@ read_password (FILE *ttyfi, FILE *ttyfo)
   int count = 0;
   char *buffer;
 
+  (void) ttyfo;
+
   if (cbreak (fileno (ttyfi)) == -1)
     {
       int err = errno;
@@ -267,13 +302,15 @@ read_password (FILE *ttyfi, FILE *ttyfo)
 	   1 and not len so that we always have space for the NUL
 	   character.  */
 	{
-	  char *tmp = secmem_realloc (buffer, 2 * len);
+	  int new_len = 2 * len;
+	  char *tmp = secmem_realloc (buffer, new_len);
 	  if (! tmp)
 	    {
 	      secmem_free (tmp);
 	      return NULL;
 	    }
 	  buffer = tmp;
+	  len = new_len;
 	}
 
       c = fgetc (ttyfi);
@@ -325,6 +362,8 @@ password (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
   if (! msg)
     msg = "Enter your passphrase.";
 
+  dump_error_text (ttyfo, pinentry->error);
+
   fprintf (ttyfo, "%s\n ", msg);
 
   while (! done)
@@ -373,13 +412,14 @@ password (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 	    }
 
 	  if (strcmp (passphrase, passphrase2) == 0)
-	    done = 1;
+	    {
+	      pinentry->repeat_okay = 1;
+	      done = 1;
+	    }
 	  else
-	    fprintf (ttyfo, "*** %s%s%s ***\n",
-		     ALERT_START,
-		     pinentry->repeat_error_string
-		     ?: "Passphrases don't match.",
-		     NORMAL_RESTORE);
+	    dump_error_text (ttyfo,
+			     pinentry->repeat_error_string
+			     ?: "Passphrases don't match.");
 
 	  secmem_free (passphrase2);
 	}
