@@ -1,6 +1,8 @@
 pinentry (0.9.6-1) unstable; urgency=medium
 
   * New upstream release
+  * fix pinentry-tty description typo (Closes: #798944)
+    Thanks, Yuri D'Elia
 
  -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 11 Sep 2015 17:14:45 -0400
 

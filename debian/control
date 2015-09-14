@@ -50,7 +50,7 @@ Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry
 Enhances: gnupg-agent
-Description: minimal dunb-terminal PIN or pass-phrase entry for GnuPG
+Description: minimal dumb-terminal PIN or pass-phrase entry for GnuPG
  This package contains a program that allows for secure entry of PINs or
  pass phrases.  That means it tries to take care that the entered
  information is not swapped to disk or temporarily stored anywhere.
