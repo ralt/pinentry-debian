@@ -1,11 +1,11 @@
-.TH PINENTRY-QT4 1 "27 Jan 2005"
+.TH PINENTRY-QT 1 "27 Jan 2005"
 .SH NAME
-pinentry\-qt4 \- PIN or pass-phrase entry dialog for GnuPG
+pinentry\-qt \- PIN or pass-phrase entry dialog for GnuPG
 .PP
 .SH SYNOPSIS
-\fBpinentry-qt4\fB [\fIOPTION\fR...]
+\fBpinentry-qt\fB [\fIOPTION\fR...]
 .SH DESCRIPTION
-\fBpinentry\-qt4\fR is a program that allows for secure entry of PINs or
+\fBpinentry\-qt\fR is a program that allows for secure entry of PINs or
 pass phrases.  That means it tries to take care that the entered
 information is not swapped to disk or temporarily stored anywhere.
 This functionality is particularly useful for entering pass phrases
@@ -13,13 +13,13 @@ when using encryption software such as GnuPG or e-mail clients using
 the same.  It uses an open protocol and is therefore not tied to
 particular software.
 .PP
-\fBpinentry-qt4\fR implements a PIN entry dialog
-using the Qt 4 tool kit, so it is especially suitable for users of KDE 4.
+\fBpinentry-qt\fR implements a PIN entry dialog
+using the Qt tool kit, so it is especially suitable for users of KDE.
 If the X Window System is not active then an alternative text-mode
 dialog will be used.  There are other flavors that implement PIN
 entry dialogs using other tool kits.
 .PP
-\fBpinentry\-qt4\fR is typically used internally by \fBgpg-agent\fR.
+\fBpinentry\-qt\fR is typically used internally by \fBgpg-agent\fR.
 Users don't normally have a reason to call it directly.
 .SH OPTIONS
 .TP
@@ -39,10 +39,10 @@ not fully supported.
 .TP
 \fB\-\-no\-global\-grab\fR, \fB\-g\fR
 Grab the keyboard only when the window is focused.  Use this
-option if you are debugging software using \fBpinentry\-qt4\fR;
+option if you are debugging software using \fBpinentry\-qt\fR;
 otherwise you may not be able to to access your X session anymore (unless
 you have other means to connect to the machine to kill
-\fBpinentry\-qt4\fR).
+\fBpinentry\-qt\fR).
 .TP
 \fB\-\-parent\-wid\fR \fIN\fR
 Use window ID \fIN\fR as the parent window for positioning the window.
@@ -50,20 +50,21 @@ Note, that this is not fully supported by all flavors of \fBpinentry\fR.
 .TP
 \fB--display\fR \fISTRING\fR, \fB--ttyname\fR \fISTRING\fR, \fB--ttytype\fR \fISTRING\fR, \fB--lc-type\fR \fISTRING\fR, \fB--lc-messages\fR \fISTRING\fR
 These options are used to pass localization information to
-\fBpinentry-qt4\fR.  They are required because
-\fBpinentry-qt4\fR is usually called by
+\fBpinentry-qt\fR.  They are required because
+\fBpinentry-qt\fR is usually called by
 some background process which does not have any information on the
 locale and terminal to use.  Assuan protocol options are an
 alternative way to pass these information.
 .SH "SEE ALSO"
 .BR pinentry-curses (1),
+.BR pinentry-gnome3 (1),
 .BR pinentry-gtk-2 (1),
 .BR pinentry-tty (1),
 .BR gpg (1),
 .BR gpg-agent (1)
 .PP
 The full documentation for
-.B pinentry-qt4
+.B pinentry-qt
 is maintained as a Texinfo manual.  If the
 .B pinentry-doc
 package is installed, the command

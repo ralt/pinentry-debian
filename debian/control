@@ -67,23 +67,33 @@ Description: minimal dumb-terminal PIN or pass-phrase entry for GnuPG
  friendlier text-mode inputs on non-dumb terminals, and other sibling
  packages that provide PIN entry dialogs using an X tool kit.
 
-Package: pinentry-qt4
+Package: pinentry-qt
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
-Provides: pinentry, pinentry-qt, pinentry-x11
+Provides: pinentry, pinentry-x11
 Enhances: gnupg-agent
-Description: Qt-4-based PIN or pass-phrase entry dialog for GnuPG
+Description: Qt-based PIN or pass-phrase entry dialog for GnuPG
  This package contains a program that allows for entry of PINs or pass
  phrases.  It is useful for entering pass phrases when using encryption
  software such as GnuPG or e-mail clients using the same.  It uses an open
  protocol and is therefore not tied to particular software.
  .
  The program contained in this package implements a PIN entry dialog
- using the Qt tool kit version 4, so it is especially suitable for
- users of KDE 4.  If the X Window System is not active then an
- alternative text-mode dialog will be used.  There are sibling
- packages that implement PIN entry dialogs using other tool kits.
+ using the Qt tool kit, so it is especially suitable for users of KDE.
+ If the X Window System is not active then an alternative text-mode
+ dialog will be used.  There are sibling packages that implement PIN
+ entry dialogs using other tool kits.
+
+Package: pinentry-qt4
+Architecture: all
+Depends: ${misc:Depends}, ${shlibs:Depends}, pinentry-qt (>= ${binary:Version})
+Description: Qt-based PIN or pass-phrase entry dialog for GnuPG (transitional dummy package)
+ Pinentry is a program for secure entry of PINs and passphrases, from
+ the GnuPG project.
+ .
+ This package installs a symbolic link from pinentry-qt4 to
+ pinentry-qt.  You should switch to using pinentry-qt instead.
 
 Package: pinentry-gtk2
 Architecture: any

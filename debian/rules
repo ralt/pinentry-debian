@@ -7,10 +7,9 @@ override_dh_auto_configure:
 		--disable-emacs --disable-inside-emacs \
 		--enable-pinentry-tty \
 		--enable-pinentry-curses \
-		--enable-pinentry-qt4 \
+		--enable-pinentry-qt \
 		--enable-pinentry-gtk2 \
-		--enable-pinentry-gnome3 \
-		--enable-pinentry-qt4-clipboard
+		--enable-pinentry-gnome3
 
 override_dh_installdocs:
 	dh_installdocs -A NEWS AUTHORS
