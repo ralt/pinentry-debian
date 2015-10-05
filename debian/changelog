@@ -1,3 +1,9 @@
+pinentry (0.9.6-2) unstable; urgency=medium
+
+  * dummy/transitional pinentry-qt4 package: update alternatives
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 05 Oct 2015 17:35:46 -0400
+
 pinentry (0.9.6-1) unstable; urgency=medium
 
   * New upstream release
