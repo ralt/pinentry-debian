@@ -1,3 +1,9 @@
+pinentry (0.9.6-3) unstable; urgency=medium
+
+  * added NEWS entry for pinentry-gtk2 (Closes: #801757)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 19 Oct 2015 20:40:16 -0400
+
 pinentry (0.9.6-2) unstable; urgency=medium
 
   * dummy/transitional pinentry-qt4 package: update alternatives
