@@ -1,3 +1,9 @@
+pinentry (0.9.6-4) unstable; urgency=medium
+
+  * make pinentry-qt use qt5 by default. (Closes: #802936)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Wed, 28 Oct 2015 14:22:02 -0400
+
 pinentry (0.9.6-3) unstable; urgency=medium
 
   * added NEWS entry for pinentry-gtk2 (Closes: #801757)
