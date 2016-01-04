@@ -13,8 +13,9 @@ See discussion at:
 
  http://lists.gnupg.org/pipermail/gnupg-devel/2014-November/029065.html
 ---
- autogen.sh | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ autogen.sh   | 4 ++--
+ configure.ac | 4 +---
+ 2 files changed, 3 insertions(+), 5 deletions(-)
 
 diff --git a/autogen.sh b/autogen.sh
 index 7effd56..5e8ca15 100755
@@ -31,3 +32,18 @@ index 7effd56..5e8ca15 100755
        rev="0000000"
        rvd="0"
      fi
+diff --git a/configure.ac b/configure.ac
+index af4e552..b962fab 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -36,9 +36,7 @@ m4_define([mym4_revision], m4_esyscmd([git branch -v 2>/dev/null \
+           | awk '/^\* / {printf "%s",$3}']))
+ m4_define([mym4_revision_dec],
+           m4_esyscmd_s([echo $((0x$(echo ]mym4_revision[|head -c 4)))]))
+-m4_define([mym4_betastring],
+-          m4_esyscmd_s([git describe --match 'pinentry-[0-9].[0-9].*[0-9]' \
+-                           --long|  awk -F- '$3!=0{print"-beta"$3}']))
++m4_define([mym4_betastring],[])
+ m4_define([mym4_isgit],m4_if(mym4_betastring,[],[no],[yes]))
+ m4_define([mym4_full_version],[mym4_version[]mym4_betastring])
+ 
