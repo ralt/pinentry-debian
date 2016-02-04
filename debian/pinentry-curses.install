@@ -1,1 +1,1 @@
-usr/bin/pinentry-curses
+build-no-libsecret/curses/pinentry-curses usr/bin

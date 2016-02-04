@@ -1,1 +1,1 @@
-usr/bin/pinentry-tty
+build-no-libsecret/tty/pinentry-tty usr/bin/

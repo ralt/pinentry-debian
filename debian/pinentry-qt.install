@@ -1,1 +1,1 @@
-usr/bin/pinentry-qt
+build-no-libsecret/qt/pinentry-qt usr/bin

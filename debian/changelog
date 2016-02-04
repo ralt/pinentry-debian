@@ -1,3 +1,9 @@
+pinentry (0.9.7-3) unstable; urgency=medium
+
+  * build -tty, -curses, and -qt without libsecret (Closes: #787883)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 04 Feb 2016 18:13:01 -0500
+
 pinentry (0.9.7-2) unstable; urgency=medium
 
   * avoid use-after-free in QT pw quality calculation (patch from upstream)
