@@ -1,3 +1,9 @@
+pinentry (0.9.7-2) unstable; urgency=medium
+
+  * avoid use-after-free in QT pw quality calculation (patch from upstream)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 04 Feb 2016 16:53:15 -0500
+
 pinentry (0.9.7-1) unstable; urgency=medium
 
   * New upstream release.

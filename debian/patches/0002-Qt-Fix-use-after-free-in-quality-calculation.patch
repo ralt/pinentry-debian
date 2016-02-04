@@ -1,0 +1,27 @@
+From: Andre Heinecke <aheinecke@intevation.de>
+Date: Tue, 5 Jan 2016 12:44:32 +0100
+Subject: Qt: Fix use after free in quality calculation
+
+* qt/pinentrydialog.cpp (PinEntryDialog::updateQuality): Keep UTF8
+ byte array alive after conversion.
+
+--
+Same problem pattern as in Bug 2133 / commit f143d216
+---
+ qt/pinentrydialog.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/qt/pinentrydialog.cpp b/qt/pinentrydialog.cpp
+index c7885d3..81205ee 100644
+--- a/qt/pinentrydialog.cpp
++++ b/qt/pinentrydialog.cpp
+@@ -309,7 +309,8 @@ void PinEntryDialog::updateQuality(const QString & txt )
+ 
+   if (!_have_quality_bar || !_pinentry_info)
+     return;
+-  const char* pin = txt.toUtf8().constData();
++  const QByteArray utf8_pin = txt.toUtf8 ();
++  const char* pin = utf8_pin.constData ();
+   length = strlen (pin);
+   percent = length? pinentry_inq_quality (_pinentry_info, pin, length) : 0;
+   if (!length)
