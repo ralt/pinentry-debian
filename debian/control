@@ -13,9 +13,9 @@ Build-Depends: debhelper (>= 9),
                libgtk2.0-dev (>= 2.4.0),
                libncurses5-dev,
                libncursesw5-dev,
-               qtbase5-dev,
                libsecret-1-dev,
-               m4
+               m4,
+               qtbase5-dev
 Standards-Version: 3.9.7
 Homepage: https://www.gnupg.org/related_software/pinentry/
 Vcs-Git: https://anonscm.debian.org/git/pkg-gnupg/pinentry.git
@@ -87,7 +87,7 @@ Description: Qt-based PIN or pass-phrase entry dialog for GnuPG
 
 Package: pinentry-qt4
 Architecture: all
-Depends: ${misc:Depends}, ${shlibs:Depends}, pinentry-qt (>= ${binary:Version})
+Depends: pinentry-qt (>= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: Qt-based PIN or pass-phrase entry dialog for GnuPG (transitional dummy package)
  Pinentry is a program for secure entry of PINs and passphrases, from
  the GnuPG project.
@@ -118,7 +118,7 @@ Description: GTK+-2-based PIN or pass-phrase entry dialog for GnuPG
 
 Package: pinentry-gnome3
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, gcr
+Depends: gcr, ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry, pinentry-x11
 Enhances: gnupg-agent
