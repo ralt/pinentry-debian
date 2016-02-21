@@ -1,3 +1,10 @@
+pinentry (0.9.7-5) unstable; urgency=medium
+
+  * use https for Vcs-* fields
+  * bump standards-version to 3.9.7
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sun, 21 Feb 2016 09:53:59 -0800
+
 pinentry (0.9.7-4) unstable; urgency=medium
 
   * avoid pinentry failures when bound to libsecret and the secret service
