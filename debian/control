@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Debian GnuPG Maintainers <pkg-gnupg-maint@lists.alioth.debian.org>
 Uploaders: Peter Eisentraut <petere@debian.org>,
            Daniel Kahn Gillmor <dkg@fifthhorseman.net>
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper (>= 9.20151116),
                dh-autoreconf,
                libassuan-dev (>= 2.1.0),
                libgcr-3-dev,
