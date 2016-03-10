@@ -15,7 +15,8 @@ Build-Depends: debhelper (>= 9),
                libncursesw5-dev,
                libsecret-1-dev,
                m4,
-               qtbase5-dev
+               qtbase5-dev,
+               texinfo
 Standards-Version: 3.9.7
 Homepage: https://www.gnupg.org/related_software/pinentry/
 Vcs-Git: https://anonscm.debian.org/git/pkg-gnupg/pinentry.git
