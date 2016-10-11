@@ -134,7 +134,7 @@ Description: GNOME 3 PIN or pass-phrase entry dialog for GnuPG
  particular software.
  .
  The program contained in this package implements a PIN entry dialog
- designed for use with GNOME 3.  It tries to follow the Gnome Human
+ designed for use with GNOME 3.  It tries to follow the GNOME Human
  Interface Guidelines as much as possible.  If the X Window System is
  not active then an alternative text-mode dialog will be used.  There
  are sibling packages that implement PIN entry dialogs using other
