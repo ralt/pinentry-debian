@@ -1,16 +1,16 @@
 pinentry-gtk2 (0.9.6-3) unstable; urgency=medium
 
-  * Since pinentry-gtk2 0.9.6, upstream now uses the default GTK text
-    entry widget instead of a custom text-entry widget.  The GTK text
-    entry widget in password mode may display characters while typed based
-    on the setting of gtk-entry-password-hint-timeout.  This value
-    defaults to 0 (never display), but may be overridden in
-    /etc/gtk-2.0/gtkrc or ~/.gtkrc-2.0.  If your password entry shows the
-    last character typed, please ensure that this value is not set in your
-    system's configuration files.
+  Since pinentry-gtk2 0.9.6, upstream now uses the default GTK text
+  entry widget instead of a custom text-entry widget.  The GTK text
+  entry widget in password mode may display characters while typed based
+  on the setting of gtk-entry-password-hint-timeout.  This value
+  defaults to 0 (never display), but may be overridden in
+  /etc/gtk-2.0/gtkrc or ~/.gtkrc-2.0.  If your password entry shows the
+  last character typed, please ensure that this value is not set in your
+  system's configuration files.
 
-     See
-    https://developer.gnome.org/gtk2/stable/GtkSettings.html#GtkSettings--gtk-entry-password-hint-timeout
-    and https://bugs.debian.org/801757 for more details.
+   See
+  https://developer.gnome.org/gtk2/stable/GtkSettings.html#GtkSettings--gtk-entry-password-hint-timeout
+  and https://bugs.debian.org/801757 for more details.
 
  -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 19 Oct 2015 20:39:25 -0400
