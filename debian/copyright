@@ -7,24 +7,13 @@ Files: *
 Copyright: 2002-2015, g10 Code GmbH
 License: GPL-2+
 
-Files: assuan/* build-aux/* depcomp doc/mdate-sh doc/texinfo.tex m4/curses.m4 m4/iconv.m4 missing secmem/secmem.c
+Files: build-aux/* depcomp doc/mdate-sh doc/texinfo.tex m4/curses.m4 m4/iconv.m4 missing secmem/secmem.c
 Copyright: 1996-2007, Free Software Foundation
 License: GPL-2+
 
 Files: install-sh
 Copyright: 1994 X Consortium
 License: X11
-
-Files: gtk+-2/gseal-gtk-compat.h
-Copyright: 2009 Thomas H.P. Andersen <phomes@gmail.com>
- 2009 Javier Jardón <jjardon@gnome.org>
- 2010 Guido Günther <agx@sigxcpu.org>
-License: LGPL-2.1+
-
-Files: gtk+-2/gtksecentry.*
-Copyright: 1995-1997 Peter Mattis, Spencer Kimball and Josh MacDonald
- 2004 Albrecht Dreß
-License: GPL-2+
 
 Files: gtk+-2/pinentry-gtk-2.c
 Copyright: 1999 Robert Bihlmeyer <robbe@orcus.priv.at>
@@ -36,7 +25,7 @@ Files: m4/pkg.m4
 Copyright: 2004 Scott James Remnant <scott@netsplit.com>
 License: GPL-2+
 
-Files: m4/qt.m4:dnl
+Files: m4/qt.m4
 Copyright: 1997 Janos Farkas (chexum@shadow.banki.hu)o
  1997,98,99 Stephan Kulow (coolo@kde.org)
  2002 g10 Code GmbH
@@ -65,32 +54,22 @@ Files: tty/pinentry-tty.c
 Copyright: 2014 Serge Voilokov
 License: GPL-2+
 
-Files: qt4/qsecurelineedit*
-Copyright: 2008 Klarälvdalens Datakonsult AB <steffen@klaralvdalens-datakonsult.se>
- 1992-2008 Trolltech ASA
-License: GPL-2+
-
-Files: qt4/secstring.*
-Copyright: 2008 Klarälvdalens Datakonsult AB <steffen@klaralvdalens-datakonsult.se>
- 2008 Nokia Corporation and/or its subsidiary(-ies) <qt-info@nokia.com>
-License: GPL-2+
-
-Files: qt4/pinentrydialog.*
+Files: qt/pinentrydialog.*
 Copyright: 2002, 2008 Klarälvdalens Datakonsult AB <steffen@klaralvdalens-datakonsult.se>
  2007 Ingo Klöcker
 License: GPL-2+
 
-Files: qt4/pinentryconfirm.*
+Files: qt/pinentryconfirm.*
 Copyright: 2011 Ben Kibbey <bjk@luxsci.net>
 License: GPL-2+
 
-Files: qt4/main.cpp
+Files: qt/main.cpp
 Copyright: 2002, 2008 Klarälvdalens Datakonsult AB (KDAB)
  2003 g10 Code GmbH
  2007 Ingo Klöcker
 License: GPL-2+
 
-Files: qt4/Makefile.am
+Files: qt/Makefile.am
 Copyright: 2002 Klarälvdalens Datakonsult AB (KDAB)
  2008 g10 Code GmbH
 License: GPL-2+
@@ -139,21 +118,6 @@ License: GPL-2+
  On Debian systems, the full text of the GNU General Public
  License version 2 can be found in the file
  `/usr/share/common-licenses/GPL-2'.
-
-License: LGPL-2.1+
- This is free software; you can redistribute it and/or modify it under
- the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
- .
- On Debian systems, the full text of the GNU General Public
- License version 2.1 can be found in the file
- `/usr/share/common-licenses/LGPL-2,1'.
 
 License: LGPL-3+
  This is free software; you can redistribute it and/or modify it under
