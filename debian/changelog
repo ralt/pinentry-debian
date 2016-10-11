@@ -1,8 +1,13 @@
 pinentry (0.9.7-6) unstable; urgency=medium
 
+  * included several patches from upstream
+  * bumped to debhelper 10
+  * p-gnome3 Recommends: dbus-user-session (addresses: #801247)
   * added texinfo to build-dependencies for /usr/bin/makeinfo
+  * added bindnow hardening flag
+  * bumped standards-version to 3.9.8 (no changes needed)
 
- -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Thu, 10 Mar 2016 09:40:02 -0500
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Tue, 11 Oct 2016 15:52:08 -0400
 
 pinentry (0.9.7-5) unstable; urgency=medium
 
