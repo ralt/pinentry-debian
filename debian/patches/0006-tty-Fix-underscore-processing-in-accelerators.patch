@@ -1,0 +1,58 @@
+From: Ineiev <ineiev@gnu.org>
+Date: Fri, 8 Apr 2016 15:26:33 +0300
+Subject: tty: Fix underscore processing in accelerators.
+
+* tty/pinentry-tty.c (button): Fix underscore processing in
+accelerators.
+---
+ tty/pinentry-tty.c | 23 ++++++++++++++++-------
+ 1 file changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/tty/pinentry-tty.c b/tty/pinentry-tty.c
+index d36a667..a36c588 100644
+--- a/tty/pinentry-tty.c
++++ b/tty/pinentry-tty.c
+@@ -84,10 +84,15 @@ button (char *text, char *default_text, FILE *ttyfo)
+     {
+       highlight = highlight + 1;
+       if (*highlight == '_')
+-	/* Escaped underscore.  */
+-	continue;
+-      else
+-	break;
++        {
++          /* Escaped underscore.  Skip both characters.  */
++          highlight++;
++          continue;
++        }
++      if (!isalnum (*highlight))
++        /* Unusable accelerator.  */
++        continue;
++      break;
+     }
+ 
+   if (! highlight)
+@@ -98,8 +103,8 @@ button (char *text, char *default_text, FILE *ttyfo)
+ 	highlight ++;
+     }
+ 
+-  if (! highlight)
+-    /* Hmm, no alpha-num characters.  */
++  if (! *highlight)
++    /* Hmm, no alpha-numeric characters.  */
+     {
+       if (! default_text)
+ 	return 0;
+@@ -111,7 +116,11 @@ button (char *text, char *default_text, FILE *ttyfo)
+     {
+       /* Skip accelerator prefix.  */
+       if (*text == '_')
+-	continue;
++        {
++          text ++;
++          if (! *text)
++            break;
++        }
+ 
+       if (text == highlight)
+ 	fputs (UNDERLINE_START, ttyfo);

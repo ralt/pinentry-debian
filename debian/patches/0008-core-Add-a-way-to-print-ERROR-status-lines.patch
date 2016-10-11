@@ -1,0 +1,136 @@
+From: Werner Koch <wk@gnupg.org>
+Date: Tue, 4 Oct 2016 09:36:39 +0200
+Subject: core: Add a way to print ERROR status lines.
+
+* pinentry/pinentry.h (struct pinentry): New fields SPECIFIC_ERR_LOC
+and SPECIFIC_ERR_INFO.
+* pinentry/pinentry.c (pinentry_reset): Free the new field.
+(write_status_error): New.
+(cmd_getpin): Use new fields.
+(cmd_confirm): Ditto.
+* gnome3/pinentry-gnome3.c (create_prompt): Set error for failed
+GCR_PROMPT.
+
+Signed-off-by: Werner Koch <wk@gnupg.org>
+---
+ gnome3/pinentry-gnome3.c |  3 +++
+ pinentry/pinentry.c      | 38 ++++++++++++++++++++++++++++++++++++--
+ pinentry/pinentry.h      |  7 +++++++
+ 3 files changed, 46 insertions(+), 2 deletions(-)
+
+diff --git a/gnome3/pinentry-gnome3.c b/gnome3/pinentry-gnome3.c
+index 8f91cb8..f8968c9 100644
+--- a/gnome3/pinentry-gnome3.c
++++ b/gnome3/pinentry-gnome3.c
+@@ -82,6 +82,9 @@ create_prompt (pinentry_t pe, int confirm)
+     {
+       g_warning ("couldn't create prompt for gnupg passphrase: %s",
+ 		 error->message);
++      pe->specific_err_loc = "gcr_prompt";
++      pe->specific_err_info = strdup (error->message);
++      pe->specific_err = gpg_error (GPG_ERR_CONFIGURATION);
+       g_error_free (error);
+       return NULL;
+     }
+diff --git a/pinentry/pinentry.c b/pinentry/pinentry.c
+index ef2b1fb..d3f5fab 100644
+--- a/pinentry/pinentry.c
++++ b/pinentry/pinentry.c
+@@ -126,6 +126,7 @@ pinentry_reset (int use_defaults)
+   free (pinentry.quality_bar);
+   free (pinentry.quality_bar_tt);
+   free (pinentry.keyinfo);
++  free (pinentry.specific_err_info);
+ 
+   /* Reset the pinentry structure.  */
+   memset (&pinentry, 0, sizeof (pinentry));
+@@ -920,6 +921,27 @@ strcpy_escaped (char *d, const char *s)
+ }
+ 
+ 
++static void
++write_status_error (assuan_context_t ctx, pinentry_t pe)
++{
++  char buf[500];
++  const char *pgm;
++
++  pgm = strchr (this_pgmname, '-');
++  if (pgm && pgm[1])
++    pgm++;
++  else
++    pgm = this_pgmname;
++
++  snprintf (buf, sizeof buf, "%s.%s %d %s",
++            pgm,
++            pe->specific_err_loc? pe->specific_err_loc : "?",
++            pe->specific_err,
++            pe->specific_err_info? pe->specific_err_info : "");
++  assuan_write_status (ctx, "ERROR", buf);
++}
++
++
+ static gpg_error_t
+ cmd_setdesc (assuan_context_t ctx, char *line)
+ {
+@@ -1234,6 +1256,9 @@ cmd_getpin (assuan_context_t ctx, char *line)
+     }
+   pinentry.locale_err = 0;
+   pinentry.specific_err = 0;
++  pinentry.specific_err_loc = NULL;
++  free (pinentry.specific_err_info);
++  pinentry.specific_err_info = NULL;
+   pinentry.close_button = 0;
+   pinentry.repeat_okay = 0;
+   pinentry.one_button = 0;
+@@ -1262,7 +1287,10 @@ cmd_getpin (assuan_context_t ctx, char *line)
+     {
+       pinentry_setbuffer_clear (&pinentry);
+       if (pinentry.specific_err)
+-        return pinentry.specific_err;
++        {
++          write_status_error (ctx, &pinentry);
++          return pinentry.specific_err;
++        }
+       return (pinentry.locale_err
+ 	      ? gpg_error (GPG_ERR_LOCALE_PROBLEM)
+ 	      : gpg_error (GPG_ERR_CANCELED));
+@@ -1310,6 +1338,9 @@ cmd_confirm (assuan_context_t ctx, char *line)
+   pinentry.close_button = 0;
+   pinentry.locale_err = 0;
+   pinentry.specific_err = 0;
++  pinentry.specific_err_loc = NULL;
++  free (pinentry.specific_err_info);
++  pinentry.specific_err_info = NULL;
+   pinentry.canceled = 0;
+   pinentry_setbuffer_clear (&pinentry);
+   result = (*pinentry_cmd_handler) (&pinentry);
+@@ -1326,7 +1357,10 @@ cmd_confirm (assuan_context_t ctx, char *line)
+     return 0;
+ 
+   if (pinentry.specific_err)
+-    return pinentry.specific_err;
++    {
++      write_status_error (ctx, &pinentry);
++      return pinentry.specific_err;
++    }
+ 
+   if (pinentry.locale_err)
+     return gpg_error (GPG_ERR_LOCALE_PROBLEM);
+diff --git a/pinentry/pinentry.h b/pinentry/pinentry.h
+index 47a5567..1df9010 100644
+--- a/pinentry/pinentry.h
++++ b/pinentry/pinentry.h
+@@ -118,6 +118,13 @@ struct pinentry
+      passphrase or a negative error code.  */
+   int specific_err;
+ 
++  /* The frontend may store a string with the error location here.  */
++  const char *specific_err_loc;
++
++  /* The frontend may store a malloced string here to emit an ERROR
++   * status code with this extra info along with SPECIFIC_ERR.  */
++  char *specific_err_info;
++
+   /* The frontend should set this to true if the window close button
+      has been used.  This flag is used in addition to a regular return
+      value.  */

@@ -1,3 +1,10 @@
 0001-avoid-self-describing-as-a-beta.patch
 0002-Qt-Fix-use-after-free-in-quality-calculation.patch
 0003-pinentry-Use-stderr-to-print-failures-in-password-ca.patch
+0004-curses-Return-better-error-codes-for-bad-ttynames.patch
+0005-tty-Refactor-usage-of-tolower.patch
+0006-tty-Fix-underscore-processing-in-accelerators.patch
+0007-tty-Provide-default-text-for-notok.patch
+0008-core-Add-a-way-to-print-ERROR-status-lines.patch
+0009-gnome3-Drop-unnecessary-use-of-gtk.patch
+0010-core-Don-t-report-error-on-setting-option-allow-emac.patch

@@ -1,0 +1,62 @@
+From: Werner Koch <wk@gnupg.org>
+Date: Thu, 1 Sep 2016 10:03:22 +0200
+Subject: curses: Return better error codes for bad ttynames
+
+* pinentry/pinentry-curses.c (dialog_create): Return better error
+codes.
+--
+
+With this change the error message is now
+
+  $ MYTTY=$(tty)
+  $ echo getpin | env -i pinentry-curses -d  --ttyname "$MYTTY"
+  OK Pleased to meet you
+  pinentry-curses: no LC_CTYPE known - assuming UTF-8
+  ERR 83886383 Required environment variable not set <Pinentry>
+
+Note that with the current released libgcrypt an unknown error code
+will be printed.
+
+GnuPG-bug-id: 2452
+Signed-off-by: Werner Koch <wk@gnupg.org>
+---
+ pinentry/pinentry-curses.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/pinentry/pinentry-curses.c b/pinentry/pinentry-curses.c
+index 659fa47..9882cbf 100644
+--- a/pinentry/pinentry-curses.c
++++ b/pinentry/pinentry-curses.c
+@@ -50,6 +50,12 @@
+ 
+ #include "pinentry.h"
+ 
++#if GPG_ERROR_VERSION_NUMBER < 0x011900 /* 1.25 */
++# define GPG_ERR_WINDOW_TOO_SMALL 301
++# define GPG_ERR_MISSING_ENVVAR   303
++#endif
++
++
+ /* FIXME: We should allow configuration of these button labels and in
+    any case use the default_ok, default_cancel values if available.
+    However, I have no clue about curses and localization.  */
+@@ -370,7 +376,8 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
+   if (y > size_y)
+     {
+       err = 1;
+-      pinentry->specific_err = gpg_error (GPG_ERR_ASS_LINE_TOO_LONG);
++      pinentry->specific_err = gpg_error (size_y < 0? GPG_ERR_MISSING_ENVVAR
++                                          /* */     : GPG_ERR_WINDOW_TOO_SMALL);
+       goto out;
+     }
+ 
+@@ -425,7 +432,8 @@ dialog_create (pinentry_t pinentry, dialog_t dialog)
+   if (x > size_x)
+     {
+       err = 1;
+-      pinentry->specific_err = gpg_error (GPG_ERR_ASS_LINE_TOO_LONG);
++      pinentry->specific_err = gpg_error (size_x < 0? GPG_ERR_MISSING_ENVVAR
++                                          /* */     : GPG_ERR_WINDOW_TOO_SMALL);
+       goto out;
+     }
+ 

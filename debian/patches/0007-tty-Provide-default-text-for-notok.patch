@@ -1,0 +1,26 @@
+From: Ineiev <ineiev@gnu.org>
+Date: Fri, 8 Apr 2016 15:33:05 +0300
+Subject: tty: Provide default text for "notok".
+
+* tty/pinentry-tty.c (confirm): Provide default text for "notok".
+
+--
+
+gniibe changed the commit message.
+---
+ tty/pinentry-tty.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tty/pinentry-tty.c b/tty/pinentry-tty.c
+index a36c588..cef6947 100644
+--- a/tty/pinentry-tty.c
++++ b/tty/pinentry-tty.c
+@@ -211,7 +211,7 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
+ 	cancel = button (pinentry->default_cancel, "Cancel", ttyfo);
+ 
+       if (pinentry->notok)
+-	notok = button (pinentry->notok, NULL, ttyfo);
++	notok = button (pinentry->notok, "No", ttyfo);
+     }
+ 
+   if (cbreak (fileno (ttyfi)) == -1)
