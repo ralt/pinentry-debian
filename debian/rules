@@ -3,6 +3,7 @@
 QT_SELECT = qt5
 export QT_SELECT
 SHARED_CONFIGS = --disable-rpath --without-libcap --disable-pinentry-emacs --disable-inside-emacs
+export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
 %:
 	dh $@ --with autoreconf
