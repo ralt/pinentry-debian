@@ -122,6 +122,7 @@ Architecture: any
 Depends: gcr, ${misc:Depends}, ${shlibs:Depends}
 Suggests: pinentry-doc
 Provides: pinentry, pinentry-x11
+Recommends: dbus-user-session
 Enhances: gnupg-agent
 Description: GNOME 3 PIN or pass-phrase entry dialog for GnuPG
  This package contains a program that allows for secure entry of PINs or
