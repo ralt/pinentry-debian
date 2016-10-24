@@ -1,3 +1,6 @@
-version=3
-opts="pasv,pgpsigurlmangle=s/$/.sig/" \
-ftp://ftp.gnupg.org/GnuPG/pinentry/pinentry-([0-9.]+)\.tar\.(?:gz|bz2)  debian  uupdate
+version=4
+
+opts=pgpsigurlmangle=s/$/.sig/ \
+  https://gnupg.org/download/ \
+  /ftp/gcrypt/pinentry/pinentry@ANY_VERSION@@ARCHIVE_EXT@ \
+  debian uupdate
