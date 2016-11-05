@@ -10,3 +10,4 @@
 0010-core-Don-t-report-error-on-setting-option-allow-emac.patch
 0011-Fix-spelling-errors.patch
 0012-Convert-to-UTF-8.patch
+0013-gnome3-Test-if-Gcr-System-Prompter-is-available-at-s.patch
