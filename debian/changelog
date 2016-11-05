@@ -1,3 +1,10 @@
+pinentry (0.9.7-8) unstable; urgency=medium
+
+  * more patches from upstream
+  * reduce work for the buildds by avoiding some duplicated builds.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Sat, 05 Nov 2016 23:28:59 -0400
+
 pinentry (0.9.7-7) unstable; urgency=medium
 
   * update debian/watch to use https
