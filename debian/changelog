@@ -1,3 +1,11 @@
+pinentry (0.9.7-7) unstable; urgency=medium
+
+  * update debian/watch to use https
+  * cleanup patches from upstream
+  * pinentry-gnome3: improve fallback to curses (Closes: #841909)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Fri, 04 Nov 2016 23:50:45 -0400
+
 pinentry (0.9.7-6) unstable; urgency=medium
 
   * included several patches from upstream
