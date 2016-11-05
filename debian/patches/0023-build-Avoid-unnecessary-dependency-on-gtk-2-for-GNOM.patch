@@ -1,0 +1,52 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Sat, 5 Nov 2016 00:44:53 -0400
+Subject: build: Avoid unnecessary dependency on gtk+-2 for GNOME3 development.
+
+* configure.ac: There is no reason to reject building the GNOME3
+pinentry if GTK+-2 development libraries are not present.  GNOME3 does
+not require GTK+-2.
+
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ configure.ac | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 779e6b8..995634b 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -436,14 +436,13 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
+ fi
+ 
+ dnl check if the module gtk+-2.0 exists
+-if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
++if test "$pinentry_gtk_2" != "no"; then
+ 	AC_MSG_CHECKING([for gtk+-2])
+ 	"${PKG_CONFIG}" --exists gtk+-2.0
+ 	if test $? -ne 0 ; then
+ 		AC_MSG_RESULT([no])
+ 		AC_MSG_WARN([pkg-config could not find the module gtk+-2.0])
+ 		pinentry_gtk_2=no
+-		pinentry_gnome_3=no
+ 	else
+ 		AC_MSG_RESULT([yes])
+ 		AC_MSG_CHECKING([gtk+-2 version >= 2.4.0])
+@@ -453,7 +452,6 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
+ 		if test $? -ne 0 ; then
+ 			AC_MSG_WARN([building GTK+-2 pinentry disabled])
+ 			pinentry_gtk_2=no
+-			pinentry_gnome_3=no
+ 		else
+ 			GTK2CFLAGS=`"${PKG_CONFIG}" --cflags gtk+-2.0`
+ 			GTK2LIBS=`"${PKG_CONFIG}" --libs gtk+-2.0`
+@@ -463,10 +461,6 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
+ 			then
+ 			  pinentry_gtk_2=yes
+ 			fi
+-			if test "$pinentry_gnome_3" != "no"
+-			then
+-			  pinentry_gnome_3=yes
+-			fi
+ 		fi
+ 	fi
+ fi

@@ -1,0 +1,48 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Fri, 4 Nov 2016 18:57:47 -0400
+Subject: tty: Report timeout.
+
+* tty/pinentry-tty.c (confirm): Report if canceled due to timeout.
+(password): Report if canceled due to timeout.
+
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ tty/pinentry-tty.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/tty/pinentry-tty.c b/tty/pinentry-tty.c
+index cef6947..183b7a5 100644
+--- a/tty/pinentry-tty.c
++++ b/tty/pinentry-tty.c
+@@ -37,6 +37,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <ctype.h>
++#include <gpg-error.h>
+ 
+ #include "pinentry.h"
+ #include "memory.h"
+@@ -283,6 +284,11 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
+         }
+     }
+ 
++#ifndef HAVE_DOSISH_SYSTEM
++  if (timed_out)
++    pinentry->specific_err = gpg_error (GPG_ERR_TIMEOUT);
++#endif
++
+   tcsetattr (fileno(ttyfi), TCSANOW, &o_term);
+ 
+   return ret;
+@@ -447,6 +453,11 @@ password (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
+ 	secmem_free (passphrase);
+     }
+ 
++#ifndef HAVE_DOSISH_SYSTEM
++  if (timed_out)
++    pinentry->specific_err = gpg_error (GPG_ERR_TIMEOUT);
++#endif
++
+   return done;
+ }
+ 

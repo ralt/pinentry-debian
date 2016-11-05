@@ -1,0 +1,52 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Sat, 5 Nov 2016 17:26:10 -0400
+Subject: gnome3: Avoid risk of uinitialized memory access.
+
+* gnome3/pinentry-gnome3.c (_propagate_g_error_to_pinentry): Ensure
+that pinentry->specific_err_info is null-terminated.
+
+--
+
+It's possible that "%d: %s" ends up producing more than 20 additional
+characters.  A 64-bit signed int at its minimum is
+"-9223372036854775808", which is 20 characters.  On any platform where
+gint is 128-bit (i don't know whether they exist), it could be
+significantly more.
+
+snprintf doesn't write the final NUL byte if the string exceeds the
+buffer, so anyone reading specific_err_info as a NUL-terminated string
+in such a case would go on to read uninitialized memory after the
+buffer.  So we should force there to always be a NUL char after the
+written buffer.  It would be simpler to use asprintf, but i suspect
+that's not portable enough for use in pinentry.
+
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ gnome3/pinentry-gnome3.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/gnome3/pinentry-gnome3.c b/gnome3/pinentry-gnome3.c
+index ba6ab46..b164ed0 100644
+--- a/gnome3/pinentry-gnome3.c
++++ b/gnome3/pinentry-gnome3.c
+@@ -93,13 +93,16 @@ static void
+ _propagate_g_error_to_pinentry (pinentry_t pe, GError *error,
+                                 gpg_err_code_t code, const char *loc)
+ {
+-  size_t infolen = strlen(error->message) + 20;
++  size_t infolen = strlen(error->message) + 24;
+ 
+   pe->specific_err = gpg_error (code);
+-  pe->specific_err_info = malloc (infolen);
++  pe->specific_err_info = malloc (infolen + 1);
+   if (pe->specific_err_info)
+-    snprintf (pe->specific_err_info, infolen,
+-              "%d: %s", error->code, error->message);
++    {
++      pe->specific_err_info[infolen] = '\0';
++      snprintf (pe->specific_err_info, infolen,
++                "%d: %s", error->code, error->message);
++    }
+   pe->specific_err_loc = loc;
+ }
+ 

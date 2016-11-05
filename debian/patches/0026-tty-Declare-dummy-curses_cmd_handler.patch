@@ -1,0 +1,53 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Sat, 5 Nov 2016 23:14:13 -0400
+Subject: tty: Declare dummy curses_cmd_handler.
+
+* tty/pinentry-tty.c: Declare a dummy handler for the
+curses_cmd_handler for fallback.
+
+--
+
+This is needed for building pinentry-tty, which links to a copy of the
+pinentry object which doesn't have curses (it makes no sense to
+fallback from tty to curses).  But the new cmd_info in
+pinentry/pinentry.c needs some sort of value to test against when
+reporting the flavor.
+
+You can replicate this linker error from git with:
+
+     ./autogen.sh
+     ./configure --enable-maintainer-mode \
+       --enable-{fallback-curses,pinentry-tty} \
+       --disable-{inside-emacs,libsecret} && make
+
+One could argue that if you --enable-tty then you must also
+--disable-fallback-curses, but that would just mean that you can't
+build one of the graphical pinentries at the same time (with curses
+fallback) as you are actually building pinentry-tty.  Arguably,
+though, the ./configure script should figure out the right thing to do
+in this case and the build should just do the right thing.
+
+This patch is a hack to ensure that pinentry-tty continues to link
+properly even when other pinentries are being built concurrently with
+a curses fallback.
+
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ tty/pinentry-tty.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/tty/pinentry-tty.c b/tty/pinentry-tty.c
+index bd82fad..3d6cd5a 100644
+--- a/tty/pinentry-tty.c
++++ b/tty/pinentry-tty.c
+@@ -556,6 +556,10 @@ tty_cmd_handler(pinentry_t pinentry)
+ 
+ pinentry_cmd_handler_t pinentry_cmd_handler = tty_cmd_handler;
+ 
++/* needed to link cleanly; should never be used except for comparison
++ * in pinentry/pinentry.c's cmd_getinfo(): */
++pinentry_cmd_handler_t curses_cmd_handler = NULL;
++
+ 
+ int
+ main (int argc, char *argv[])
