@@ -1,0 +1,48 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Thu, 3 Nov 2016 12:59:18 -0400
+Subject: Convert to UTF-8.
+
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ AUTHORS           | 2 +-
+ doc/pinentry.texi | 2 +-
+ qt/Makefile.am    | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/AUTHORS b/AUTHORS
+index 695d0ba..d74004a 100644
+--- a/AUTHORS
++++ b/AUTHORS
+@@ -5,7 +5,7 @@ License: GPLv2+
+ 
+ Robert Bihlmeyer <robbe@orcus.priv.at>
+ Werner Koch, g10 Code GmbH <wk@gnupg.org>
+-Steffen Hansen, Klarälvdalens Datakonsult AB <steffen@klaralvdalens-datakonsult.se>
++Steffen Hansen, KlarÃ¤lvdalens Datakonsult AB <steffen@klaralvdalens-datakonsult.se>
+ Marcus Brinkmann, g10 Code GmbH <marcus@g10code.com>
+ Timo Schulz, g10 Code GmbH
+ Neal Walfied, g10 Code GmbH <neal@gnu.org>
+diff --git a/doc/pinentry.texi b/doc/pinentry.texi
+index 856a4f6..17fc666 100644
+--- a/doc/pinentry.texi
++++ b/doc/pinentry.texi
+@@ -64,7 +64,7 @@ This is edition @value{EDITION}, last updated @value{UPDATED}, of
+ @cite{The `PINEntry' Manual}, for version @value{VERSION}.
+ @sp 1
+ Published by g10 Code GmbH@*
+-Hüttenstr. 61@*
++HÃ¼ttenstr. 61@*
+ 40699 Erkrath, Germany
+ @sp 1
+ @copyrightnotice{}
+diff --git a/qt/Makefile.am b/qt/Makefile.am
+index 96d0880..6659007 100644
+--- a/qt/Makefile.am
++++ b/qt/Makefile.am
+@@ -1,5 +1,5 @@
+ # Makefile.am
+-# Copyright (C) 2002 g10 Code GmbH, Klarälvdalens Datakonsult AB
++# Copyright (C) 2002 g10 Code GmbH, KlarÃ¤lvdalens Datakonsult AB
+ # Copyright (C) 2008, 2015 g10 Code GmbH
+ #
+ # This file is part of PINENTRY.

@@ -8,3 +8,5 @@
 0008-core-Add-a-way-to-print-ERROR-status-lines.patch
 0009-gnome3-Drop-unnecessary-use-of-gtk.patch
 0010-core-Don-t-report-error-on-setting-option-allow-emac.patch
+0011-Fix-spelling-errors.patch
+0012-Convert-to-UTF-8.patch

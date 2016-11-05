@@ -1,0 +1,361 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Thu, 3 Nov 2016 12:59:17 -0400
+Subject: Fix spelling errors.
+
+--
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+
+Note that this also updates
+     \texinfoversion to 2016-11-03.12
+
+Signed-off-by: Werner Koch <wk@gnupg.org>
+---
+ ChangeLog-old            |  8 ++++----
+ NEWS                     |  2 +-
+ build-aux/texinfo.tex    | 12 ++++++------
+ doc/pinentry.texi        |  4 ++--
+ doc/texinfo.tex          | 12 ++++++------
+ gnome3/pinentry-gnome3.c |  2 +-
+ m4/glib.m4               |  6 +++---
+ m4/gtk.m4                |  6 +++---
+ pinentry/argparse.c      |  2 +-
+ pinentry/pinentry.c      |  4 ++--
+ pinentry/pinentry.h      |  4 ++--
+ qt/pinentrydialog.cpp    |  2 +-
+ 12 files changed, 32 insertions(+), 32 deletions(-)
+
+diff --git a/ChangeLog-old b/ChangeLog-old
+index cad8c1a..02a8010 100644
+--- a/ChangeLog-old
++++ b/ChangeLog-old
+@@ -999,7 +999,7 @@
+ 
+ 	* configure.ac: Version 0.6.9
+ 	* qt/Makefile.am: Added moc files to DISTCLEANFILES
+-	* qt/pinentrycontroller.cpp: Dont spew assuan debug stuff out on stderr.
++	* qt/pinentrycontroller.cpp: Don't spew assuan debug stuff out on stderr.
+ 
+ 2003-03-26  Steffen Hansen  <steffen@klaralvdalens-datakonsult.se>
+ 
+@@ -1619,7 +1619,7 @@
+ 2000-04-23  Robert Bihlmeyer  <robbe@orcus.priv.at>
+ 
+ 	* secret-query.c (constrain_size): Lower window max_width to
+-	accomodate bugs in GTK and Scwm.
++	accommodate bugs in GTK and Scwm.
+ 
+ 	* agent.c (main): Set x_enabled if X appears to be available.
+ 	Use it to selectively make FLAGS_INSURE supported.
+@@ -1861,7 +1861,7 @@
+ 
+ 	* agent.c (main): Moved secmem_init() after the fork, since that
+ 	seemingly munlock's all pages.
+-	Drop priviledges just in case somebody wants to install this
++	Drop privileges just in case somebody wants to install this
+ 	suid-root.
+ 	Flush stdout.
+ 
+@@ -1953,7 +1953,7 @@
+ 	* Thoughts: Removed discussion of other names.
+ 	Added indication of which things already work.
+ 
+-	* agent.c (make_tmpdir): Removed occurance of "gpg-agent."
++	* agent.c (make_tmpdir): Removed occurrence of "gpg-agent."
+ 
+ 	* README: First proper version.
+ 
+diff --git a/NEWS b/NEWS
+index 69f0dd9..11731aa 100644
+--- a/NEWS
++++ b/NEWS
+@@ -196,7 +196,7 @@ Noteworthy changes in version 0.7.3 (2007-07-06)
+  * New option --colors=FG,BG,SO to set the colors for the curses
+    pinentry.
+ 
+- * Pinentry-w32 does now basicaly work.  It needs some finishing
++ * Pinentry-w32 does now basically work.  It needs some finishing
+    though.  For example the buttons should resize themself according
+    to the size of the text.
+ 
+diff --git a/build-aux/texinfo.tex b/build-aux/texinfo.tex
+index a181898..5552e50 100644
+--- a/build-aux/texinfo.tex
++++ b/build-aux/texinfo.tex
+@@ -3,7 +3,7 @@
+ % Load plain if necessary, i.e., if running under initex.
+ \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
+ %
+-\def\texinfoversion{2007-05-03.09}
++\def\texinfoversion{2016-11-03.12}
+ %
+ % Copyright (C) 1985, 1986, 1988, 1990, 1991, 1992, 1993, 1994, 1995,
+ % 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+@@ -415,7 +415,7 @@
+ \def\argremovecomment#1\comment#2\ArgTerm{\argremovec #1\c\ArgTerm}
+ \def\argremovec#1\c#2\ArgTerm{\argcheckspaces#1\^^M\ArgTerm}
+ 
+-% Each occurence of `\^^M' or `<space>\^^M' is replaced by a single space.
++% Each occurrence of `\^^M' or `<space>\^^M' is replaced by a single space.
+ %
+ % \argremovec might leave us with trailing space, e.g.,
+ %    @end itemize  @c foo
+@@ -440,7 +440,7 @@
+ % to get _exactly_ the rest of the line, we had to prevent such situation.
+ % We prepended an \empty token at the very beginning and we expand it now,
+ % just before passing the control to \argtorun.
+-% (Similarily, we have to think about #3 of \argcheckspacesY above: it is
++% (Similarly, we have to think about #3 of \argcheckspacesY above: it is
+ % either the null string, or it ends with \^^M---thus there is no danger
+ % that a pair of braces would be stripped.
+ %
+@@ -497,7 +497,7 @@
+ % used to check whether the current environment is the one expected.
+ %
+ % Non-false conditionals (@iftex, @ifset) don't fit into this, so they
+-% are not treated as enviroments; they don't open a group.  (The
++% are not treated as environments; they don't open a group.  (The
+ % implementation of @end takes care not to call \endgroup in this
+ % special case.)
+ 
+@@ -4598,7 +4598,7 @@ end
+ \chardef\maxseclevel = 3
+ %
+ % A numbered section within an unnumbered changes to unnumbered too.
+-% To achive this, remember the "biggest" unnum. sec. we are currently in:
++% To achieve this, remember the "biggest" unnum. sec. we are currently in:
+ \chardef\unmlevel = \maxseclevel
+ %
+ % Trace whether the current chapter is an appendix or not:
+@@ -7034,7 +7034,7 @@ end
+ % In case a @footnote appears in a vbox, save the footnote text and create
+ % the real \insert just after the vbox finished.  Otherwise, the insertion
+ % would be lost.
+-% Similarily, if a @footnote appears inside an alignment, save the footnote
++% Similarly, if a @footnote appears inside an alignment, save the footnote
+ % text to a box and make the \insert when a row of the table is finished.
+ % And the same can be done for other insert classes.  --kasal, 16nov03.
+ 
+diff --git a/doc/pinentry.texi b/doc/pinentry.texi
+index fd1d624..856a4f6 100644
+--- a/doc/pinentry.texi
++++ b/doc/pinentry.texi
+@@ -700,14 +700,14 @@ The actual return code is dependent on whether the dialog is in
+ message mode or in passphrase mode.
+ 
+ If the dialog is in message mode and the user pressed ok, return 1.
+-Otherwise, return 0.  If an error occured, indicate this by setting it
++Otherwise, return 0.  If an error occurred, indicate this by setting it
+ in @code{specific_err} or setting @code{locale_err} to @code{1} (for
+ locale specific errors).  If the dialog was canceled, then the handler
+ should set the @code{canceled} variable to @code{1}.  If the not ok
+ button was pressed, don't do anything else.
+ 
+ If the dialog is in passphrase mode return @code{1} if the user
+-entered a password and pressed ok.  If an error occured, return
++entered a password and pressed ok.  If an error occurred, return
+ @code{-1} and set @code{specific_err} or @code{locale_err}, as above.
+ If the user canceled the dialog box, return @code{-1}.
+ 
+diff --git a/doc/texinfo.tex b/doc/texinfo.tex
+index 5063065..919d85d 100644
+--- a/doc/texinfo.tex
++++ b/doc/texinfo.tex
+@@ -3,7 +3,7 @@
+ % Load plain if necessary, i.e., if running under initex.
+ \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
+ %
+-\def\texinfoversion{2007-05-03.09}
++\def\texinfoversion{2016-11-03.12}
+ %
+ % Copyright (C) 1985, 1986, 1988, 1990, 1991, 1992, 1993, 1994, 1995,
+ % 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+@@ -415,7 +415,7 @@
+ \def\argremovecomment#1\comment#2\ArgTerm{\argremovec #1\c\ArgTerm}
+ \def\argremovec#1\c#2\ArgTerm{\argcheckspaces#1\^^M\ArgTerm}
+ 
+-% Each occurence of `\^^M' or `<space>\^^M' is replaced by a single space.
++% Each occurrence of `\^^M' or `<space>\^^M' is replaced by a single space.
+ %
+ % \argremovec might leave us with trailing space, e.g.,
+ %    @end itemize  @c foo
+@@ -440,7 +440,7 @@
+ % to get _exactly_ the rest of the line, we had to prevent such situation.
+ % We prepended an \empty token at the very beginning and we expand it now,
+ % just before passing the control to \argtorun.
+-% (Similarily, we have to think about #3 of \argcheckspacesY above: it is
++% (Similarly, we have to think about #3 of \argcheckspacesY above: it is
+ % either the null string, or it ends with \^^M---thus there is no danger
+ % that a pair of braces would be stripped.
+ %
+@@ -497,7 +497,7 @@
+ % used to check whether the current environment is the one expected.
+ %
+ % Non-false conditionals (@iftex, @ifset) don't fit into this, so they
+-% are not treated as enviroments; they don't open a group.  (The
++% are not treated as environments; they don't open a group.  (The
+ % implementation of @end takes care not to call \endgroup in this
+ % special case.)
+ 
+@@ -4598,7 +4598,7 @@ end
+ \chardef\maxseclevel = 3
+ %
+ % A numbered section within an unnumbered changes to unnumbered too.
+-% To achive this, remember the "biggest" unnum. sec. we are currently in:
++% To achieve this, remember the "biggest" unnum. sec. we are currently in:
+ \chardef\unmlevel = \maxseclevel
+ %
+ % Trace whether the current chapter is an appendix or not:
+@@ -7034,7 +7034,7 @@ end
+ % In case a @footnote appears in a vbox, save the footnote text and create
+ % the real \insert just after the vbox finished.  Otherwise, the insertion
+ % would be lost.
+-% Similarily, if a @footnote appears inside an alignment, save the footnote
++% Similarly, if a @footnote appears inside an alignment, save the footnote
+ % text to a box and make the \insert when a row of the table is finished.
+ % And the same can be done for other insert classes.  --kasal, 16nov03.
+ 
+diff --git a/gnome3/pinentry-gnome3.c b/gnome3/pinentry-gnome3.c
+index d6d7d16..90ff60f 100644
+--- a/gnome3/pinentry-gnome3.c
++++ b/gnome3/pinentry-gnome3.c
+@@ -104,7 +104,7 @@ create_prompt (pinentry_t pe, int confirm)
+       g_free (msg);
+     }
+ 
+-  /* An error occured during the last prompt.  */
++  /* An error occurred during the last prompt.  */
+   if (pe->error)
+     {
+       msg = pinentry_utf8_validate (pe->error);
+diff --git a/m4/glib.m4 b/m4/glib.m4
+index b3c632b..7338acb 100644
+--- a/m4/glib.m4
++++ b/m4/glib.m4
+@@ -95,7 +95,7 @@ main ()
+              glib_major_version, glib_minor_version, glib_micro_version);
+       printf ("*** was found! If glib-config was correct, then it is best\n");
+       printf ("*** to remove the old version of GLIB. You may also be able to fix the error\n");
+-      printf("*** by modifying your LD_LIBRARY_PATH enviroment variable, or by editing\n");
++      printf("*** by modifying your LD_LIBRARY_PATH environment variable, or by editing\n");
+       printf("*** /etc/ld.so.conf. Make sure you have run ldconfig if that is\n");
+       printf("*** required on your system.\n");
+       printf("*** If glib-config was wrong, set the environment variable GLIB_CONFIG\n");
+@@ -132,7 +132,7 @@ main ()
+         printf("*** being found. The easiest way to fix this is to remove the old version\n");
+         printf("*** of GLIB, but you can also set the GLIB_CONFIG environment to point to the\n");
+         printf("*** correct copy of glib-config. (In this case, you will have to\n");
+-        printf("*** modify your LD_LIBRARY_PATH enviroment variable, or edit /etc/ld.so.conf\n");
++        printf("*** modify your LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf\n");
+         printf("*** so that the correct libraries are found at run-time))\n");
+       }
+     }
+@@ -179,7 +179,7 @@ main ()
+           echo "***"
+           echo "***    rpm --erase --nodeps gtk gtk-devel" ],
+         [ echo "*** The test program failed to compile or link. See the file config.log for the"
+-          echo "*** exact error that occured. This usually means GLIB was incorrectly installed"
++          echo "*** exact error that occurred. This usually means GLIB was incorrectly installed"
+           echo "*** or that you have moved GLIB since it was installed. In the latter case, you"
+           echo "*** may want to edit the glib-config script: $GLIB_CONFIG" ])
+           CFLAGS="$ac_save_CFLAGS"
+diff --git a/m4/gtk.m4 b/m4/gtk.m4
+index f2dd472..6f6a422 100644
+--- a/m4/gtk.m4
++++ b/m4/gtk.m4
+@@ -91,7 +91,7 @@ main ()
+              gtk_major_version, gtk_minor_version, gtk_micro_version);
+       printf ("*** was found! If gtk-config was correct, then it is best\n");
+       printf ("*** to remove the old version of GTK+. You may also be able to fix the error\n");
+-      printf("*** by modifying your LD_LIBRARY_PATH enviroment variable, or by editing\n");
++      printf("*** by modifying your LD_LIBRARY_PATH environment variable, or by editing\n");
+       printf("*** /etc/ld.so.conf. Make sure you have run ldconfig if that is\n");
+       printf("*** required on your system.\n");
+       printf("*** If gtk-config was wrong, set the environment variable GTK_CONFIG\n");
+@@ -130,7 +130,7 @@ main ()
+         printf("*** being found. The easiest way to fix this is to remove the old version\n");
+         printf("*** of GTK+, but you can also set the GTK_CONFIG environment to point to the\n");
+         printf("*** correct copy of gtk-config. (In this case, you will have to\n");
+-        printf("*** modify your LD_LIBRARY_PATH enviroment variable, or edit /etc/ld.so.conf\n");
++        printf("*** modify your LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf\n");
+         printf("*** so that the correct libraries are found at run-time))\n");
+       }
+     }
+@@ -177,7 +177,7 @@ main ()
+           echo "***"
+           echo "***    rpm --erase --nodeps gtk gtk-devel" ],
+         [ echo "*** The test program failed to compile or link. See the file config.log for the"
+-          echo "*** exact error that occured. This usually means GTK was incorrectly installed"
++          echo "*** exact error that occurred. This usually means GTK was incorrectly installed"
+           echo "*** or that you have moved GTK since it was installed. In the latter case, you"
+           echo "*** may want to edit the gtk-config script: $GTK_CONFIG" ])
+           CFLAGS="$ac_save_CFLAGS"
+diff --git a/pinentry/argparse.c b/pinentry/argparse.c
+index e31b67e..4f586d4 100644
+--- a/pinentry/argparse.c
++++ b/pinentry/argparse.c
+@@ -845,7 +845,7 @@ find_long_option( ARGPARSE_ARGS *arg,
+     /* Would be better if we can do a binary search, but it is not
+        possible to reorder our option table because we would mess
+        up our help strings - What we can do is: Build a nice option
+-       lookup table wehn this function is first invoked */
++       lookup table when this function is first invoked */
+     if( !*keyword )
+ 	return -1;
+     for(i=0; opts[i].short_opt; i++ )
+diff --git a/pinentry/pinentry.c b/pinentry/pinentry.c
+index d5d70e0..161754a 100644
+--- a/pinentry/pinentry.c
++++ b/pinentry/pinentry.c
+@@ -93,7 +93,7 @@ pinentry_reset (int use_defaults)
+   pinentry_color_t color_so = pinentry.color_so;
+   int color_so_bright = pinentry.color_so_bright;
+ 
+-  int timout = pinentry.timeout;
++  int timeout = pinentry.timeout;
+ 
+   char *invisible_char = pinentry.invisible_char;
+ 
+@@ -175,7 +175,7 @@ pinentry_reset (int use_defaults)
+       pinentry.color_so = color_so;
+       pinentry.color_so_bright = color_so_bright;
+ 
+-      pinentry.timeout = timout;
++      pinentry.timeout = timeout;
+     }
+ }
+ 
+diff --git a/pinentry/pinentry.h b/pinentry/pinentry.h
+index 1df9010..d043a4b 100644
+--- a/pinentry/pinentry.h
++++ b/pinentry/pinentry.h
+@@ -109,7 +109,7 @@ struct pinentry
+   int canceled;
+ 
+   /* The frontend should set this to true if an error with the local
+-     conversion occured. */
++     conversion occurred. */
+   int locale_err;
+ 
+   /* The frontend should set this to a gpg-error so that commands are
+@@ -213,7 +213,7 @@ typedef struct pinentry *pinentry_t;
+    PIN.  If PIN->pin is zero, request a confirmation, otherwise a PIN
+    entry.  On confirmation, the function should return TRUE if
+    confirmed, and FALSE otherwise.  On PIN entry, the function should
+-   return -1 if an error occured or the user cancelled the operation
++   return -1 if an error occurred or the user cancelled the operation
+    and 1 otherwise.  */
+ typedef int (*pinentry_cmd_handler_t) (pinentry_t pin);
+ 
+diff --git a/qt/pinentrydialog.cpp b/qt/pinentrydialog.cpp
+index 81205ee..c1eba70 100644
+--- a/qt/pinentrydialog.cpp
++++ b/qt/pinentrydialog.cpp
+@@ -72,7 +72,7 @@ WINBOOL SetForegroundWindowEx( HWND hWnd )
+ 
+ void raiseWindow( QWidget* w )
+ {
+-    /* Maybe Qt will become agressive enough one day that
++    /* Maybe Qt will become aggressive enough one day that
+      * this is enough on windows too*/
+     w->raise();
+ #ifdef Q_WS_WIN
