@@ -1,6 +1,9 @@
 From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
-Date: Sat, 5 Nov 2016 23:14:13 -0400
+Date: Sat, 5 Nov 2016 23:26:35 -0400
 Subject: tty: Declare dummy curses_cmd_handler.
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
 * tty/pinentry-tty.c: Declare a dummy handler for the
 curses_cmd_handler for fallback.
@@ -20,12 +23,22 @@ You can replicate this linker error from git with:
        --enable-{fallback-curses,pinentry-tty} \
        --disable-{inside-emacs,libsecret} && make
 
-One could argue that if you --enable-tty then you must also
---disable-fallback-curses, but that would just mean that you can't
-build one of the graphical pinentries at the same time (with curses
-fallback) as you are actually building pinentry-tty.  Arguably,
-though, the ./configure script should figure out the right thing to do
-in this case and the build should just do the right thing.
+Which produces:
+
+    gcc  -g -O2 -Wall -Wcast-align -Wshadow -Wstrict-prototypes -Wformat -Wno-format-y2k -Wformat-security -W -Wno-sign-compare -Wno-missing-field-initializers -Wdeclaration-after-statement -Wno-pointer-sign -Wpointer-arith   -o pinentry-tty pinentry-tty.o ../pinentry/libpinentry.a ../secmem/libsecmem.a -lassuan -L/usr/lib/x86_64-linux-gnu -lgpg-error -L/usr/lib/x86_64-linux-gnu -lgpg-error  -lcap
+    ../pinentry/libpinentry.a(pinentry.o): In function `cmd_getinfo':
+    «BUILDDIR»/pinentry/pinentry.c:1457: undefined reference to `curses_cmd_handler'
+    collect2: error: ld returned 1 exit status
+    Makefile:410: recipe for target 'pinentry-tty' failed
+    make[2]: *** [pinentry-tty] Error 1
+    make[2]: Leaving directory '«BUILDDIR»/tty'
+
+One could argue that developers who --enable-tty then must also
+--disable-fallback-curses, but that would just mean that it's
+impossible to't build one of the graphical pinentries at the same time
+(with curses fallback) as you are actually building pinentry-tty.
+Arguably, though, the ./configure script should figure out the right
+thing to do in this case and the build each variant sensibly.
 
 This patch is a hack to ensure that pinentry-tty continues to link
 properly even when other pinentries are being built concurrently with

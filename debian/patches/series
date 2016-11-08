@@ -22,5 +22,8 @@
 0022-all-Prefer-https-over-http-in-source-where-possible.patch
 0023-build-Avoid-unnecessary-dependency-on-gtk-2-for-GNOM.patch
 0024-gnome3-Test-if-Gcr-System-Prompter-is-available-at-s.patch
-0025-gnome3-Avoid-risk-of-uinitialized-memory-access.patch
+0025-gnome3-Fall-back-to-curses-if-screensaver-is-locked.patch
 0026-tty-Declare-dummy-curses_cmd_handler.patch
+0027-gnome3-Avoid-risk-of-uinitialized-memory-access.patch
+0028-Add-fail-safe-string-termination-for-snprintf.patch
+0029-gnome3-Tighten-up-error-messages-when-GNOME-screensa.patch

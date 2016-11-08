@@ -1,0 +1,96 @@
+From: Werner Koch <wk@gnupg.org>
+Date: Mon, 7 Nov 2016 08:37:11 +0100
+Subject: Add fail-safe string termination for snprintf.
+
+* gtk+-2/pinentry-gtk-2.c (changed_text_handler): Make sure an
+ snprintf buffer is always ternminated.
+* pinentry/pinentry.c (my_strusage): Ditto.
+(write_status_error): Ditto.
+(cmd_getinfo): Ditto.
+* w32/main.c (w32_strerror): Ditto.
+--
+
+This is to fix the surprising implementation of snprintf on Windows.
+Note that we don't need this in GnuPG because there we use our own
+snprintf.
+
+Signed-off-by: Werner Koch <wk@gnupg.org>
+---
+ gtk+-2/pinentry-gtk-2.c |  2 ++
+ pinentry/pinentry.c     | 10 ++++++++--
+ w32/main.c              |  1 +
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/gtk+-2/pinentry-gtk-2.c b/gtk+-2/pinentry-gtk-2.c
+index f215b2e..e3dd085 100644
+--- a/gtk+-2/pinentry-gtk-2.c
++++ b/gtk+-2/pinentry-gtk-2.c
+@@ -330,12 +330,14 @@ changed_text_handler (GtkWidget *widget)
+   else if (percent < 0)
+     {
+       snprintf (textbuf, sizeof textbuf, "(%d%%)", -percent);
++      textbuf[sizeof textbuf -1] = 0;
+       color.red = 0xffff;
+       percent = -percent;
+     }
+   else
+     {
+       snprintf (textbuf, sizeof textbuf, "%d%%", percent);
++      textbuf[sizeof textbuf -1] = 0;
+       color.green = 0xffff;
+     }
+   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (qualitybar),
+diff --git a/pinentry/pinentry.c b/pinentry/pinentry.c
+index 35707ad..b49c95a 100644
+--- a/pinentry/pinentry.c
++++ b/pinentry/pinentry.c
+@@ -595,8 +595,11 @@ my_strusage( int level )
+             size_t n = 50 + strlen (this_pgmname);
+             str = malloc (n);
+             if (str)
+-              snprintf (str, n, "Usage: %s [options] (-h for help)",
+-                        this_pgmname);
++              {
++                snprintf (str, n, "Usage: %s [options] (-h for help)",
++                          this_pgmname);
++                str[n-1] = 0;
++              }
+           }
+         p = str;
+       }
+@@ -939,6 +942,7 @@ write_status_error (assuan_context_t ctx, pinentry_t pe)
+             pe->specific_err_loc? pe->specific_err_loc : "?",
+             pe->specific_err,
+             pe->specific_err_info? pe->specific_err_info : "");
++  buf[sizeof buf -1] = 0;
+   assuan_write_status (ctx, "ERROR", buf);
+ }
+ 
+@@ -1408,6 +1412,7 @@ cmd_getinfo (assuan_context_t ctx, char *line)
+     {
+ 
+       snprintf (buffer, sizeof buffer, "%lu", (unsigned long)getpid ());
++      buffer[sizeof buffer -1] = 0;
+       rc = assuan_send_data (ctx, buffer, strlen (buffer));
+     }
+   else if (!strcmp (line, "flavor"))
+@@ -1433,6 +1438,7 @@ cmd_getinfo (assuan_context_t ctx, char *line)
+         flags = "";
+ 
+       snprintf (buffer, sizeof buffer, "%s%s", s, flags);
++      buffer[sizeof buffer -1] = 0;
+       rc = assuan_send_data (ctx, buffer, strlen (buffer));
+     }
+   else
+diff --git a/w32/main.c b/w32/main.c
+index 8c19cb2..b35879d 100644
+--- a/w32/main.c
++++ b/w32/main.c
+@@ -83,6 +83,7 @@ w32_strerror (int ec)
+   /* There is only a wchar_t FormatMessage.  It does not make much
+      sense to play the conversion game; we print only the code.  */
+   snprintf (strerr, sizeof strerr, "ec=%d", ec);
++  strerr[sizeof strerr -1] = 0;
+ #else
+   FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, ec,
+                  MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
