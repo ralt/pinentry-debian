@@ -1,3 +1,323 @@
+2016-11-22  Werner Koch  <wk@gnupg.org>
+
+	Release 1.0.0.
+
+	emacs: Add curses handler stub.
+	* emacs/pinentry-emacs.c (curses_cmd_handler): New stub.
+
+2016-11-08  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	gnome3: Tighten up error messages when GNOME screensaver is absent.
+	* gnome3/pinentry-gnome3.c (pe_gnome_screen_locked): clean up error
+	messages when GNOME screensaver is absent or misbehaving.
+
+2016-11-07  Werner Koch  <wk@gnupg.org>
+
+	Add fail-safe string termination for snprintf.
+	* gtk+-2/pinentry-gtk-2.c (changed_text_handler): Make sure an
+	 snprintf buffer is always ternminated.
+	* pinentry/pinentry.c (my_strusage): Ditto.
+	(write_status_error): Ditto.
+	(cmd_getinfo): Ditto.
+	* w32/main.c (w32_strerror): Ditto.
+
+2016-11-07  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	gnome3: Avoid risk of uinitialized memory access.
+	* gnome3/pinentry-gnome3.c (_propagate_g_error_to_pinentry): Ensure
+	that pinentry->specific_err_info is null-terminated.
+
+	tty: Declare dummy curses_cmd_handler.
+	* tty/pinentry-tty.c: Declare a dummy handler for the
+	curses_cmd_handler for fallback.
+
+	gnome3: Fall back to curses if screensaver is locked.
+	* gnome3/pinentry-gnome3.c (pe_gnome_screen_locked): New Function.
+	Returns true only if we can talk to a GNOME screensaver over D-Bus and
+	it assures us that it is locked.
+	(main): If GNOME screensaver is locked, fall back to curses.
+
+2016-11-05  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	gnome3: Test if Gcr System Prompter is available at startup.
+	* gnome3/pinentry-gnome3.c (gcr_system_prompt_available): New. Tests
+	whether it is possible to create a GcrSystemPrompt.
+	(main): Use gcr_system_prompt_available() to decide whether to fall
+	back to curses or not.
+
+	build: Avoid unnecessary dependency on gtk+-2 for GNOME3 development.
+	* configure.ac: There is no reason to reject building the GNOME3
+	pinentry if GTK+-2 development libraries are not present.  GNOME3 does
+	not require GTK+-2.
+
+2016-11-05  Werner Koch  <wk@gnupg.org>
+
+	gnome3: Avoid using gnome and gcr symbol namespace.
+	* gnome3/pinentry-gnome3.c (struct _gnome3_run): Rename to
+	pe_gnome3_run_s.
+	(_gcr_prompt_password_done): Rename to pe_gcr_prompt_password_done.
+	(_gcr_prompt_confirm_done): Rename to pe_gcr_prompt_confirm_done.
+	(_gcr_timeout_done): Rename to pe_gcr_timeout_done.
+
+2016-11-05  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	gnome3: Honor timeout.
+	* gnome3/pinentry-gnome3.c (create_prompt): Use timeout to determine
+	how long to wait for Gcr to provide a system prompt before giving up.
+	(_gcr_timeout_done): New.  Record that a timeout has elapsed.
+	(gnome3_cmd_handler): Set up a timeout before launching the prompt,
+	and tear it down afterward.
+	(_gcr_prompt_password_done): Report timeout differently from normal
+	cancellation.
+	(_gcr_prompt_confirm_done): Report timeout differently from normal
+	cancellation.
+
+	gnome3: Convert password/confirmation to asynchronous model.
+	* gnome3/pinentry-gnome3.c (gnome3_cmd_handler): Convert main part of
+	password or confirmation fetching into asynchronous code by moving
+	completion into...
+	(_gcr_prompt_password_done): ... here and...
+	(_gcr_prompt_confirm_done): ... here.
+
+	qt: Report timeout.
+	* qt/pinentryconfirm.h (PinentryConfirm): Add _timed_out, timedOut().
+	* qt/pinentrydialog.h (PinentryDialog): Add _timed_out, timedOut().
+	* qt/pinentryconfirm.cpp (slotTimeout): Record elapsed timeout.
+	(PinentryConfirm): Initialize _timed_out to false.
+	(timedOut): New. Returns value of _timed_out.
+	* qt/pinentryDialog.cpp (slotTimeout): Record elapsed timeout.
+	(PinentryDialog): Initialize _timed_out to false.
+	(timedOut): New. Returns value of _timed_out.
+	* qt/main.cpp (qt_cmd_handler): Report if canceled due to timeout.
+
+	curses: Report timeout.
+	* pinentry/pinentry-curses.c (dialog_run): Report if canceled due to
+	timeout.
+
+	gtk2: Report timeout.
+	* gtk+-2/pinentry-gtk-2.c (create_window): Send pointer to pinentry
+	into timeout_cb.
+	(timeout_cb): Report if canceled due to timeout.
+
+	tty: Report timeout.
+	* tty/pinentry-tty.c (confirm): Report if canceled due to timeout.
+	(password): Report if canceled due to timeout.
+
+	gnome3: Propagate GError messages to pinentry.
+	* gnome3/pinentry-gnome3.c (_propagate_g_error_to_pinentry): New. Send
+	GError messages back out to pinentry error reporting.
+	(create_prompt): Use _propagate_g_error_to_pinentry on error.
+	(gnome3_cmd_handler): Use _propagate_g_error_to_pinentry on error.
+
+	gnome3: Set parent window.
+	* gnome3/pinentry-gnome3.c (create_prompt): Tell Gcr about the caller
+	window, if we know it.
+
+2016-11-05  Werner Koch  <wk@gnupg.org>
+
+	core: Add command getinfo/flavor.
+	* pinentry/pinentry.c: Inlcude pinentry-curses.h.
+	(cmd_getinfo): Add sub-command "flavor"
+
+2016-11-03  Daniel Kahn Gillmor  <dkg@fifthhorseman.net>
+
+	Convert to UTF-8.
+
+2016-10-11  Daiki Ueno  <ueno@gnu.org>
+
+	core: Don't report error on setting option 'allow-emacs-pinentry'.
+	Previously "OPTION allow-emacs-pinentry" returned an error if the Emacs
+	pinentry is not compiled in.  Since it is merely an option, it would
+	make more sense to just return OK.
+
+	Suggested-by: Werner Koch <wk@gnupg.org>
+
+2016-10-04  Werner Koch  <wk@gnupg.org>
+
+	gnome3: Drop unnecessary use of gtk.
+	* configure.ac: pinentry-gnome3 only needs gcr-base, not gcr.
+	* gnome3/pinentry-gnome3.c (main): Instead of testing whether GTK can
+	be loaded, check for DBUS_SESSION_BUS_ADDRESS.
+	(create_prompt): Use fprintf (stderr, ...) instead of g_warning (...),
+	to align with the rest of pinentry.c.
+
+	core: Add a way to print ERROR status lines.
+	* pinentry/pinentry.h (struct pinentry): New fields SPECIFIC_ERR_LOC
+	and SPECIFIC_ERR_INFO.
+	* pinentry/pinentry.c (pinentry_reset): Free the new field.
+	(write_status_error): New.
+	(cmd_getpin): Use new fields.
+	(cmd_confirm): Ditto.
+	* gnome3/pinentry-gnome3.c (create_prompt): Set error for failed
+	GCR_PROMPT.
+
+2016-10-03  Ineiev  <ineiev@gnu.org>
+
+	tty: Provide default text for "notok".
+	* tty/pinentry-tty.c (confirm): Provide default text for "notok".
+
+	tty: Fix underscore processing in accelerators.
+	* tty/pinentry-tty.c (button): Fix underscore processing in
+	accelerators.
+
+	tty: Refactor usage of tolower.
+	* tty/pinentry-tty.c (button): Apply tolower to the result.
+	* tty/pinentry-tty.c (confirm): Compare lowercased character instead of
+	converting them every time.
+
+2016-09-01  Werner Koch  <wk@gnupg.org>
+
+	curses: Return better error codes for bad ttynames.
+	* pinentry/pinentry-curses.c (dialog_create): Return better error
+	codes.
+
+2016-08-18  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Add SetWindowPos based foreground hack for Win.
+	* qt/pinentrydialog.cpp(raiseWindow): Add another fallback for
+	our foreground window hacks.
+
+2016-08-12  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Disable automatic wrap for desc and errors.
+	* qt/pinentrydialog.cpp (PinEntryDialog): Disable WordWrap.
+
+2016-08-12  Kristian Fiskerstrand  <kf@sumptuouscapital.com>
+
+	Qt: Append -std=c++11 if building against Qt 5.7.
+	 * m4/qt.m4: Append -std=c++11 to CFLAGS if building against Qt 5.7
+
+2016-08-04  Ben Kibbey  <bjk@luxsci.net>
+
+	Fix ncurses build.
+	* pinentry/Makefile.am: Add NCURSES_CFLAGS.
+
+2016-08-02  Justus Winter  <justus@g10code.com>
+
+	gtk2: Also grab the pointer.
+	* gtk+-2/pinentry-gtk-2.c (grab_pointer): New function.
+	(ungrab_keyboard): Rename to 'ungrab_inputs' and also release the
+	pointer grab.
+	(create_window): Also grab the pointer.
+
+	GnuPG-bug-id: 2430
+
+2016-08-01  Justus Winter  <justus@g10code.com>
+
+	gtk2: Be more persistent trying to grab the keyboard.
+	We seem to get the 'visibility-notify' event before X is willing to
+	let us grab the keyboard, insisting that the target window is not
+	viewable (sic).
+
+	* gtk+-2/pinentry-gtk-2.c (grab_keyboard): Retry grabbing the
+	keyboard.
+
+	GnuPG-bug-id: 2375
+
+	gtk2: Print keyboard grabbing errors.
+	* gtk+-2/pinentry-gtk-2.c (grab_strerror): New function.
+	(grab_keyboard): Use the new function to print the error.
+
+	gtk2: Avoid possible format string troubles.
+	* gtk+-2/pinentry-gtk-2.c (confirm_unhiding): Do not use message as
+	format string.
+
+2016-04-25  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Only use one line action for visibility.
+	* qt/pinentrydialog.cpp (PinEntryDialog::toggleVisibility): Toggle
+	both lines in repeat mode.
+	(PinEntryDialog::PinEntryDialog): Remove repeat line action.
+
+	Qt: Move qualitybar below repeat.
+	* qt/pinentrydialog.cpp (PinEntryDialog::PinEntryDialog): Move
+	quality bar below repeat.
+
+	Qt: Do not take icon from theme.
+	* qt/main.cpp (main): Revert changes to take icon from theme.
+
+2016-04-15  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Change qualitybar position back to below.
+	* qt/pinentrydialog.cpp (PinEntryDialog::PinEntryDialog): Change
+	position back to below the entry. Fix label alignment.
+
+	gtk2: Add a button to show/hide the passphrase.
+	* gtk+-2/pinentry-gtk-2.c (HIG_TINY): New.
+	 (confirm_unhiding): New.
+	 (show_hide_button_toggled): New.
+	 (create_show_hide_button): New.
+	 (create_window): Add a show/hide button.
+
+2016-04-14  Andre Heinecke  <aheinecke@intevation.de>
+
+	Revert "GTK: Add visibility toggle button"
+	This reverts commit 71b51e02cf20174ba7144765e985f7e889eaa429.
+
+	GTK: Add visibility toggle button.
+	* gtk+-2/pinentry-gtk-2.c (create_window): Create checkbox.
+	 (show_passphrase_toggled): New. Do the toggling.
+
+	Qt: Restrict list of icon themes to try.
+	* qt/main.cpp (main): Only search in select icon themes.
+
+	Qt: Add actions to make passphrase visible.
+	* qt/main.cpp (qt_cmd_handler): Support visibility tooltips.
+	* qt/pinentrydialog.cpp (PinEntryDialog::PinEntryDialog):
+	 Add a checkbox or line actions.
+	 (PinEntryDialog::checkRepeat): Renabed to textChanged.
+	 (PinEntryDialog::toggleVisibility): New. Toggle echo mode.
+	* qt/pinentrydialog.h: Update accordingly.
+
+	Add support for visibility string options.
+	* doc/pinentry.texi: Note new values.
+	* pinentry/pinentry.c (pinentry): Add default_cf_visi,
+	 default_tt_visi and default_tt_hide.
+	 (option_handler): Parse new values.
+	* pinentry/pinentry.h (pinentry_t): Add new values.
+
+	Qt: Implement repeat and improve grabbing.
+	The keyboard is now only grabbed if an edit has input focus.
+
+	* qt/main.cpp (qt_cmd_handler): Parse repeat values. Set repeat_okay.
+	* qt/pinentrydialog.cpp (PinentryDialog::PinentryDialog): Update
+	 layout. Add repeat label and edit. Connect focusChanged.
+	 (PinEntryDialog::hideEvent): Remove grabbing hack.
+	 (PinEntryDialog::focusChanged): New. Properly handle grabbing.
+	 (PinEntryDialog::checkRepeat): New. Enable Ok if repeat matches.
+	 (PinEntryDialog::repeatedPin): New. Getter for repeated pin.
+	 (PinEntryDialog::setRepeatErrorText): Setter for error.
+	* qt/pinentrydialog.h: Update accordingly.
+
+	Qt: Respect icon themes and only fallback to own.
+	* m4/qt.m4: Raise version requirement.
+	* qt/main.cpp (main): Use QIcon::fromTheme to get the icon.
+
+	Qt: Unify coding style and encoding.
+	* qt/main.cpp, qt/pinentryconfirm.cpp, qt/pinentryconfirm.h,
+	  qt/pinentrydialog.cpp, qt/pinentrydialog.h: Use KDE coding style.
+	  Encode as UTF-8.
+
+2016-03-04  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Fix Windows foreground window hacks for Qt5.
+	* qt/pinentrydialog.cpp: Use Q_OS_WIN instead of Q_WS_WIN
+	 (SetForegroundWindowEx): Handle new Wid type with casts.
+
+2016-02-15  Stef Walter  <stefw@redhat.com>
+
+	pinentry: Use stderr to print failures in password-cache.c.
+	Otherwise this interferes with the assuan protocol expected
+	on stdout.
+
+	GnuPG-bug-id: 2243
+
+2016-01-05  Andre Heinecke  <aheinecke@intevation.de>
+
+	Qt: Fix use after free in quality calculation.
+	* qt/pinentrydialog.cpp (PinEntryDialog::updateQuality): Keep UTF8
+	 byte array alive after conversion.
+
 2015-12-07  Werner Koch  <wk@gnupg.org>
 
 	Release 0.9.7.

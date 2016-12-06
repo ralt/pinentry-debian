@@ -1,3 +1,34 @@
+Noteworthy changes in version 1.0.0 (2016-11-22)
+------------------------------------------------
+
+ * Qt pinentry now supports repeat mode in one dialog.
+
+ * Qt and GTK pinentries now make it possible to show the entered
+   value.
+
+ * Qt pinentry now only grabs the keyboard if an entry field is
+   focused.
+
+ * Fixed foreground handling in pinentry-qt if compiled with Qt5 for
+   Windows.
+
+ * Fixed potential crash in Qt qualitybar calculation.
+
+ * GTK keyboard grabbing is now a bit more robust.  The cursor is
+   changed to a big dot as a visual indication that a pinentry has
+   popped up and is waiting for input.
+
+ * The GNOME pinentry now falls back to curses if it can't use the
+   GCR system prompter or a screenlock is active.
+
+ * Fixed error output for cached passwords.
+
+ * A show/hide passphrase button or checkbox is now available with
+   some pinentry flavors.
+
+ * Improved diagnostics and error codes.
+
+
 Noteworthy changes in version 0.9.7 (2015-12-07)
 ------------------------------------------------
 
@@ -196,7 +227,7 @@ Noteworthy changes in version 0.7.3 (2007-07-06)
  * New option --colors=FG,BG,SO to set the colors for the curses
    pinentry.
 
- * Pinentry-w32 does now basicaly work.  It needs some finishing
+ * Pinentry-w32 does now basically work.  It needs some finishing
    though.  For example the buttons should resize themself according
    to the size of the text.
 

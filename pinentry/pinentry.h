@@ -14,7 +14,7 @@
    General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.
+   along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef PINENTRY_H
@@ -109,7 +109,7 @@ struct pinentry
   int canceled;
 
   /* The frontend should set this to true if an error with the local
-     conversion occured. */
+     conversion occurred. */
   int locale_err;
 
   /* The frontend should set this to a gpg-error so that commands are
@@ -117,6 +117,13 @@ struct pinentry
      the fact that pinentry_cmd_handler_t returns the length of the
      passphrase or a negative error code.  */
   int specific_err;
+
+  /* The frontend may store a string with the error location here.  */
+  const char *specific_err_loc;
+
+  /* The frontend may store a malloced string here to emit an ERROR
+   * status code with this extra info along with SPECIFIC_ERR.  */
+  char *specific_err_info;
 
   /* The frontend should set this to true if the window close button
      has been used.  This flag is used in addition to a regular return
@@ -171,6 +178,15 @@ struct pinentry
   /* (Assuan: "OPTION default-pwmngr
      SAVE_PASSWORD_WITH_PASSWORD_MANAGER?").  */
   char *default_pwmngr;
+  /* (Assuan: "OPTION default-cf-visi
+     Do you really want to make your passphrase visible?").  */
+  char *default_cf_visi;
+  /* (Assuan: "OPTION default-tt-visi
+     Make passphrase visible?").  */
+  char *default_tt_visi;
+  /* (Assuan: "OPTION default-tt-hide
+     Hide passphrase").  */
+  char *default_tt_hide;
 
   /* Whether we are allowed to read the password from an external
      cache.  (Assuan: "OPTION allow-external-password-cache")  */
@@ -206,7 +222,7 @@ typedef struct pinentry *pinentry_t;
    PIN.  If PIN->pin is zero, request a confirmation, otherwise a PIN
    entry.  On confirmation, the function should return TRUE if
    confirmed, and FALSE otherwise.  On PIN entry, the function should
-   return -1 if an error occured or the user cancelled the operation
+   return -1 if an error occurred or the user cancelled the operation
    and 1 otherwise.  */
 typedef int (*pinentry_cmd_handler_t) (pinentry_t pin);
 

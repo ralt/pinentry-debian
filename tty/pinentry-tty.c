@@ -16,7 +16,7 @@
    General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.
+   along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <gpg-error.h>
 
 #include "pinentry.h"
 #include "memory.h"
@@ -84,10 +85,15 @@ button (char *text, char *default_text, FILE *ttyfo)
     {
       highlight = highlight + 1;
       if (*highlight == '_')
-	/* Escaped underscore.  */
-	continue;
-      else
-	break;
+        {
+          /* Escaped underscore.  Skip both characters.  */
+          highlight++;
+          continue;
+        }
+      if (!isalnum (*highlight))
+        /* Unusable accelerator.  */
+        continue;
+      break;
     }
 
   if (! highlight)
@@ -98,8 +104,8 @@ button (char *text, char *default_text, FILE *ttyfo)
 	highlight ++;
     }
 
-  if (! highlight)
-    /* Hmm, no alpha-num characters.  */
+  if (! *highlight)
+    /* Hmm, no alpha-numeric characters.  */
     {
       if (! default_text)
 	return 0;
@@ -111,7 +117,11 @@ button (char *text, char *default_text, FILE *ttyfo)
     {
       /* Skip accelerator prefix.  */
       if (*text == '_')
-	continue;
+        {
+          text ++;
+          if (! *text)
+            break;
+        }
 
       if (text == highlight)
 	fputs (UNDERLINE_START, ttyfo);
@@ -121,7 +131,7 @@ button (char *text, char *default_text, FILE *ttyfo)
     }
   fputc ('\n', ttyfo);
 
-  return *highlight;
+  return tolower (*highlight);
 }
 
 static void
@@ -202,7 +212,7 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 	cancel = button (pinentry->default_cancel, "Cancel", ttyfo);
 
       if (pinentry->notok)
-	notok = button (pinentry->notok, NULL, ttyfo);
+	notok = button (pinentry->notok, "No", ttyfo);
     }
 
   if (cbreak (fileno (ttyfi)) == -1)
@@ -223,17 +233,18 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
         {
           fputc ('[', ttyfo);
           if (ok)
-            fputc (tolower (ok), ttyfo);
+            fputc (ok, ttyfo);
           if (cancel)
-            fputc (tolower (cancel), ttyfo);
+            fputc (cancel, ttyfo);
           if (notok)
-            fputc (tolower (notok), ttyfo);
+            fputc (notok, ttyfo);
           fputs("]? ", ttyfo);
         }
       fflush (ttyfo);
 
       input = fgetc (ttyfi);
       fprintf (ttyfo, "%c\n", input);
+      input = tolower (input);
 
       if (input == EOF || input == 0x4)
 	/* End of file or control-d (= end of file).  */
@@ -251,18 +262,18 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 	  break;
 	}
 
-      if (cancel && (input == toupper (cancel) || input == tolower (cancel)))
+      if (cancel && input == cancel)
 	{
 	  pinentry->canceled = 1;
 	  ret = 0;
 	  break;
 	}
-      else if (notok && (input == toupper (notok) || input == tolower (notok)))
+      else if (notok && input == notok)
 	{
 	  ret = 0;
 	  break;
 	}
-      else if (ok && (input == toupper (ok) || input == tolower (ok)))
+      else if (ok && input == ok)
 	{
 	  ret = 1;
 	  break;
@@ -272,6 +283,11 @@ confirm (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
           fprintf (ttyfo, "Invalid selection.\n");
         }
     }
+
+#ifndef HAVE_DOSISH_SYSTEM
+  if (timed_out)
+    pinentry->specific_err = gpg_error (GPG_ERR_TIMEOUT);
+#endif
 
   tcsetattr (fileno(ttyfi), TCSANOW, &o_term);
 
@@ -437,6 +453,11 @@ password (pinentry_t pinentry, FILE *ttyfi, FILE *ttyfo)
 	secmem_free (passphrase);
     }
 
+#ifndef HAVE_DOSISH_SYSTEM
+  if (timed_out)
+    pinentry->specific_err = gpg_error (GPG_ERR_TIMEOUT);
+#endif
+
   return done;
 }
 
@@ -534,6 +555,10 @@ tty_cmd_handler(pinentry_t pinentry)
 
 
 pinentry_cmd_handler_t pinentry_cmd_handler = tty_cmd_handler;
+
+/* needed to link cleanly; should never be used except for comparison
+ * in pinentry/pinentry.c's cmd_getinfo(): */
+pinentry_cmd_handler_t curses_cmd_handler = NULL;
 
 
 int

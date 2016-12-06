@@ -26,7 +26,7 @@
  *
  * You should have received a copies of the GNU General Public License
  * and the GNU Lesser General Public License along with this program;
- * if not, see <http://www.gnu.org/licenses/>.
+ * if not, see <https://www.gnu.org/licenses/>.
  */
 
 /* This file may be used as part of GnuPG or standalone.  A GnuPG
@@ -845,7 +845,7 @@ find_long_option( ARGPARSE_ARGS *arg,
     /* Would be better if we can do a binary search, but it is not
        possible to reorder our option table because we would mess
        up our help strings - What we can do is: Build a nice option
-       lookup table wehn this function is first invoked */
+       lookup table when this function is first invoked */
     if( !*keyword )
 	return -1;
     for(i=0; opts[i].short_opt; i++ )
@@ -1490,10 +1490,10 @@ strusage( int level )
     case 10:
 #if ARGPARSE_GPL_VERSION == 3
       p = ("License GPLv3+: GNU GPL version 3 or later "
-           "<http://gnu.org/licenses/gpl.html>");
+           "<https://www.gnu.org/licenses/gpl.html>");
 #else
       p = ("License GPLv2+: GNU GPL version 2 or later "
-           "<http://gnu.org/licenses/>");
+           "<https://www.gnu.org/licenses/>");
 #endif
       break;
     case 11: p = "foo"; break;
@@ -1515,7 +1515,7 @@ ARGPARSE_STR2(ARGPARSE_GPL_VERSION)
 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
 "GNU General Public License for more details.\n\n"
 "You should have received a copy of the GNU General Public License\n"
-"along with this software.  If not, see <http://www.gnu.org/licenses/>.\n";
+"along with this software.  If not, see <https://www.gnu.org/licenses/>.\n";
       break;
     case 40: /* short and long usage */
     case 41: p = ""; break;

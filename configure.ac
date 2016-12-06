@@ -1,6 +1,6 @@
 # configure.ac
 # Copyright (C) 1999 Robert Bihlmeyer <robbe@orcus.priv.at>
-# Copyright (C) 2001, 2002, 2003, 2004, 2007, 2015 g10 Code GmbH
+# Copyright (C) 2001, 2002, 2003, 2004, 2007, 2015, 2016 g10 Code GmbH
 #
 # This file is part of PINENTRY.
 #
@@ -26,7 +26,7 @@ min_automake_version="1.14"
 # (git tag -s pinentry-n.m.k) and run "./autogen.sh --force".  Please
 # bump the version number immediately after the release, do another
 # commit, and a push so that the git magic is able to work.
-m4_define(mym4_version, [0.9.7])
+m4_define(mym4_version, [1.0.0])
 
 # Below is m4 magic to extract and compute the git revision number,
 # the decimalized short revision number, a beta version string and a
@@ -42,7 +42,7 @@ m4_define([mym4_betastring],
 m4_define([mym4_isgit],m4_if(mym4_betastring,[],[no],[yes]))
 m4_define([mym4_full_version],[mym4_version[]mym4_betastring])
 
-AC_INIT([pinentry],[mym4_full_version], [http://bugs.gnupg.org])
+AC_INIT([pinentry],[mym4_full_version], [https://bugs.gnupg.org])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AM_CONFIG_HEADER(config.h)
@@ -438,14 +438,13 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
 fi
 
 dnl check if the module gtk+-2.0 exists
-if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
+if test "$pinentry_gtk_2" != "no"; then
 	AC_MSG_CHECKING([for gtk+-2])
 	"${PKG_CONFIG}" --exists gtk+-2.0
 	if test $? -ne 0 ; then
 		AC_MSG_RESULT([no])
 		AC_MSG_WARN([pkg-config could not find the module gtk+-2.0])
 		pinentry_gtk_2=no
-		pinentry_gnome_3=no
 	else
 		AC_MSG_RESULT([yes])
 		AC_MSG_CHECKING([gtk+-2 version >= 2.4.0])
@@ -455,7 +454,6 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
 		if test $? -ne 0 ; then
 			AC_MSG_WARN([building GTK+-2 pinentry disabled])
 			pinentry_gtk_2=no
-			pinentry_gnome_3=no
 		else
 			GTK2CFLAGS=`"${PKG_CONFIG}" --cflags gtk+-2.0`
 			GTK2LIBS=`"${PKG_CONFIG}" --libs gtk+-2.0`
@@ -465,10 +463,6 @@ if test "$pinentry_gtk_2" != "no" -o "$pinentry_gnome_3" != "no"; then
 			then
 			  pinentry_gtk_2=yes
 			fi
-			if test "$pinentry_gnome_3" != "no"
-			then
-			  pinentry_gnome_3=yes
-			fi
 		fi
 	fi
 fi
@@ -476,15 +470,15 @@ AM_CONDITIONAL(BUILD_PINENTRY_GTK_2, test "$pinentry_gtk_2" = "yes")
 
 if test "$pinentry_gnome_3" != "no"; then
 	AC_MSG_CHECKING([for gcr])
-	"${PKG_CONFIG}" --exists gcr-3,gcr-base-3
+	"${PKG_CONFIG}" --exists gcr-base-3
 	if test $? -ne 0 ; then
 		AC_MSG_RESULT([no])
-		AC_MSG_WARN([pkg-config could not find the module gcr-3,gcr-base-3])
+		AC_MSG_WARN([pkg-config could not find the module gcr-base-3])
 		pinentry_gnome_3=no
 	else
 		AC_MSG_RESULT([yes])
-		GNOME3CFLAGS=`"${PKG_CONFIG}" --cflags gcr-3,gcr-base-3`
-		GNOME3LIBS=`"${PKG_CONFIG}" --libs gcr-3,gcr-base-3`
+		GNOME3CFLAGS=`"${PKG_CONFIG}" --cflags gcr-base-3`
+		GNOME3LIBS=`"${PKG_CONFIG}" --libs gcr-base-3`
 		AC_SUBST(GNOME3CFLAGS)
 		AC_SUBST(GNOME3LIBS)
 		AC_DEFINE(GCR_API_SUBJECT_TO_CHANGE, 1, [Nod nod])

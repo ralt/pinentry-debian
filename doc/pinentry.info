@@ -8,11 +8,11 @@ END-INFO-DIR-ENTRY
 
 This file documents the use and the internals of the PINENTRY.
 
-   This is edition 0.9.7, last updated 16 September 2015, of 'The
-'PINEntry' Manual', for version 0.9.7.
+   This is edition 1.0.0, last updated 3 November 2016, of 'The
+'PINEntry' Manual', for version 1.0.0.
 
    Published by g10 Code GmbH
-Hüttenstr.  61
+HÃ¼ttenstr.  61
 40699 Erkrath, Germany
 
    Copyright (C) 2002, 2005, 2015 g10 Code GmbH
@@ -547,6 +547,17 @@ relevant elements that describe the layout:
      then a check box with the specified string should be displayed.
      The check box must default to off.
 
+'default-cf-visi'
+     The string to show with a question if you want to confirm that the
+     user wants to change the visibility of the password.
+
+'default-tt-visi'
+     Tooltip for an action that would reveal the entered password.
+
+'default-tt-hide'
+     Tooltip for an action that would hide the password revealed by the
+     action labeld with 'default-tt-visi'
+
    When the handler is done, it should store the passphrase in 'pin', if
 appropriate.  This variable is allocated in secure memory.  Use
 'pinentry_setbufferlen' to size the buffer.
@@ -555,14 +566,14 @@ appropriate.  This variable is allocated in secure memory.  Use
 message mode or in passphrase mode.
 
    If the dialog is in message mode and the user pressed ok, return 1.
-Otherwise, return 0.  If an error occured, indicate this by setting it
+Otherwise, return 0.  If an error occurred, indicate this by setting it
 in 'specific_err' or setting 'locale_err' to '1' (for locale specific
 errors).  If the dialog was canceled, then the handler should set the
 'canceled' variable to '1'.  If the not ok button was pressed, don't do
 anything else.
 
    If the dialog is in passphrase mode return '1' if the user entered a
-password and pressed ok.  If an error occured, return '-1' and set
+password and pressed ok.  If an error occurred, return '-1' and set
 'specific_err' or 'locale_err', as above.  If the user canceled the
 dialog box, return '-1'.
 
@@ -971,13 +982,13 @@ Index
 
 
 Tag Table:
-Node: Top817
-Node: Using pinentry2242
-Node: Front ends4093
-Node: Protocol7763
-Node: Implementation Details16224
-Node: Copying23736
-Node: Option Index42915
-Node: Index43997
+Node: Top816
+Node: Using pinentry2241
+Node: Front ends4092
+Node: Protocol7762
+Node: Implementation Details16223
+Node: Copying24105
+Node: Option Index43284
+Node: Index44366
 
 End Tag Table

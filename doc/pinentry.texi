@@ -64,7 +64,7 @@ This is edition @value{EDITION}, last updated @value{UPDATED}, of
 @cite{The `PINEntry' Manual}, for version @value{VERSION}.
 @sp 1
 Published by g10 Code GmbH@*
-Hüttenstr. 61@*
+HÃ¼ttenstr. 61@*
 40699 Erkrath, Germany
 @sp 1
 @copyrightnotice{}
@@ -690,6 +690,17 @@ above condition is true and @code{tried_password_cache} is false, then
 a check box with the specified string should be displayed.  The check
 box must default to off.
 
+@item @code{default-cf-visi}
+The string to show with a question if you want to confirm that
+the user wants to change the visibility of the password.
+
+@item @code{default-tt-visi}
+Tooltip for an action that would reveal the entered password.
+
+@item @code{default-tt-hide}
+Tooltip for an action that would hide the password revealed
+by the action labeld with @code{default-tt-visi}
+
 @end table
 
 When the handler is done, it should store the passphrase in
@@ -700,14 +711,14 @@ The actual return code is dependent on whether the dialog is in
 message mode or in passphrase mode.
 
 If the dialog is in message mode and the user pressed ok, return 1.
-Otherwise, return 0.  If an error occured, indicate this by setting it
+Otherwise, return 0.  If an error occurred, indicate this by setting it
 in @code{specific_err} or setting @code{locale_err} to @code{1} (for
 locale specific errors).  If the dialog was canceled, then the handler
 should set the @code{canceled} variable to @code{1}.  If the not ok
 button was pressed, don't do anything else.
 
 If the dialog is in passphrase mode return @code{1} if the user
-entered a password and pressed ok.  If an error occured, return
+entered a password and pressed ok.  If an error occurred, return
 @code{-1} and set @code{specific_err} or @code{locale_err}, as above.
 If the user canceled the dialog box, return @code{-1}.
 

@@ -1,5 +1,5 @@
 /* pinentry.c - The PIN entry support library
-   Copyright (C) 2002, 2003, 2007, 2008, 2010, 2015 g10 Code GmbH
+   Copyright (C) 2002, 2003, 2007, 2008, 2010, 2015, 2016 g10 Code GmbH
 
    This file is part of PINENTRY.
 
@@ -14,7 +14,7 @@
    General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.
+   along with this program; if not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -52,7 +52,10 @@
 #include "password-cache.h"
 
 #ifdef INSIDE_EMACS
-#include "pinentry-emacs.h"
+# include "pinentry-emacs.h"
+#endif
+#ifdef FALLBACK_CURSES
+# include "pinentry-curses.h"
 #endif
 
 #ifdef HAVE_W32CE_SYSTEM
@@ -79,6 +82,9 @@ pinentry_reset (int use_defaults)
   char *default_cancel = pinentry.default_cancel;
   char *default_prompt = pinentry.default_prompt;
   char *default_pwmngr = pinentry.default_pwmngr;
+  char *default_cf_visi = pinentry.default_cf_visi;
+  char *default_tt_visi = pinentry.default_tt_visi;
+  char *default_tt_hide = pinentry.default_tt_hide;
   char *touch_file = pinentry.touch_file;
 
   /* These options are set from the command line.  Don't reset
@@ -93,7 +99,7 @@ pinentry_reset (int use_defaults)
   pinentry_color_t color_so = pinentry.color_so;
   int color_so_bright = pinentry.color_so_bright;
 
-  int timout = pinentry.timeout;
+  int timeout = pinentry.timeout;
 
   char *invisible_char = pinentry.invisible_char;
 
@@ -109,6 +115,9 @@ pinentry_reset (int use_defaults)
       free (pinentry.default_cancel);
       free (pinentry.default_prompt);
       free (pinentry.default_pwmngr);
+      free (pinentry.default_cf_visi);
+      free (pinentry.default_tt_visi);
+      free (pinentry.default_tt_hide);
       free (pinentry.touch_file);
       free (pinentry.display);
     }
@@ -126,6 +135,7 @@ pinentry_reset (int use_defaults)
   free (pinentry.quality_bar);
   free (pinentry.quality_bar_tt);
   free (pinentry.keyinfo);
+  free (pinentry.specific_err_info);
 
   /* Reset the pinentry structure.  */
   memset (&pinentry, 0, sizeof (pinentry));
@@ -162,6 +172,9 @@ pinentry_reset (int use_defaults)
       pinentry.default_cancel = default_cancel;
       pinentry.default_prompt = default_prompt;
       pinentry.default_pwmngr = default_pwmngr;
+      pinentry.default_cf_visi = default_cf_visi;
+      pinentry.default_tt_visi = default_tt_visi;
+      pinentry.default_tt_hide = default_tt_hide;
       pinentry.touch_file = touch_file;
 
       pinentry.debug = debug;
@@ -174,7 +187,7 @@ pinentry_reset (int use_defaults)
       pinentry.color_so = color_so;
       pinentry.color_so_bright = color_so_bright;
 
-      pinentry.timeout = timout;
+      pinentry.timeout = timeout;
     }
 }
 
@@ -579,7 +592,7 @@ my_strusage( int level )
     case 11: p = this_pgmname; break;
     case 12: p = "pinentry"; break;
     case 13: p = PACKAGE_VERSION; break;
-    case 14: p = "Copyright (C) 2015 g10 Code GmbH"; break;
+    case 14: p = "Copyright (C) 2016 g10 Code GmbH"; break;
     case 19: p = "Please report bugs to <" PACKAGE_BUGREPORT ">.\n"; break;
     case 1:
     case 40:
@@ -591,8 +604,11 @@ my_strusage( int level )
             size_t n = 50 + strlen (this_pgmname);
             str = malloc (n);
             if (str)
-              snprintf (str, n, "Usage: %s [options] (-h for help)",
-                        this_pgmname);
+              {
+                snprintf (str, n, "Usage: %s [options] (-h for help)",
+                          this_pgmname);
+                str[n-1] = 0;
+              }
           }
         p = str;
       }
@@ -873,6 +889,24 @@ option_handler (assuan_context_t ctx, const char *key, const char *value)
       if (!pinentry.default_pwmngr)
 	return gpg_error_from_syserror ();
     }
+  else if (!strcmp (key, "default-cf-visi"))
+    {
+      pinentry.default_cf_visi = strdup (value);
+      if (!pinentry.default_cf_visi)
+	return gpg_error_from_syserror ();
+    }
+  else if (!strcmp (key, "default-tt-visi"))
+    {
+      pinentry.default_tt_visi = strdup (value);
+      if (!pinentry.default_tt_visi)
+	return gpg_error_from_syserror ();
+    }
+  else if (!strcmp (key, "default-tt-hide"))
+    {
+      pinentry.default_tt_hide = strdup (value);
+      if (!pinentry.default_tt_hide)
+	return gpg_error_from_syserror ();
+    }
   else if (!strcmp (key, "allow-external-password-cache") && !*value)
     {
       pinentry.allow_external_password_cache = 1;
@@ -882,8 +916,6 @@ option_handler (assuan_context_t ctx, const char *key, const char *value)
     {
 #ifdef INSIDE_EMACS
       pinentry_enable_emacs_cmd_handler ();
-#else
-      return gpg_error (GPG_ERR_NOT_SUPPORTED);
 #endif
     }
   else if (!strcmp (key, "invisible-char"))
@@ -917,6 +949,28 @@ strcpy_escaped (char *d, const char *s)
         *d++ = *s++;
     }
   *d = 0;
+}
+
+
+static void
+write_status_error (assuan_context_t ctx, pinentry_t pe)
+{
+  char buf[500];
+  const char *pgm;
+
+  pgm = strchr (this_pgmname, '-');
+  if (pgm && pgm[1])
+    pgm++;
+  else
+    pgm = this_pgmname;
+
+  snprintf (buf, sizeof buf, "%s.%s %d %s",
+            pgm,
+            pe->specific_err_loc? pe->specific_err_loc : "?",
+            pe->specific_err,
+            pe->specific_err_info? pe->specific_err_info : "");
+  buf[sizeof buf -1] = 0;
+  assuan_write_status (ctx, "ERROR", buf);
 }
 
 
@@ -1234,6 +1288,9 @@ cmd_getpin (assuan_context_t ctx, char *line)
     }
   pinentry.locale_err = 0;
   pinentry.specific_err = 0;
+  pinentry.specific_err_loc = NULL;
+  free (pinentry.specific_err_info);
+  pinentry.specific_err_info = NULL;
   pinentry.close_button = 0;
   pinentry.repeat_okay = 0;
   pinentry.one_button = 0;
@@ -1262,7 +1319,10 @@ cmd_getpin (assuan_context_t ctx, char *line)
     {
       pinentry_setbuffer_clear (&pinentry);
       if (pinentry.specific_err)
-        return pinentry.specific_err;
+        {
+          write_status_error (ctx, &pinentry);
+          return pinentry.specific_err;
+        }
       return (pinentry.locale_err
 	      ? gpg_error (GPG_ERR_LOCALE_PROBLEM)
 	      : gpg_error (GPG_ERR_CANCELED));
@@ -1310,6 +1370,9 @@ cmd_confirm (assuan_context_t ctx, char *line)
   pinentry.close_button = 0;
   pinentry.locale_err = 0;
   pinentry.specific_err = 0;
+  pinentry.specific_err_loc = NULL;
+  free (pinentry.specific_err_info);
+  pinentry.specific_err_info = NULL;
   pinentry.canceled = 0;
   pinentry_setbuffer_clear (&pinentry);
   result = (*pinentry_cmd_handler) (&pinentry);
@@ -1326,7 +1389,10 @@ cmd_confirm (assuan_context_t ctx, char *line)
     return 0;
 
   if (pinentry.specific_err)
-    return pinentry.specific_err;
+    {
+      write_status_error (ctx, &pinentry);
+      return pinentry.specific_err;
+    }
 
   if (pinentry.locale_err)
     return gpg_error (GPG_ERR_LOCALE_PROBLEM);
@@ -1355,23 +1421,52 @@ cmd_message (assuan_context_t ctx, char *line)
 
      version     - Return the version of the program.
      pid         - Return the process id of the server.
+     flavor      - Return information about the used pinentry flavor
  */
 static gpg_error_t
 cmd_getinfo (assuan_context_t ctx, char *line)
 {
   int rc;
+  const char *s;
+  char buffer[100];
 
   if (!strcmp (line, "version"))
     {
-      const char *s = VERSION;
+      s = VERSION;
       rc = assuan_send_data (ctx, s, strlen (s));
     }
   else if (!strcmp (line, "pid"))
     {
-      char numbuf[50];
 
-      snprintf (numbuf, sizeof numbuf, "%lu", (unsigned long)getpid ());
-      rc = assuan_send_data (ctx, numbuf, strlen (numbuf));
+      snprintf (buffer, sizeof buffer, "%lu", (unsigned long)getpid ());
+      buffer[sizeof buffer -1] = 0;
+      rc = assuan_send_data (ctx, buffer, strlen (buffer));
+    }
+  else if (!strcmp (line, "flavor"))
+    {
+      const char *flags;
+
+      if (!strncmp (this_pgmname, "pinentry-", 9) && this_pgmname[9])
+        s = this_pgmname + 9;
+      else
+        s = this_pgmname;
+
+      if (0)
+        ;
+#ifdef INSIDE_EMACS
+      else if (pinentry_cmd_handler == emacs_cmd_handler)
+        flags = ":emacs";
+#endif
+#ifdef FALLBACK_CURSES
+      else if (pinentry_cmd_handler == curses_cmd_handler)
+        flags = ":curses";
+#endif
+      else
+        flags = "";
+
+      snprintf (buffer, sizeof buffer, "%s%s", s, flags);
+      buffer[sizeof buffer -1] = 0;
+      rc = assuan_send_data (ctx, buffer, strlen (buffer));
     }
   else
     rc = gpg_error (GPG_ERR_ASS_PARAMETER);
