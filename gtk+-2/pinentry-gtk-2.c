@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gpg-error.h>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -64,6 +65,7 @@ static int passphrase_ok;
 typedef enum { CONFIRM_CANCEL, CONFIRM_OK, CONFIRM_NOTOK } confirm_value_t;
 static confirm_value_t confirm_value;
 
+static GtkWindow *mainwindow;
 static GtkWidget *entry;
 static GtkWidget *repeat_entry;
 static GtkWidget *error_label;
@@ -76,6 +78,7 @@ static guint timeout_source;
 static int confirm_mode;
 
 /* Gnome hig small and large space in pixels.  */
+#define HIG_TINY       2
 #define HIG_SMALL      6
 #define HIG_LARGE     12
 
@@ -113,7 +116,7 @@ constrain_size (GtkWidget *win, GtkRequisition *req, gpointer data)
 /* Realize the window as transient if we grab the keyboard.  This
    makes the window a modal dialog to the root window, which helps the
    window manager.  See the following quote from:
-   http://standards.freedesktop.org/wm-spec/wm-spec-1.4.html#id2512420
+   https://standards.freedesktop.org/wm-spec/wm-spec-1.4.html#id2512420
 
    Implementing enhanced support for application transient windows
 
@@ -143,33 +146,99 @@ make_transient (GtkWidget *win, GdkEvent *event, gpointer data)
 }
 
 
+/* Convert GdkGrabStatus to string.  */
+static const char *
+grab_strerror (GdkGrabStatus status)
+{
+  switch (status) {
+  case GDK_GRAB_SUCCESS: return "success";
+  case GDK_GRAB_ALREADY_GRABBED: return "already grabbed";
+  case GDK_GRAB_INVALID_TIME: return "invalid time";
+  case GDK_GRAB_NOT_VIEWABLE: return "not viewable";
+  case GDK_GRAB_FROZEN: return "frozen";
+  }
+  return "unknown";
+}
+
+
 /* Grab the keyboard for maximum security */
 static int
 grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
 {
+  GdkGrabStatus err;
+  int tries = 0, max_tries = 4096;
   (void)data;
 
   if (! pinentry->grab)
     return FALSE;
 
-  if (gdk_keyboard_grab (gtk_widget_get_window (win),
-			 FALSE, gdk_event_get_time (event)))
+  do
+    err = gdk_keyboard_grab (gtk_widget_get_window (win),
+                             FALSE, gdk_event_get_time (event));
+  while (tries++ < max_tries && err == GDK_GRAB_NOT_VIEWABLE);
+
+  if (err)
     {
-      g_critical ("could not grab keyboard");
+      g_critical ("could not grab keyboard: %s (%d)",
+                  grab_strerror (err), err);
       grab_failed = 1;
       gtk_main_quit ();
     }
+
+  if (tries > 1)
+    g_warning ("it took %d tries to grab the keyboard", tries);
+
   return FALSE;
 }
 
 
-/* Remove grab.  */
+/* Grab the pointer to prevent the user from accidentally locking
+   herself out of her graphical interface.  */
 static int
-ungrab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
+grab_pointer (GtkWidget *win, GdkEvent *event, gpointer data)
 {
+  GdkGrabStatus err;
+  GdkCursor *cursor;
+  int tries = 0, max_tries = 4096;
   (void)data;
 
+  /* Change the cursor for the duration of the grab to indicate that
+     something is going on.  */
+  /* XXX: It would be nice to have a key cursor, unfortunately there
+     is none readily available.  */
+  cursor = gdk_cursor_new_for_display (gtk_widget_get_display (win),
+                                       GDK_DOT);
+
+  do
+    err = gdk_pointer_grab (gtk_widget_get_window (win),
+                            TRUE, 0 /* event mask */,
+                            NULL /* confine to */,
+                            cursor,
+                            gdk_event_get_time (event));
+  while (tries++ < max_tries && err == GDK_GRAB_NOT_VIEWABLE);
+
+  if (err)
+    {
+      g_critical ("could not grab pointer: %s (%d)",
+                  grab_strerror (err), err);
+      grab_failed = 1;
+      gtk_main_quit ();
+    }
+
+  if (tries > 1)
+    g_warning ("it took %d tries to grab the pointer", tries);
+
+  return FALSE;
+}
+
+
+/* Remove all grabs and restore the windows transient state.  */
+static int
+ungrab_inputs (GtkWidget *win, GdkEvent *event, gpointer data)
+{
+  (void)data;
   gdk_keyboard_ungrab (gdk_event_get_time (event));
+  gdk_pointer_ungrab (gdk_event_get_time (event));
   /* Unmake window transient for the root window.  */
   /* gdk_window_set_transient_for cannot be used with parent = NULL to
      unset transient hint (unlike gtk_ version which can).  Replacement
@@ -329,12 +398,14 @@ changed_text_handler (GtkWidget *widget)
   else if (percent < 0)
     {
       snprintf (textbuf, sizeof textbuf, "(%d%%)", -percent);
+      textbuf[sizeof textbuf -1] = 0;
       color.red = 0xffff;
       percent = -percent;
     }
   else
     {
       snprintf (textbuf, sizeof textbuf, "%d%%", percent);
+      textbuf[sizeof textbuf -1] = 0;
       color.green = 0xffff;
     }
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (qualitybar),
@@ -356,16 +427,125 @@ may_save_passphrase_toggled (GtkWidget *widget, gpointer data)
 #endif
 
 
+/* Return TRUE if it is okay to unhide the entry.  */
+static int
+confirm_unhiding (void)
+{
+  const char *s;
+  GtkWidget *dialog;
+  int result;
+  char *message, *show_btn_label;
+
+  s = gtk_entry_get_text (GTK_ENTRY (entry));
+  if (!s || !*s)
+    return TRUE;  /* Nothing entered - go ahead an unhide.  */
+
+  message = pinentry_utf8_validate (pinentry->default_cf_visi);
+  if (!message)
+    {
+      message = g_strdup ("Do you really want to make "
+                          "your passphrase visible on the screen?");
+    }
+
+  show_btn_label = pinentry_utf8_validate (pinentry->default_tt_visi);
+  if (!show_btn_label)
+    {
+      show_btn_label = g_strdup ("Make passphrase visible");
+    }
+
+  dialog = gtk_message_dialog_new
+    (GTK_WINDOW (mainwindow),
+     GTK_DIALOG_MODAL,
+     GTK_MESSAGE_WARNING,
+     GTK_BUTTONS_NONE,
+     "%s", message);
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                          show_btn_label, GTK_RESPONSE_OK,
+                          NULL);
+  result = (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_OK);
+  gtk_widget_destroy (dialog);
+  g_free (message);
+  g_free (show_btn_label);
+
+  return result;
+}
+
+
+static void
+show_hide_button_toggled (GtkWidget *widget, gpointer data)
+{
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON (widget);
+  GtkWidget *label = data;
+  const char *text;
+  char *tooltip;
+  gboolean reveal;
+
+  if (!gtk_toggle_button_get_active (button) || !confirm_unhiding ())
+    {
+      text = "<span font=\"Monospace\" size=\"xx-small\">abc</span>";
+      tooltip = pinentry_utf8_validate (pinentry->default_tt_visi);
+      if (!tooltip)
+        {
+          tooltip = g_strdup ("Make the passphrase visible");
+        }
+      gtk_toggle_button_set_active (button, FALSE);
+      reveal = FALSE;
+    }
+  else
+    {
+      text = "<span font=\"Monospace\" size=\"xx-small\">***</span>";
+      tooltip = pinentry_utf8_validate (pinentry->default_tt_hide);
+      if (!tooltip)
+        {
+          tooltip = g_strdup ("Hide the passphrase");
+        }
+      reveal = TRUE;
+    }
+
+  gtk_entry_set_visibility (GTK_ENTRY (entry), reveal);
+  if (repeat_entry)
+    {
+      gtk_entry_set_visibility (GTK_ENTRY (repeat_entry), reveal);
+    }
+
+  gtk_label_set_markup (GTK_LABEL(label), text);
+  gtk_widget_set_tooltip_text (GTK_WIDGET(button), tooltip);
+  g_free (tooltip);
+}
+
+
 static gboolean
 timeout_cb (gpointer data)
 {
-  (void)data;
+  pinentry_t pe = (pinentry_t)data;
   if (!got_input)
-    gtk_main_quit ();
+    {
+      gtk_main_quit ();
+      if (pe)
+        pe->specific_err = gpg_error (GPG_ERR_TIMEOUT);
+    }
 
   /* Don't run again.  */
   timeout_source = 0;
   return FALSE;
+}
+
+
+static GtkWidget *
+create_show_hide_button (void)
+{
+  GtkWidget *button, *label;
+
+  label = gtk_label_new (NULL);
+  button = gtk_toggle_button_new ();
+  show_hide_button_toggled (button, label);
+  gtk_container_add (GTK_CONTAINER (button), label);
+  g_signal_connect (G_OBJECT (button), "toggled",
+                    G_CALLBACK (show_hide_button_toggled),
+                    label);
+
+  return button;
 }
 
 
@@ -387,6 +567,7 @@ create_window (pinentry_t ctx)
   /* FIXME: check the grabbing code against the one we used with the
      old gpg-agent */
   win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  mainwindow = GTK_WINDOW (win);
   acc = gtk_accel_group_new ();
 
   g_signal_connect (G_OBJECT (win), "delete_event",
@@ -414,9 +595,13 @@ create_window (pinentry_t ctx)
                         ? "visibility-notify-event"
                         : "focus-in-event",
 			G_CALLBACK (grab_keyboard), NULL);
+      if (pinentry->grab)
+        g_signal_connect (G_OBJECT (win),
+                          "visibility-notify-event",
+                          G_CALLBACK (grab_pointer), NULL);
       g_signal_connect (G_OBJECT (win),
 			pinentry->grab ? "unmap-event" : "focus-out-event",
-			G_CALLBACK (ungrab_keyboard), NULL);
+			G_CALLBACK (ungrab_inputs), NULL);
     }
   gtk_window_add_accel_group (GTK_WINDOW (win), acc);
 
@@ -474,7 +659,7 @@ create_window (pinentry_t ctx)
   if (!confirm_mode)
     {
       int nrow;
-      GtkWidget* table;
+      GtkWidget *table, *hbox;
 
       nrow = 1;
       if (pinentry->quality_bar)
@@ -515,7 +700,14 @@ create_window (pinentry_t ctx)
       gtk_widget_set_size_request (entry, 200, -1);
       g_signal_connect (G_OBJECT (entry), "changed",
                         G_CALLBACK (changed_text_handler), entry);
-      gtk_table_attach (GTK_TABLE (table), entry, 1, 2, nrow, nrow+1,
+      hbox = gtk_hbox_new (FALSE, HIG_TINY);
+      gtk_box_pack_start (GTK_BOX (hbox), entry, TRUE, TRUE, 0);
+      /* There was a wish in issue #2139 that this button should not
+         be part of the tab order (focus_order).
+         This should still be added. */
+      w = create_show_hide_button ();
+      gtk_box_pack_end (GTK_BOX (hbox), w, FALSE, FALSE, 0);
+      gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, nrow, nrow+1,
                         GTK_EXPAND|GTK_FILL, GTK_EXPAND|GTK_FILL, 0, 0);
       gtk_widget_show (entry);
       nrow++;
@@ -688,7 +880,7 @@ create_window (pinentry_t ctx)
   gtk_window_present (GTK_WINDOW (win));  /* Make sure it has the focus.  */
 
   if (pinentry->timeout > 0)
-    timeout_source = g_timeout_add (pinentry->timeout*1000, timeout_cb, NULL);
+    timeout_source = g_timeout_add (pinentry->timeout*1000, timeout_cb, pinentry);
 
   return win;
 }

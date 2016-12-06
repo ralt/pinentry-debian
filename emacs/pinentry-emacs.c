@@ -14,7 +14,7 @@
    General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, see <http://www.gnu.org/licenses/>.
+   along with this program; if not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -28,6 +28,11 @@
 #include "pinentry-emacs.h"
 
 pinentry_cmd_handler_t pinentry_cmd_handler = emacs_cmd_handler;
+
+/* needed to link cleanly; should never be used except for comparison
+ * in pinentry/pinentry.c's cmd_getinfo(): */
+pinentry_cmd_handler_t curses_cmd_handler = NULL;
+
 
 
 int

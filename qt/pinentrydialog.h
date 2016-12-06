@@ -1,10 +1,11 @@
-/*
-   pinentrydialog.h - A (not yet) secure Qt 4 dialog for PIN entry.
+/* pinentrydialog.h - A (not yet) secure Qt 4 dialog for PIN entry.
 
-   Copyright (C) 2002, 2008 Klar�lvdalens Datakonsult AB (KDAB)
+   Copyright (C) 2002, 2008 Klarälvdalens Datakonsult AB (KDAB)
    Copyright 2007 Ingo Klöcker
+   Copyright 2016 Intevation GmbH
 
    Written by Steffen Hansen <steffen@klaralvdalens-datakonsult.se>.
+   Modified by Andre Heinecke <aheinecke@intevation.de>
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License as
@@ -35,65 +36,85 @@ class QPushButton;
 class QLineEdit;
 class QString;
 class QProgressBar;
+class QCheckBox;
+class QAction;
 
-QPixmap icon( QStyle::StandardPixmap which = QStyle::SP_CustomBase );
+QPixmap icon(QStyle::StandardPixmap which = QStyle::SP_CustomBase);
 
-void raiseWindow( QWidget* w );
+void raiseWindow(QWidget *w);
 
-class PinEntryDialog : public QDialog {
-  Q_OBJECT
+class PinEntryDialog : public QDialog
+{
+    Q_OBJECT
 
-  Q_PROPERTY( QString description READ description WRITE setDescription )
-  Q_PROPERTY( QString error READ error WRITE setError )
-  Q_PROPERTY( QString pin READ pin WRITE setPin )
-  Q_PROPERTY( QString prompt READ prompt WRITE setPrompt )
+    Q_PROPERTY(QString description READ description WRITE setDescription)
+    Q_PROPERTY(QString error READ error WRITE setError)
+    Q_PROPERTY(QString pin READ pin WRITE setPin)
+    Q_PROPERTY(QString prompt READ prompt WRITE setPrompt)
 public:
-  friend class PinEntryController; // TODO: remove when assuan lets me use Qt eventloop.
-  explicit PinEntryDialog( QWidget* parent = 0, const char* name = 0, int timeout = 0, bool modal = false, bool enable_quality_bar = false );
+    explicit PinEntryDialog(QWidget *parent = 0, const char *name = 0,
+                            int timeout = 0, bool modal = false,
+                            bool enable_quality_bar = false,
+                            const QString &repeatString = QString(),
+                            const QString &visibiltyTT = QString(),
+                            const QString &hideTT = QString());
 
-  void setDescription( const QString& );
-  QString description() const;
+    void setDescription(const QString &);
+    QString description() const;
 
-  void setError( const QString& );
-  QString error() const;
+    void setError(const QString &);
+    QString error() const;
 
-  void setPin( const QString & );
-  QString pin() const;
+    void setPin(const QString &);
+    QString pin() const;
 
-  void setPrompt( const QString& );
-  QString prompt() const;
+    QString repeatedPin() const;
+    void setRepeatErrorText(const QString &);
 
-  void setOkText( const QString& );
-  void setCancelText( const QString& );
+    void setPrompt(const QString &);
+    QString prompt() const;
 
-  void setQualityBar( const QString& );
-  void setQualityBarTT( const QString& );
+    void setOkText(const QString &);
+    void setCancelText(const QString &);
 
-  void setPinentryInfo (pinentry_t);
+    void setQualityBar(const QString &);
+    void setQualityBarTT(const QString &);
 
-public slots:
-  void updateQuality(const QString&);
-  void slotTimeout();
+    void setPinentryInfo(pinentry_t);
+
+    bool timedOut() const;
+
+protected slots:
+    void updateQuality(const QString &);
+    void slotTimeout();
+    void textChanged(const QString &);
+    void focusChanged(QWidget *old, QWidget *now);
+    void toggleVisibility();
 
 protected:
-  /* reimp */ void showEvent( QShowEvent* event );
-  /* reimp */ void hideEvent( QHideEvent* );
-  /* reimp */ void paintEvent( QPaintEvent* event );
+    /* reimp */ void showEvent(QShowEvent *event);
 
 private:
-  QLabel*    _icon;
-  QLabel*    _desc;
-  QLabel*    _error;
-  QLabel*    _prompt;
-  QLabel*    _quality_bar_label;
-  QProgressBar* _quality_bar;
-  QLineEdit* _edit;
-  QPushButton* _ok;
-  QPushButton* _cancel;
-  bool       _grabbed;
-  bool       _have_quality_bar;
-  pinentry_t _pinentry_info;
-  QTimer*    _timer;
+    QLabel    *_icon;
+    QLabel    *_desc;
+    QLabel    *_error;
+    QLabel    *_prompt;
+    QLabel    *_quality_bar_label;
+    QProgressBar *_quality_bar;
+    QLineEdit *_edit;
+    QLineEdit *mRepeat;
+    QPushButton *_ok;
+    QPushButton *_cancel;
+    bool       _grabbed;
+    bool       _have_quality_bar;
+    bool       _timed_out;
+    pinentry_t _pinentry_info;
+    QTimer    *_timer;
+    QString    mRepeatError,
+               mVisibilityTT,
+               mHideTT;
+    QAction   *mVisiActionEdit;
+    QCheckBox *mVisiCB;
 };
 
 #endif // __PINENTRYDIALOG_H__
