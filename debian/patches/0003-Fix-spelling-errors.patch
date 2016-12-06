@@ -1,0 +1,28 @@
+From: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+Date: Tue, 6 Dec 2016 12:04:25 -0500
+Subject: Fix spelling errors.
+
+--
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+
+(cherry picked from commit cc0d783cf03a814df48c03ddcbb4d09115e9596d)
+---
+ doc/pinentry.texi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/doc/pinentry.texi b/doc/pinentry.texi
+index feef4f0..23c1c5e 100644
+--- a/doc/pinentry.texi
++++ b/doc/pinentry.texi
+@@ -386,9 +386,9 @@ a GETPIN or CONFIRM, and is only displayed when asking for a PIN.
+ @item Enable a passphrase quality indicator
+ Adds a quality indicator to the GETPIN window.  This indicator is
+ updated as the passphrase is typed.  The clients needs to implement an
+-inquiry named "QUALITY" which gets passed the current passpharse
++inquiry named "QUALITY" which gets passed the current passphrase
+ (percent-plus escaped) and should send back a string with a single
+-numerical vauelue between -100 and 100.  Negative values will be
++numerical value between -100 and 100.  Negative values will be
+ displayed in red.
+ @example
+   C: SETQUALITYBAR
