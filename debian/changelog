@@ -1,3 +1,10 @@
+pinentry (1.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+  * removed most patches, already imported upstream.
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 05 Dec 2016 22:24:12 -0500
+
 pinentry (0.9.7-9) unstable; urgency=medium
 
   * more upstream patches (pinentry-gnome3 now falls back to curses when
