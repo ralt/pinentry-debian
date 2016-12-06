@@ -18,7 +18,7 @@ See discussion at:
  2 files changed, 3 insertions(+), 5 deletions(-)
 
 diff --git a/autogen.sh b/autogen.sh
-index 7effd56..5e8ca15 100755
+index 37edfc6..2dff9cd 100755
 --- a/autogen.sh
 +++ b/autogen.sh
 @@ -228,8 +228,8 @@ if [ "$myhost" = "find-version" ]; then
@@ -33,7 +33,7 @@ index 7effd56..5e8ca15 100755
        rvd="0"
      fi
 diff --git a/configure.ac b/configure.ac
-index af4e552..b962fab 100644
+index 42c1589..3424fc8 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -36,9 +36,7 @@ m4_define([mym4_revision], m4_esyscmd([git branch -v 2>/dev/null \
