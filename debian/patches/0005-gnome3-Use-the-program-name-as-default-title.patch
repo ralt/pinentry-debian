@@ -1,0 +1,35 @@
+From: Justus Winter <justus@g10code.com>
+Date: Mon, 16 Jan 2017 16:29:10 +0100
+Subject: gnome3: Use the program name as default title.
+
+* gnome3/pinentry-gnome3.c (create_prompt): If no title is requested,
+use the program name as the default title.  This mimics what the GTK+2
+variant does (although the GTK+2 pinentry seems to use
+basename(argv[0])).
+
+GnuPG-bug-id: 2920
+Signed-off-by: Justus Winter <justus@g10code.com>
+---
+ gnome3/pinentry-gnome3.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/gnome3/pinentry-gnome3.c b/gnome3/pinentry-gnome3.c
+index 29cd997..c148fd9 100644
+--- a/gnome3/pinentry-gnome3.c
++++ b/gnome3/pinentry-gnome3.c
+@@ -149,12 +149,9 @@ create_prompt (pinentry_t pe, int confirm)
+     }
+ 
+   /* Set the messages for the various buttons, etc.  */
+-  if (pe->title)
+-    {
+-      msg = pinentry_utf8_validate (pe->title);
+-      gcr_prompt_set_title (prompt, msg);
+-      g_free (msg);
+-    }
++  msg = pinentry_utf8_validate (pe->title ? pe->title : PGMNAME);
++  gcr_prompt_set_title (prompt, msg);
++  g_free (msg);
+ 
+   if (pe->description)
+     {
