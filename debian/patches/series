@@ -3,3 +3,4 @@
 0003-Fix-spelling-errors.patch
 0004-gnome3-Fix-CONFIRM-condition.patch
 0005-gnome3-Use-the-program-name-as-default-title.patch
+0006-gtk2-Fix-a-problem-with-fvwm.patch
