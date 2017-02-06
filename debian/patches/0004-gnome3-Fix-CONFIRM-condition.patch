@@ -1,0 +1,26 @@
+From: NIIBE Yutaka <gniibe@fsij.org>
+Date: Fri, 13 Jan 2017 14:22:33 +0900
+Subject: gnome3: Fix CONFIRM condition.
+
+* gnome3/pinentry-gnome3.c (gnome3_cmd_handler): No buffer for PIN means
+it's not passphrase input but confirmation dialog.
+
+Signed-off-by: NIIBE Yutaka <gniibe@fsij.org>
+(cherry picked from commit c725fdd260b0c2291660ff954e6b2250006ec08f)
+---
+ gnome3/pinentry-gnome3.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gnome3/pinentry-gnome3.c b/gnome3/pinentry-gnome3.c
+index d5a49d6..29cd997 100644
+--- a/gnome3/pinentry-gnome3.c
++++ b/gnome3/pinentry-gnome3.c
+@@ -247,7 +247,7 @@ gnome3_cmd_handler (pinentry_t pe)
+   state.ret = 0;
+   state.timeout_id = 0;
+   state.timed_out = 0;
+-  state.prompt = create_prompt (pe, !!(pe->pin));
++  state.prompt = create_prompt (pe, !(pe->pin));
+   if (!state.prompt)
+     {
+       pe->canceled = 1;
