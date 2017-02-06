@@ -1,0 +1,62 @@
+From: Vincent Bernat <bernat@debian.org>
+Date: Mon, 6 Feb 2017 02:38:59 -0500
+Subject: gtk2: When X11 input grabbing fails, try again over ~0.4 seconds.
+
+* gtk+-2/pinentry-gtk-2.c (grab_keyboard): Delay 1 ms before retrying
+keyboard grab, limit to about 0.2 seconds.
+(grab_pointer): Delay 1 ms before retrying pointer_grab, limit to
+about 0.2 seconds.
+
+--
+
+These changes were proposed by Vincent Bernat in
+https://bugs.debian.org/851707#124
+
+Debian-bug-id: 851707
+Signed-off-by: Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+---
+ gtk+-2/pinentry-gtk-2.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/gtk+-2/pinentry-gtk-2.c b/gtk+-2/pinentry-gtk-2.c
+index e37601f..1c58b3d 100644
+--- a/gtk+-2/pinentry-gtk-2.c
++++ b/gtk+-2/pinentry-gtk-2.c
+@@ -166,7 +166,7 @@ static int
+ grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
+ {
+   GdkGrabStatus err;
+-  int tries = 0, max_tries = 4096;
++  int tries = 0, max_tries = 2048;
+   (void)data;
+ 
+   if (! pinentry->grab)
+@@ -175,7 +175,8 @@ grab_keyboard (GtkWidget *win, GdkEvent *event, gpointer data)
+   do
+     err = gdk_keyboard_grab (gtk_widget_get_window (win),
+                              FALSE, gdk_event_get_time (event));
+-  while (tries++ < max_tries && err == GDK_GRAB_NOT_VIEWABLE);
++  while (tries++ < max_tries && err == GDK_GRAB_NOT_VIEWABLE
++         && (usleep(100), TRUE));
+ 
+   if (err)
+     {
+@@ -199,7 +200,7 @@ grab_pointer (GtkWidget *win, GdkEvent *event, gpointer data)
+ {
+   GdkGrabStatus err;
+   GdkCursor *cursor;
+-  int tries = 0, max_tries = 4096;
++  int tries = 0, max_tries = 2048;
+   (void)data;
+ 
+   /* Change the cursor for the duration of the grab to indicate that
+@@ -221,7 +222,8 @@ grab_pointer (GtkWidget *win, GdkEvent *event, gpointer data)
+                             cursor,
+                             gdk_event_get_time (event));
+   while (tries++ < max_tries && (err == GDK_GRAB_NOT_VIEWABLE
+-                                 || err == GDK_GRAB_ALREADY_GRABBED));
++                                 || err == GDK_GRAB_ALREADY_GRABBED)
++         && (usleep (100), TRUE));
+ 
+   if (err)
+     {

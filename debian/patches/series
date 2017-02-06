@@ -4,3 +4,4 @@
 0004-gnome3-Fix-CONFIRM-condition.patch
 0005-gnome3-Use-the-program-name-as-default-title.patch
 0006-gtk2-Fix-a-problem-with-fvwm.patch
+0007-gtk2-When-X11-input-grabbing-fails-try-again-over-0..patch
