@@ -1,3 +1,13 @@
+pinentry (1.0.0-2) unstable; urgency=medium
+
+  * fix documentation typos (Closes: #665879)
+  * pinentry-gnome3: Ask for new passwords twice (Closes: #851277)
+  * normalize window title behavior across graphical variants
+  * pinentry-gtk-2: busy-wait while pointer is already grabbed (Closes: #850708)
+  * pinentry-gtk-2: retry input grab based on real time delay (Closes: #851707)
+
+ -- Daniel Kahn Gillmor <dkg@fifthhorseman.net>  Mon, 06 Feb 2017 03:56:27 -0500
+
 pinentry (1.0.0-1) unstable; urgency=medium
 
   * New upstream release.
