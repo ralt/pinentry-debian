@@ -1,3 +1,9 @@
+pinentry (1.0.0-3) UNRELEASED; urgency=medium
+
+  * Add the pinentry-emacs package.
+
+ -- Florian Margaine <florian@platform.sh>  Fri, 10 Feb 2017 12:14:39 +0100
+
 pinentry (1.0.0-2) unstable; urgency=medium
 
   * fix documentation typos (Closes: #665879)
