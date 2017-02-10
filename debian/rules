@@ -2,7 +2,7 @@
 
 QT_SELECT = qt5
 export QT_SELECT
-SHARED_CONFIGS = --disable-rpath --without-libcap --disable-pinentry-emacs --disable-inside-emacs --enable-fallback-curses
+SHARED_CONFIGS = --disable-rpath --without-libcap --enable-pinentry-emacs --enable-inside-emacs --enable-fallback-curses
 export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
 %:
